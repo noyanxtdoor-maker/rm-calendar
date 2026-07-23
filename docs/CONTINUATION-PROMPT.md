@@ -1,47 +1,63 @@
 # RM Calendar — Paste This Into the Next Session
 
 ```text
-Continue the RM Calendar project as product architect and implementation planner.
+Continue the RM Calendar project as the product architect and implementation partner.
 
-First read these files in this order:
+Start by reading these files in this exact order:
 1. docs/PROJECT-HANDOFF.md
 2. docs/Scope-Decision-LDS.md
 3. docs/Phase-2-UX-Spec.md
-4. docs/Product-Bible.md
-5. docs/Domain-Model.md
-6. docs/Critical-Workflows.md
+4. docs/Phase-3-Implementation-Plan.md
+5. docs/Database-Schema-Plan.md
+6. docs/Domain-Model.md
 7. docs/Business-Rules.md
-8. docs/Data-Sync-Architecture.md
+8. docs/Critical-Workflows.md
+9. docs/Data-Sync-Architecture.md
 
-If local files are unavailable, start from this public repository:
+If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
 
-Project scope is now settled:
+Project scope is settled:
 - Product name: RM Calendar.
-- Audience: LDS members and returned missionaries who understand the planning rhythm used in missionary service.
+- Audience: LDS members and returned missionaries who remember the planning rhythm from missionary service.
 - Product: an independent, web-first, mobile-first planning companion for people/households, visits, activities, places, notes, tasks, and follow-ups.
-- Product positioning: familiar missionary-planning rhythm, but NOT an official Church app, NOT a PMG clone, and NOT a replacement for official Church systems.
+- Positioning: familiar planning rhythm, but NOT an official Church app, NOT a PMG clone, and NOT a replacement for official Church systems.
 - No claim of Church affiliation or access to official Church/member data.
-- No copying PMG branding, assets, source code, colors, text, exact layouts, or screens.
+- Never copy PMG branding, assets, source code, colors, text, icons, exact layouts, or screens.
 
-References:
-- User-owned Google AI Studio prototype repository: https://github.com/noyanxtdoor-maker/Calendar
-- Local workflow/design reference, if available: C:\Users\sherl\Downloads\Preach My Gospel Reference
+Reference material:
+- Founder-owned Google AI Studio mockup: https://github.com/noyanxtdoor-maker/Calendar
+- Local workflow/design material, if available: C:\Users\sherl\Downloads\Preach My Gospel Reference
+- Use both for abstract workflow and quality inspiration only. Do not fork or copy them.
 
-The Phase 2 outcome is complete. The active clickable artifact is:
+The approved clickable experience is:
 design/RM Calendar — Mission Companion Prototype.html
 
-It demonstrates the intended original structure:
-Home → Calendar → People → Map → Tools, plus a side drawer, quick add, person context, and the important completed-activity → outcome → linked follow-up/task flow.
+It establishes the original mobile-first structure:
+Home → Calendar → People → Map → Tools
+with a side drawer, quick add, person context, and the core completed-activity → outcome → linked follow-up/task flow.
 
-Do not restart architecture discovery. Begin Phase 3: translate the approved UX specification and domain rules into a technical implementation plan. Produce, in order:
-1. implementation-ready component inventory and state model;
-2. data/schema mapping from the existing domain model;
-3. web-first technology decision with trade-offs;
-4. local-first persistence/sync implementation plan;
-5. milestone-based build plan for the functional web beta.
+Phase 3 technical planning is complete. Its selected direction is:
+- React + TypeScript + Vite + React Router.
+- Tailwind CSS 3.4.17 only, plus project-owned tokens.
+- Dexie/IndexedDB local-first source of truth and durable foreground outbox.
+- Static PWA app-shell cache only; do not promise closed-browser sync.
+- Supabase Postgres/Auth/RLS/RPC for the future authenticated beta.
+- Six-digit email OTP and custom SMTP before non-team beta invites.
+- Private single-owner workspaces for functional beta.
+- No attachments, imports, live maps, background location, sharing, official data, AI, or native packaging in the first functional beta.
 
-Keep the product original, privacy-conscious, local-first, and usable in poor connectivity. Treat sensitive people/household notes and location data carefully. Do not build production code until the founder explicitly approves the Phase 3 plan.
+Before writing production code, confirm whether the founder has explicitly approved the Phase 3 checklist in docs/PROJECT-HANDOFF.md. If approval is missing, present the checklist and resolve only the founder’s decisions; do not scaffold the app or provision external services.
 
-Workspace constraints: sources/ is read-only; use apply_patch for local edits; preserve unrelated changes; Tailwind must remain on 3.4, never v4. If implementation requires an external SDK, retrieve its current official documentation first.
+After approval, begin Phase 4 Milestone 0 only:
+1. Create a fresh React/Vite/TypeScript app in this repository—never fork the reference mockup.
+2. Configure Tailwind 3.4.17, the static app-shell service worker, routes, CSS tokens, fake-data fixtures, lint/type/test commands, and CI baseline.
+3. Do not create a live Supabase project, email configuration, domain, or real-user data without explicit additional authorization.
+4. Validate typecheck, unit tests, production build, and a phone-width visual smoke test before moving to Milestone 1.
+
+Workspace constraints:
+- `sources/` is read-only reference material.
+- Use apply_patch for local edits; preserve unrelated changes and never destructively reset/clean.
+- If `.codegraph/` exists in a future code repository, use CodeGraph before grep/find for code understanding.
+- Retrieve current official documentation before adding an external SDK or provider.
 ```
