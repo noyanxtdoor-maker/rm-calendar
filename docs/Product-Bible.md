@@ -81,7 +81,7 @@ When I review my work, I want a trustworthy history of visits and follow-ups, so
 | Activity | A planned or completed unit of work; the generic parent concept for an appointment, visit, meeting, or call. |
 | Calendar event | The time-based scheduling representation of an activity. |
 | Task | A discrete action that can stand alone or be linked to an activity. |
-| Follow-up | A future action or activity created because of an earlier interaction. |
+| Follow-up | An explicit link from a completed Activity to exactly one newly created future Task or Activity; it is not the target work record itself. |
 | Note | Context or outcome captured against one primary record (Contact, Organization, Place, Activity, or Task). |
 | Route | An ordered plan of activities and places for a day or field session. |
 
