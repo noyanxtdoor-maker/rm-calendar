@@ -4,6 +4,8 @@
 **Status:** Architectural foundation  
 **Last updated:** 2026-07-23
 
+> **Scope amendment (2026-07-23):** The canonical first audience is LDS members and returned missionaries, not the earlier general field-work market. Read [Scope-Decision-LDS.md](Scope-Decision-LDS.md) and [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md) before relying on any older audience or positioning statements below. RM Calendar remains an independent product and must not copy PMG or claim Church affiliation.
+
 ## 1. Product in one sentence
 
 RM Calendar is an offline-friendly field-work planner that helps people organize appointments, contacts, places, tasks, and follow-ups in one practical daily workspace.
