@@ -20,6 +20,8 @@ This document defines where users go to plan, execute, capture, and review field
 
 ## 3. Primary navigation (mobile-first)
 
+**Delivery contract:** v1 is a web-first beta with a phone-sized, mobile-first interface. It runs in a browser and remains usable on larger screens, but the initial interaction and layout decisions optimize for a handheld device. Native mobile applications follow only after web-beta workflow validation and launch-budget planning.
+
 ```mermaid
 flowchart TD
     Today["Today"]
@@ -36,6 +38,7 @@ flowchart TD
     More --> Settings["Settings"]
     More --> Sync["Sync status"]
     More --> Places["Places"]
+    More --> Review["Weekly summary"]
 
     QuickAdd --> Activity
     QuickAdd --> Task
@@ -52,7 +55,7 @@ flowchart TD
 | Calendar | Day/week/agenda planning and rescheduling | Add activity |
 | Contacts | Find people and view their context/history | Add contact |
 | Tasks | Manage open, due, completed, and cancelled tasks | Add task |
-| More | Supporting tools and product configuration | Search, settings, sync |
+| More | Supporting tools, review, and product configuration | Search, weekly summary, settings, sync |
 
 `Places` remains under More in beta. It can move into primary navigation only if research shows users open it as often as Contacts or Tasks.
 
@@ -106,6 +109,10 @@ One search field returns grouped results for Contacts, Places, Activities, and T
 
 Normal status is compact. The full screen lists pending changes, last successful sync, actionable failures, and visible `needs attention` conflicts. It does not expose raw technical logs as the default experience.
 
+### Weekly summary
+
+Weekly summary is a lightweight review surface under More. It shows completed activities, cancellations, open follow-ups, and overdue tasks for the selected week. It is generated from normal work records; it never requires duplicate reporting entry.
+
 ## 5. Core navigation flows
 
 ### Plan a visit
@@ -123,6 +130,10 @@ Normal status is compact. The full screen lists pending changes, last successful
 ### Recover from sync problem
 
 `Sync indicator → Sync status → inspect plain-language issue → retry or resolve conflict → return to originating record`
+
+### Review the week
+
+`More → Weekly summary → select week → inspect completed work, cancellations, and open follow-ups → open linked record when action is needed`
 
 ## 6. First-use information architecture
 
