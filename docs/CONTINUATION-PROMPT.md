@@ -16,10 +16,11 @@ Start by reading these files in this exact order:
 10. docs/Sync-Contract.md
 11. docs/Phase-4-Milestone-4-Prep.md
 12. docs/Phase-4-Milestone-5-Prep.md
-13. docs/Domain-Model.md
-14. docs/Business-Rules.md
-15. docs/Critical-Workflows.md
-16. docs/Data-Sync-Architecture.md
+13. docs/Calendar-Interaction-Refinement.md
+14. docs/Domain-Model.md
+15. docs/Business-Rules.md
+16. docs/Critical-Workflows.md
+17. docs/Data-Sync-Architecture.md
 
 If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
@@ -63,9 +64,11 @@ Completed implementation:
 - M4-prep test proof: 15 unit tests cover ordered dispatch, idempotent acknowledgement, retries, conflicts, follow-up source revision, and safe diagnostics; 4 phone-width browser flows include Sync Status privacy behavior.
 - M5 local privacy/recovery preparation: versioned first-use privacy acknowledgement, offline private JSON export, accurate browser-storage persistence request, explicit checkbox-gated device erase, and accessible local recovery state. It does not provide accounts, remote deletion, or deployment.
 - M5-prep test proof: 22 unit tests and 5 phone-width browser flows, including offline export plus explicit erase confirmation and post-erase recovery.
+- Calendar refinement: original Day plan / Week rhythm tabs, Monday–Sunday local planning scan, per-day planned counts, date movement, and keyboard-operable tabs. It is inspired only by Dayflow’s high-level interaction quality and does not import or copy Dayflow.
+- Calendar-refinement test proof: 22 unit tests and 6 phone-width browser flows, including keyboard Arrow navigation from Day plan to Week rhythm and visible local activity context.
 - No live user data, Supabase client/project, authentication, email, remote sync, live maps, sharing, or official-data integration exists.
 
-Do not redo M0-M3, M4 local preparation, or M5 local privacy/recovery preparation. The remaining M4 authenticated-sync work may not start until the founder explicitly authorizes external services. Until then, only local-only usability, accessibility, documentation, or founder-approved prototype refinement is permitted.
+Do not redo M0-M3, M4 local preparation, M5 local privacy/recovery preparation, or the Calendar interaction refinement. The remaining M4 authenticated-sync work may not start until the founder explicitly authorizes external services. Until then, only local-only usability, accessibility, documentation, or founder-approved prototype refinement is permitted.
 
 Before M4 begins, obtain explicit founder authorization for:
 

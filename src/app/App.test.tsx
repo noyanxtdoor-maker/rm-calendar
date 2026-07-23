@@ -25,7 +25,7 @@ describe('Milestone 1 route shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue to my planning space' }))
 
     expect(await screen.findByRole('heading', { name: 'Calendar' })).toBeInTheDocument()
-    expect(await screen.findByText('Day plan')).toBeInTheDocument()
+    expect(await screen.findByRole('tab', { name: 'Day plan' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('Avery visit')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument()
 

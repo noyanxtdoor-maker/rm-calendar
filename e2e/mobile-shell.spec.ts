@@ -188,3 +188,31 @@ test('local data controls export while offline and require an explicit erase ack
   }))
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
 })
+
+test('week rhythm provides an original keyboard-operable planning scan at phone width', async ({ page }, testInfo) => {
+  await openLocalWorkspace(page, '/calendar')
+
+  const dayPlan = page.getByRole('tab', { name: 'Day plan' })
+  const weekRhythm = page.getByRole('tab', { name: 'Week rhythm' })
+  await expect(dayPlan).toHaveAttribute('aria-selected', 'true')
+  await dayPlan.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(weekRhythm).toHaveAttribute('aria-selected', 'true')
+  await expect(weekRhythm).toBeFocused()
+  await expect(page.getByText('Scan the week before you commit to a day. Open any day to work with its detailed plan.')).toBeVisible()
+  await expect(page.getByText('Avery visit')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Open day:/ }).first()).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Previous week' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Next week' })).toBeVisible()
+
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
+  await page.screenshot({
+    path: testInfo.outputPath('calendar-week-rhythm.png'),
+    fullPage: true,
+    animations: 'disabled'
+  })
+})

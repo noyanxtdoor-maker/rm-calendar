@@ -14,7 +14,7 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Current status
 
-Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 4 Milestones 0-3 are complete locally. M4 local preparation is also complete: the app has a testable sync contract, durable dependency/retry/conflict rules, and a transparent Sync Status screen. The safe local portion of M5 adds a first-use privacy acknowledgement, offline JSON export, browser-storage protection request, and explicit device erase/recovery. Cloud authentication, remote sync, account deletion, email, and deployment remain intentionally unconfigured.
+Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 4 Milestones 0-3 are complete locally. M4 local preparation is also complete: the app has a testable sync contract, durable dependency/retry/conflict rules, and a transparent Sync Status screen. The safe local portion of M5 adds a first-use privacy acknowledgement, offline JSON export, browser-storage protection request, and explicit device erase/recovery. The calendar now has an original Day plan and Week rhythm interaction refinement informed only by high-level Dayflow lessons. Cloud authentication, remote sync, account deletion, email, and deployment remain intentionally unconfigured.
 
 Start with these source-of-truth documents:
 
@@ -29,7 +29,8 @@ Start with these source-of-truth documents:
 9. [Sync contract](docs/Sync-Contract.md)
 10. [Phase 4 Milestone 4 preparation](docs/Phase-4-Milestone-4-Prep.md)
 11. [Phase 4 Milestone 5 local privacy preparation](docs/Phase-4-Milestone-5-Prep.md)
-12. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+12. [Calendar interaction refinement](docs/Calendar-Interaction-Refinement.md)
+13. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 

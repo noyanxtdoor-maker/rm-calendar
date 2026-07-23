@@ -1,11 +1,11 @@
 # RM Calendar — Complete Project Handoff
 
-> **Latest implementation update - 2026-07-24:** M5's safe local privacy/recovery preparation is complete and verified. Read [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md) after the M4 records. The app now has a versioned privacy acknowledgement, offline private export, accurate browser-storage request, and explicit local erase/recovery flow. It still has no cloud service, authentication, data transmission, remote backup, account deletion, or deployment configuration. Dayflow Calendar remains an interaction reference only; see the M1 record for its license and non-copying boundary.
+> **Latest implementation update - 2026-07-24:** The original Calendar Day plan / Week rhythm refinement is complete and verified. Read [Calendar Interaction Refinement](Calendar-Interaction-Refinement.md) after the M4/M5 records. It adds an accessible mobile planning scan and keyboard-operable Day/Week navigation using existing local records—no Dayflow dependency, code, or visual copying. The app still has no cloud service, authentication, data transmission, remote backup, account deletion, or deployment configuration.
 
 **Last updated:** 2026-07-24  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3 and the local preparation portions of M4/M5 are complete and locally verified. M4 authenticated sync, account-aware M5 work, and all external beta configuration remain gated on explicit founder authority.
+**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3, the local preparation portions of M4/M5, and the original calendar refinement are complete and locally verified. M4 authenticated sync, account-aware M5 work, and all external beta configuration remain gated on explicit founder authority.
 
 ## 1. Read this first
 
@@ -35,8 +35,9 @@ When documents disagree, use this order:
 8. [Phase 4 Milestone 3](Phase-4-Milestone-3.md) — activity/task completion, outcome, notes, quick capture, linked follow-up, weekly derivation, and persistence verification.
 9. [Sync Contract](Sync-Contract.md) and [Phase 4 Milestone 4 Prep](Phase-4-Milestone-4-Prep.md) — implemented local operation contract and the remaining external authority boundary.
 10. [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md) — implemented local privacy/recovery controls and the remaining account/deployment boundary.
-11. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
-12. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
+11. [Calendar Interaction Refinement](Calendar-Interaction-Refinement.md) — implemented original Day/Week calendar behavior and Dayflow reference boundary.
+12. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+13. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
 Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
@@ -154,6 +155,10 @@ M4 remote sync has not begun, but its local prerequisites are now real and teste
 ### Phase 4 — Milestone 5: local privacy/recovery preparation: complete
 
 The safe local subset of M5 now adds a first-use privacy acknowledgement, private JSON export that works offline, an honest browser-storage persistence request, and a checkbox-gated erase/recovery flow. It is deliberately not a cloud backup, sign-out, account deletion, email, or deployment implementation. The authoritative evidence and remaining boundary are in [Phase-4-Milestone-5-Prep.md](Phase-4-Milestone-5-Prep.md).
+
+### Calendar interaction refinement: complete
+
+The Calendar now combines a detailed Day plan with a mobile Week rhythm scan. It adds date movement, planned-count signals, direct activity navigation, and accessible tab keyboard behavior without changing the domain model or importing/copying Dayflow. The complete original-design boundary and verification record are in [Calendar-Interaction-Refinement.md](Calendar-Interaction-Refinement.md).
 
 ## 6. Approved Phase 3 technical direction
 
@@ -290,7 +295,7 @@ If the founder explicitly authorizes M4, begin with the lowest-risk external set
 1. Read the source-of-truth documents in Section 2 in order.
 2. Open the active Mission Companion prototype before changing UI behavior.
 3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
-4. Do not redo M0-M3, the local M4 preparation, or the local M5 privacy/recovery preparation. Review [Phase-4-Milestone-4-Prep.md](Phase-4-Milestone-4-Prep.md), [Sync-Contract.md](Sync-Contract.md), and [Phase-4-Milestone-5-Prep.md](Phase-4-Milestone-5-Prep.md) before changing sync or data-control behavior.
+4. Do not redo M0-M3, the local M4 preparation, the local M5 privacy/recovery preparation, or the Calendar interaction refinement. Review [Phase-4-Milestone-4-Prep.md](Phase-4-Milestone-4-Prep.md), [Sync-Contract.md](Sync-Contract.md), [Phase-4-Milestone-5-Prep.md](Phase-4-Milestone-5-Prep.md), and [Calendar-Interaction-Refinement.md](Calendar-Interaction-Refinement.md) before changing sync, data-control, or calendar behavior.
 5. If the founder asks to continue without authorizing an external service, work only on local usability, accessibility, or founder-approved local features.
 6. If the founder authorizes M4, use the M4 gate in Section 11 and retain the documented Supabase/RLS/RPC contract.
 7. Keep the public repository and local handoff synchronized only after local validation succeeds.
