@@ -50,7 +50,7 @@ hosted project has been linked or contacted.
   - authenticated profiles and exactly-one-owner private workspaces;
   - contacts, organizations, places, activities, tasks, notes, reminders, histories, follow-ups, change logs, and mutation receipts;
   - same-workspace relationship triggers, RLS read policies, and no direct browser write grants;
-  - `bootstrap_private_workspace(name, timezone)` and bounded owner-scoped `pull_changes` RPCs.
+  - `bootstrap_private_workspace(name, timezone)`, bounded owner-scoped `pull_changes`, and a restricted `apply_sync_batch` RPC for simple creates.
 - Added a local pgTAP owner-isolation suite with two fictional Auth users.
 
 ## 3. Verification evidence
@@ -86,7 +86,7 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
   clean local migration replay: pass
   schema lint: pass
-  pgTAP owner-isolation checks: 12 passed
+  pgTAP owner-isolation and simple-batch checks: 24 passed
 ~~~
 
 ## 4. What this does not do
@@ -112,7 +112,7 @@ The founder must explicitly identify or authorize all of the following before ex
 
 After approval, the next implementation sequence is:
 
-1. implement and locally test `apply_sync_batch` against [Sync Contract](Sync-Contract.md);
+1. extend and locally test `apply_sync_batch` for Activity/Task lifecycle, Notes, and atomic Follow-ups against [Sync Contract](Sync-Contract.md);
 2. add the remote RPC adapter and authenticated browser bootstrap;
 3. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;

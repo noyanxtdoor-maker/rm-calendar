@@ -4,6 +4,7 @@ import peoplePlacesMigration from '../../../supabase/migrations/20260724091000_p
 import activitiesTasksMigration from '../../../supabase/migrations/20260724092000_activities_tasks.sql?raw'
 import followUpsSyncMigration from '../../../supabase/migrations/20260724093000_followups_sync_schema.sql?raw'
 import pullChangesMigration from '../../../supabase/migrations/20260724094000_pull_changes.sql?raw'
+import applySyncSimpleRecordsMigration from '../../../supabase/migrations/20260724095000_apply_sync_simple_records.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -22,7 +23,14 @@ describe('Supabase identity migration guardrails', () => {
   })
 
   it('keeps each currently migrated workspace table behind RLS and browser read-only grants', () => {
-    const sql = [identityMigration, peoplePlacesMigration, activitiesTasksMigration, followUpsSyncMigration, pullChangesMigration]
+    const sql = [
+      identityMigration,
+      peoplePlacesMigration,
+      activitiesTasksMigration,
+      followUpsSyncMigration,
+      pullChangesMigration,
+      applySyncSimpleRecordsMigration
+    ]
       .join('\n')
       .toLocaleLowerCase()
 
@@ -55,5 +63,16 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).toContain("'nextcursor'")
     expect(sql).toContain('revoke all on function public.pull_changes(uuid, bigint, integer) from public')
     expect(sql).toContain('grant execute on function public.pull_changes(uuid, bigint, integer) to authenticated')
+  })
+
+  it('limits batch mutation to the reviewed RPC and keeps receipt idempotency in the database', () => {
+    const sql = applySyncSimpleRecordsMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.apply_sync_batch')
+    expect(sql).toContain("p_table not in ('contacts', 'organizations', 'places')")
+    expect(sql).toContain('insert into public.mutation_receipts')
+    expect(sql).toContain("'already_applied'")
+    expect(sql).toContain('revoke all on function public.apply_sync_batch(uuid, jsonb) from public')
+    expect(sql).toContain('grant execute on function public.apply_sync_batch(uuid, jsonb) to authenticated')
   })
 })

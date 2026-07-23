@@ -9,7 +9,7 @@
 - Row-level security (RLS) that lets an authenticated beta owner read only their own profile, root workspace, and membership.
 - A narrowly scoped `bootstrap_private_workspace(name, timezone)` RPC. It binds ownership to `auth.uid()`, validates an IANA timezone, and atomically creates or recovers one private workspace.
 - A guarded browser configuration reader. Remote sync remains off when configuration is missing or partial.
-- A reviewed, locally executed `pull_changes` migration exists; `apply_sync_batch` does not exist yet and domain table writes remain denied to browser clients.
+- Reviewed, locally executed `pull_changes` and restricted `apply_sync_batch` migrations exist. The apply RPC currently accepts only Contact, Household, and Place creation; domain table writes remain denied to browser clients and the app is not connected to either RPC.
 - No Supabase URL, browser key, service-role key, SMTP secret, user, user-owned content, or live database connection.
 
 ## Explicitly out of scope until a dedicated project is approved
@@ -36,7 +36,7 @@ Before any cloud connection, the founder must either create a new RM Calendar Su
 
 ## Local verification evidence
 
-On 2026-07-24, a clean local RM Calendar Supabase stack applied every migration, passed `supabase db lint --local --fail-on error`, and passed the 12-test pgTAP suite in `supabase/tests/001_identity_workspace.pgtap.sql`.
+On 2026-07-24, a clean local RM Calendar Supabase stack applied every migration, passed `supabase db lint --local --fail-on error`, and passed the 24-test pgTAP suite in `supabase/tests/`.
 
 The suite uses two fictional local Auth users and proves:
 
@@ -45,6 +45,7 @@ The suite uses two fictional local Auth users and proves:
 - an owner can see only their own profile, workspace, and membership;
 - a second owner cannot enumerate or pull the first owner's workspace;
 - direct browser-role workspace mutation is denied.
+- simple Contact, Household, and Place creates are receipt-idempotent, journaled, and constrained to the caller's workspace.
 
 To reproduce the local verification:
 
@@ -55,4 +56,4 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
 ```
 
-The next migration will add `apply_sync_batch`. It must prove owner isolation, idempotent receipts, revision conflicts, and atomic follow-up creation with fictional data before it is connected to a hosted project.
+The next apply migration will add Activity/Task lifecycle changes, Notes, and atomic Follow-ups. It must prove revision conflicts and compound follow-up creation with fictional data before the app is connected to a hosted project.
