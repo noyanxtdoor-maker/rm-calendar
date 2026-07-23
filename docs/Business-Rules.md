@@ -4,6 +4,8 @@
 **Status:** Phase 1 draft  
 **Depends on:** [Domain Model](Domain-Model.md), [Critical Workflows](Critical-Workflows.md), [Information Architecture](Information-Architecture.md)
 
+> **Scope amendment:** Rules remain technically applicable, but real user data is expected to include sensitive personal, household, place, and pastoral context. Apply the privacy/product boundaries in [Scope-Decision-LDS.md](Scope-Decision-LDS.md).
+
 ## 1. Purpose
 
 These rules define the behavior that must stay consistent across the web application, future native applications, local storage, and backend services. They are product rules, not database implementation details.
@@ -20,7 +22,7 @@ These rules define the behavior that must stay consistent across the web applica
 | Rule | Behavior |
 | --- | --- |
 | Valid states | `Draft`, `Scheduled`, `Completed`, `Cancelled` |
-| Draft | May be unscheduled and does not appear as a calendar commitment. |
+| Draft | Is unscheduled and does not appear as a calendar commitment. |
 | Scheduled | Has either an all-day date or a timed start/end range. |
 | Completed | Has an actual completion timestamp and preserves its original schedule. |
 | Cancelled | Remains in history with optional reason; it does not appear as pending work. |
