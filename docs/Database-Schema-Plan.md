@@ -1,8 +1,8 @@
 # RM Calendar — Database and Sync Schema Plan
 
 **Version:** 0.1  
-**Status:** Complete Phase 3 blueprint — founder approval required before executable migrations  
-**Last updated:** 2026-07-23  
+**Status:** Phase 3 blueprint; local migration foundation started, hosted application still gated  
+**Last updated:** 2026-07-24  
 **Depends on:** [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md), [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Data and Sync Architecture](Data-Sync-Architecture.md)
 
 ## 1. Purpose and boundaries
