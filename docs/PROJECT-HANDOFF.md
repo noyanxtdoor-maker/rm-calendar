@@ -1,11 +1,11 @@
 # RM Calendar — Complete Project Handoff
 
-> **Latest implementation update - 2026-07-24:** M4 local sync-contract preparation is complete and verified. Read [Sync Contract](Sync-Contract.md) and [Phase 4 Milestone 4 Prep](Phase-4-Milestone-4-Prep.md) after the M0-3 records. The app now has a local operation contract, ordering, retry, conflict, and privacy-safe Sync Status behavior, but no cloud service, authentication, or data transmission is configured. Dayflow Calendar remains an interaction reference only; see the M1 record for its license and non-copying boundary.
+> **Latest implementation update - 2026-07-24:** M5's safe local privacy/recovery preparation is complete and verified. Read [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md) after the M4 records. The app now has a versioned privacy acknowledgement, offline private export, accurate browser-storage request, and explicit local erase/recovery flow. It still has no cloud service, authentication, data transmission, remote backup, account deletion, or deployment configuration. Dayflow Calendar remains an interaction reference only; see the M1 record for its license and non-copying boundary.
 
 **Last updated:** 2026-07-24  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3 are complete and locally verified. M4 local preparation is complete, but M4 authenticated sync remains gated on explicit founder authority before any external service is created or configured.
+**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3 and the local preparation portions of M4/M5 are complete and locally verified. M4 authenticated sync, account-aware M5 work, and all external beta configuration remain gated on explicit founder authority.
 
 ## 1. Read this first
 
@@ -34,8 +34,9 @@ When documents disagree, use this order:
 7. [Phase 4 Milestone 2](Phase-4-Milestone-2.md) — local People/Household/Place commands, calendar planning, drafts, overlap warning, and persistence verification.
 8. [Phase 4 Milestone 3](Phase-4-Milestone-3.md) — activity/task completion, outcome, notes, quick capture, linked follow-up, weekly derivation, and persistence verification.
 9. [Sync Contract](Sync-Contract.md) and [Phase 4 Milestone 4 Prep](Phase-4-Milestone-4-Prep.md) — implemented local operation contract and the remaining external authority boundary.
-10. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
-11. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
+10. [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md) — implemented local privacy/recovery controls and the remaining account/deployment boundary.
+11. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+12. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
 Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
@@ -150,6 +151,10 @@ Milestone 3 adds separate actual-completion records, outcome capture, correction
 
 M4 remote sync has not begun, but its local prerequisites are now real and tested: typed operation kinds, operation base revisions/dependencies, canonical payload preparation, safe acknowledgement/retry/conflict handling, and a privacy-safe Sync Status surface. The detailed boundary and external authority requirements are in [Sync-Contract.md](Sync-Contract.md) and [Phase-4-Milestone-4-Prep.md](Phase-4-Milestone-4-Prep.md).
 
+### Phase 4 — Milestone 5: local privacy/recovery preparation: complete
+
+The safe local subset of M5 now adds a first-use privacy acknowledgement, private JSON export that works offline, an honest browser-storage persistence request, and a checkbox-gated erase/recovery flow. It is deliberately not a cloud backup, sign-out, account deletion, email, or deployment implementation. The authoritative evidence and remaining boundary are in [Phase-4-Milestone-5-Prep.md](Phase-4-Milestone-5-Prep.md).
+
 ## 6. Approved Phase 3 technical direction
 
 ### Client and user experience
@@ -212,8 +217,8 @@ Before real beta data or non-team beta invites:
 1. Deploy over HTTPS with approved production redirect URLs.
 2. Implement and test RLS workspace isolation in migrations.
 3. Configure custom SMTP, sender domain, rate controls, and the final email OTP flow.
-4. Present onboarding consent plus independent/non-affiliation language.
-5. Add export and account-delete request behavior.
+4. Present the implemented local acknowledgement plus final production onboarding consent and independent/non-affiliation language.
+5. Retain the implemented local export/erase controls and add account-delete request behavior after authentication exists.
 6. If the outbox contains unsynced work, sign-out must offer **Sync now** or **Remove local data and sign out**—never silently discard it.
 7. Clear the active workspace’s local IndexedDB and in-memory state after an intentional completed sign-out.
 8. Keep diagnostics to operation ID, record type/ID, and error codes; never log note/outcome/body text.
@@ -232,7 +237,7 @@ Implementation begins only after the founder accepts the Phase 3 decisions. Buil
 | M2 — People/places/planning | People/households, places, Calendar day view/date ribbon, create/edit/reschedule Activity, drafts | Complete locally: user creates a person, plans a linked activity, reloads offline, and sees the local linked data |
 | M3 — Completion/follow-up | Activity/Task history, outcome capture, notes, tasks, atomic linked follow-up, Today derivation, weekly review | Complete locally: complete/capture/follow-up works offline after restart; no orphan follow-up exists |
 | M4 — Auth/sync | Local operation contract/preflight complete; Supabase migrations/RLS/RPC tests, owner workspace, authenticated pull/apply remain | Requires explicit founder authority before any external service is provisioned; then two signed-in browser profiles sync exactly once and intentional conflict is visible with no data loss |
-| M5 — Beta readiness | Export/delete flows, sign-out safety, storage-persistence request, deployment/auth config, manual beta script | Privacy/recovery checklist passes using fictional data; no public invite before final approval |
+| M5 — Beta readiness | Local export/erase/persistence/onboarding preparation complete; account-aware sign-out/delete, deployment/auth config, and manual beta script remain | The local privacy/recovery checklist passes with fictional data; no public invite before final approval |
 
 Deferred until the beta loop is actually validated: live map tiles, routing, turn-by-turn navigation, background location, attachments/photos, contact imports, shared workspaces/roles, official-data integrations, AI, push claims while closed, and native Android/iOS packaging.
 
@@ -270,7 +275,7 @@ The founder approved the Phase 3 decisions and M0 delivered the scaffold without
 - [x] CI baseline and clean-install verification.
 - [x] No live Supabase project, email service, production domain, account flow, or real-user data.
 
-Milestones 1, 2, and 3 are complete. M4 local preparation is also complete, but M4 authenticated sync is not started. Do not create a hosted Supabase project, configure email, store beta data remotely, invite real users, use a real domain, or implement a real remote adapter without separate founder direction.
+Milestones 1, 2, and 3 are complete. M4 local preparation and M5 local privacy/recovery preparation are also complete, but M4 authenticated sync is not started. Do not create a hosted Supabase project, configure email, store beta data remotely, invite real users, use a real domain, or implement a real remote adapter without separate founder direction.
 
 If the founder explicitly authorizes M4, begin with the lowest-risk external setup and document every provisioned resource:
 
@@ -285,7 +290,7 @@ If the founder explicitly authorizes M4, begin with the lowest-risk external set
 1. Read the source-of-truth documents in Section 2 in order.
 2. Open the active Mission Companion prototype before changing UI behavior.
 3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
-4. Do not redo M0-M3 or the local M4 preparation. Review [Phase-4-Milestone-4-Prep.md](Phase-4-Milestone-4-Prep.md) and [Sync-Contract.md](Sync-Contract.md) before changing any sync behavior.
+4. Do not redo M0-M3, the local M4 preparation, or the local M5 privacy/recovery preparation. Review [Phase-4-Milestone-4-Prep.md](Phase-4-Milestone-4-Prep.md), [Sync-Contract.md](Sync-Contract.md), and [Phase-4-Milestone-5-Prep.md](Phase-4-Milestone-5-Prep.md) before changing sync or data-control behavior.
 5. If the founder asks to continue without authorizing an external service, work only on local usability, accessibility, or founder-approved local features.
 6. If the founder authorizes M4, use the M4 gate in Section 11 and retain the documented Supabase/RLS/RPC contract.
 7. Keep the public repository and local handoff synchronized only after local validation succeeds.

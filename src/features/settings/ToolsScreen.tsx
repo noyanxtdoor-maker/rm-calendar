@@ -2,15 +2,14 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { completeTask } from '../../data/local/commands'
 import { displayDate } from '../../lib/time'
-import { clearAllLocalData, createLocalDemoContact, resetFictionalWorkspace } from '../../data/local/workspace'
+import { createLocalDemoContact } from '../../data/local/workspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
-import { useLocalSyncStatus, useLocalWorkspace, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
+import { useLocalSyncStatus, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 
 export function ToolsScreen() {
   const snapshot = useWorkspaceSnapshot()
   const sync = useLocalSyncStatus()
-  const { restoreWorkspace } = useLocalWorkspace()
   const [message, setMessage] = useState<string>()
   const [busy, setBusy] = useState(false)
 
@@ -44,33 +43,6 @@ export function ToolsScreen() {
       setMessage('Task completed on this device.')
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : 'The task could not be completed.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function resetWorkspace() {
-    if (!window.confirm('Restore the fictional starter workspace? This replaces all local planning data on this device.')) {
-      return
-    }
-
-    setBusy(true)
-    try {
-      await resetFictionalWorkspace()
-      setMessage('Fictional starter data restored on this device.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function clearWorkspace() {
-    if (!window.confirm('Clear all local RM Calendar data from this browser? This cannot be undone.')) {
-      return
-    }
-
-    setBusy(true)
-    try {
-      await clearAllLocalData()
     } finally {
       setBusy(false)
     }
@@ -134,34 +106,17 @@ export function ToolsScreen() {
         </button>
       </section>
 
-      <section className="rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5">
-        <SectionLabel>Data controls</SectionLabel>
-        <div className="mt-4 grid gap-2">
-          <button
-            className="min-h-11 rounded-2xl border border-white/[0.1] px-4 text-left text-sm font-semibold text-slate-200 transition hover:border-[var(--rm-gold)]/40"
-            disabled={busy}
-            onClick={() => void resetWorkspace()}
-            type="button"
-          >
-            Restore fictional starter data
-          </button>
-          <button
-            className="min-h-11 rounded-2xl border border-red-300/20 bg-red-400/[0.04] px-4 text-left text-sm font-semibold text-red-200 transition hover:border-red-300/40"
-            disabled={busy}
-            onClick={() => void clearWorkspace()}
-            type="button"
-          >
-            Clear all local data
-          </button>
-        </div>
-      </section>
+      <Link className="flex min-h-16 items-center justify-between rounded-3xl border border-red-300/20 bg-red-400/[0.04] px-5 text-left transition hover:border-red-300/40" to="/tools/data">
+        <span>
+          <span className="block text-sm font-semibold text-red-100">Data controls</span>
+          <span className="mt-1 block text-xs leading-5 text-slate-400">Download a private copy, protect storage, or clear this browser</span>
+        </span>
+        <span aria-hidden="true" className="text-lg text-red-200">›</span>
+      </Link>
 
       <section className="rounded-3xl border border-[var(--rm-gold)]/15 bg-[var(--rm-gold)]/[0.07] p-5">
         <p className="text-sm font-semibold text-[var(--rm-gold)]">Independent planning companion</p>
         <p className="mt-2 text-xs leading-5 text-slate-300">RM Calendar is independent and is not affiliated with The Church of Jesus Christ of Latter-day Saints. Do not enter official Church records or confidential information.</p>
-        <button className="mt-4 text-xs font-semibold text-[var(--rm-teal)]" onClick={() => void restoreWorkspace()} type="button">
-          Reopen local workspace
-        </button>
       </section>
     </section>
   )

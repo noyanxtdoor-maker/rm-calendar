@@ -1,7 +1,14 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
+
+async function openLocalWorkspace(page: Page, path = '/') {
+  await page.goto(path)
+  await expect(page.getByRole('heading', { name: 'Before you begin' })).toBeVisible()
+  await page.getByRole('checkbox', { name: 'I understand this local-only privacy boundary.' }).check()
+  await page.getByRole('button', { name: 'Continue to my planning space' }).click()
+}
 
 test('the Milestone 1 local workspace stays usable at phone width and reopens offline with saved data', async ({ page }, testInfo) => {
-  await page.goto('/')
+  await openLocalWorkspace(page)
 
   await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Start with what matters.' })).toBeVisible()
@@ -49,7 +56,7 @@ test('the Milestone 1 local workspace stays usable at phone width and reopens of
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-  await page.goto('/people')
+  await openLocalWorkspace(page, '/people')
 
   await page.getByRole('link', { name: 'Add person', exact: true }).click()
   await page.getByLabel('Person name').fill('Morgan Local')
@@ -83,7 +90,7 @@ test('a user can create a person, plan a linked visit, and retain it offline aft
 test('a user can complete a visit, create a linked next action, and retain it offline', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-  await page.goto('/calendar')
+  await openLocalWorkspace(page, '/calendar')
 
   await page.getByRole('link', { name: 'Avery visit' }).click()
   await expect(page.getByRole('heading', { name: 'Avery visit' })).toBeVisible()
@@ -122,7 +129,7 @@ test('a user can complete a visit, create a linked next action, and retain it of
 })
 
 test('sync status exposes queued local work without exposing private record text', async ({ page }, testInfo) => {
-  await page.goto('/people')
+  await openLocalWorkspace(page, '/people')
   await page.getByRole('link', { name: 'Add person', exact: true }).click()
   await page.getByLabel('Person name').fill('Private queue person')
   await page.getByRole('button', { name: 'Save person' }).click()
@@ -143,4 +150,41 @@ test('sync status exposes queued local work without exposing private record text
     fullPage: true,
     animations: 'disabled'
   })
+})
+
+test('local data controls export while offline and require an explicit erase acknowledgement', async ({ page }, testInfo) => {
+  await openLocalWorkspace(page, '/people')
+  await page.getByRole('link', { name: 'Add person', exact: true }).click()
+  await page.getByLabel('Person name').fill('Private export person')
+  await page.getByRole('button', { name: 'Save person' }).click()
+
+  await page.getByRole('link', { name: 'Tools', exact: true }).click()
+  await page.getByRole('link', { name: 'Data controls' }).click()
+  await expect(page.getByRole('heading', { name: 'Your local data' })).toBeVisible()
+  await page.screenshot({
+    path: testInfo.outputPath('milestone-5-prep-data-controls.png'),
+    fullPage: true,
+    animations: 'disabled'
+  })
+
+  await page.context().setOffline(true)
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download local data' }).click()
+  const download = await downloadPromise
+  await expect(page.getByText('Your private local export was downloaded. Store that file somewhere you trust.')).toBeVisible()
+  expect(download.suggestedFilename()).toMatch(/^rm-calendar-local-export-\d{4}-\d{2}-\d{2}\.json$/)
+  await page.context().setOffline(false)
+
+  const erase = page.getByRole('button', { name: 'Clear this browser' })
+  await expect(erase).toBeDisabled()
+  await page.getByRole('checkbox', { name: 'I understand that this removes all RM Calendar data from this browser.' }).check()
+  await expect(erase).toBeEnabled()
+  await erase.click()
+  await expect(page.getByRole('heading', { name: 'Local data cleared' })).toBeVisible()
+
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
 })

@@ -57,6 +57,9 @@ export function destinationTitle(pathname: string) {
   if (pathname === '/tools/sync-status') {
     return 'Sync status'
   }
+  if (pathname === '/tools/data') {
+    return 'Data controls'
+  }
 
   return navigationDestinations.find((destination) => destination.path === pathname)?.label ?? 'RM Calendar'
 }

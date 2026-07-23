@@ -12,6 +12,7 @@ import { PeopleScreen } from '../features/people/PeopleScreen'
 import { PlaceFormScreen } from '../features/places/PlaceFormScreen'
 import { PlacesScreen } from '../features/places/PlacesScreen'
 import { ToolsScreen } from '../features/settings/ToolsScreen'
+import { DataControlsScreen } from '../features/settings/DataControlsScreen'
 import { TaskFormScreen } from '../features/tasks/TaskFormScreen'
 import { TodayScreen } from '../features/today/TodayScreen'
 import { WeeklyReviewScreen } from '../features/review/WeeklyReviewScreen'
@@ -38,6 +39,7 @@ export function AppRoutes() {
           <Route path="map" element={<PlacesScreen />} />
           <Route path="map/new" element={<PlaceFormScreen />} />
           <Route path="tools" element={<ToolsScreen />} />
+          <Route path="tools/data" element={<DataControlsScreen />} />
           <Route path="tools/tasks/new" element={<TaskFormScreen />} />
           <Route path="tools/weekly-review" element={<WeeklyReviewScreen />} />
           <Route path="tools/sync-status" element={<SyncStatusScreen />} />

@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createLocalDemoContact, bootstrapLocalWorkspace, DEMO_WORKSPACE_ID } from './workspace'
+import { acknowledgeLocalPrivacyNotice, clearAllLocalData, createLocalDemoContact, bootstrapLocalWorkspace, DEMO_WORKSPACE_ID, PRIVACY_NOTICE_KEY, WORKSPACE_LIFECYCLE_KEY } from './workspace'
 import { deleteRmCalendarDatabase, rmCalendarDb, RmCalendarDatabase } from './RmCalendarDatabase'
 
 describe('Milestone 1 local workspace', () => {
@@ -51,5 +51,20 @@ describe('Milestone 1 local workspace', () => {
 
     upgraded.close()
     await Dexie.delete(databaseName)
+  })
+
+  it('clears local records and acknowledgement state without silently recreating a workspace', async () => {
+    await bootstrapLocalWorkspace()
+    await acknowledgeLocalPrivacyNotice()
+    await createLocalDemoContact({ displayName: 'Clear this device' })
+
+    await clearAllLocalData()
+
+    expect(await rmCalendarDb.workspaces.count()).toBe(0)
+    expect(await rmCalendarDb.contacts.count()).toBe(0)
+    expect(await rmCalendarDb.outboxOperations.count()).toBe(0)
+    expect(await rmCalendarDb.localSettings.get(PRIVACY_NOTICE_KEY)).toBeUndefined()
+    expect((await rmCalendarDb.localSettings.get(WORKSPACE_LIFECYCLE_KEY))?.valueJson.state).toBe('cleared')
+    await expect(bootstrapLocalWorkspace()).resolves.toBeUndefined()
   })
 })

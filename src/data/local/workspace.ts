@@ -13,7 +13,9 @@ import { atLocalTime, localIsoDate, localTimeZone } from '../../lib/time'
 import { rmCalendarDb } from './RmCalendarDatabase'
 
 export const DEMO_WORKSPACE_ID = 'rm-calendar-private-demo'
-const WORKSPACE_LIFECYCLE_KEY = 'workspace-lifecycle'
+export const WORKSPACE_LIFECYCLE_KEY = 'workspace-lifecycle'
+export const PRIVACY_NOTICE_KEY = 'privacy-notice'
+export const PRIVACY_NOTICE_VERSION = 1
 
 type WorkspaceLifecycle = 'active' | 'cleared'
 
@@ -129,6 +131,17 @@ async function workspaceLifecycle() {
   return setting?.valueJson.state as WorkspaceLifecycle | undefined
 }
 
+export async function acknowledgeLocalPrivacyNotice() {
+  await rmCalendarDb.localSettings.put({
+    key: PRIVACY_NOTICE_KEY,
+    valueJson: {
+      version: PRIVACY_NOTICE_VERSION,
+      acknowledgedAt: nowIso()
+    },
+    updatedAt: nowIso()
+  })
+}
+
 export async function bootstrapLocalWorkspace() {
   await rmCalendarDb.open()
 
@@ -237,6 +250,7 @@ export async function clearAllLocalData() {
   const timestamp = nowIso()
   await rmCalendarDb.transaction('rw', [...clearableTableNames, 'localSettings'], async () => {
     await Promise.all(clearableTableNames.map((tableName) => rmCalendarDb.table(tableName).clear()))
+    await rmCalendarDb.localSettings.clear()
     await rmCalendarDb.localSettings.put({
       key: WORKSPACE_LIFECYCLE_KEY,
       valueJson: { state: 'cleared' },
@@ -258,6 +272,7 @@ export async function resetFictionalWorkspace() {
   const timestamp = nowIso()
   await rmCalendarDb.transaction('rw', [...clearableTableNames, 'localSettings'], async () => {
     await Promise.all(clearableTableNames.map((tableName) => rmCalendarDb.table(tableName).clear()))
+    await rmCalendarDb.localSettings.clear()
     await rmCalendarDb.localSettings.put({
       key: WORKSPACE_LIFECYCLE_KEY,
       valueJson: { state: 'active' },

@@ -99,4 +99,4 @@ After approval, the next implementation sequence is:
 2. implement the remote RPC adapter against [Sync Contract](Sync-Contract.md);
 3. add authenticated workspace bootstrap and foreground pull/push;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;
-5. only then move to beta-readiness controls.
+5. finish the remaining account-aware and deployment portions of beta readiness. The safe local privacy/recovery preparation is already documented in [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md).

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { rmCalendarDb } from '../../data/local/RmCalendarDatabase'
-import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID, restoreFictionalWorkspace } from '../../data/local/workspace'
+import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID, PRIVACY_NOTICE_KEY, PRIVACY_NOTICE_VERSION, restoreFictionalWorkspace, WORKSPACE_LIFECYCLE_KEY } from '../../data/local/workspace'
 import { LocalWorkspaceContext, type LocalWorkspaceContextValue } from './LocalWorkspaceContext'
+import { PrivacyOnboarding } from './PrivacyOnboarding'
 
 type BootstrapStatus = 'opening' | 'ready' | 'error'
 
@@ -18,11 +19,11 @@ function BootstrapScreen({
   onAction?: () => void
 }) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-[var(--rm-ink)] px-6 text-slate-100">
+    <main className="grid min-h-dvh place-items-center bg-[var(--rm-ink)] px-6 text-slate-100">
       <section className="w-full max-w-sm rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-6 shadow-[var(--rm-shadow-card)]">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--rm-teal)]">RM Calendar</p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">{title}</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-300">{detail}</p>
+        <p className="mt-3 text-sm leading-6 text-slate-300" role={title === 'Workspace unavailable' ? 'alert' : undefined}>{detail}</p>
         {onAction && actionLabel ? (
           <button
             className="mt-6 min-h-12 w-full rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)] transition hover:bg-[#83e6de]"
@@ -37,7 +38,7 @@ function BootstrapScreen({
           </div>
         )}
       </section>
-    </div>
+    </main>
   )
 }
 
@@ -45,6 +46,8 @@ export function LocalWorkspaceProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<BootstrapStatus>('opening')
   const [error, setError] = useState<string>()
   const workspace = useLiveQuery(() => rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID), [])
+  const privacyNotice = useLiveQuery(() => rmCalendarDb.localSettings.get(PRIVACY_NOTICE_KEY), [])
+  const lifecycle = useLiveQuery(() => rmCalendarDb.localSettings.get(WORKSPACE_LIFECYCLE_KEY), [])
 
   const restoreWorkspace = useCallback(async () => {
     setStatus('opening')
@@ -103,14 +106,19 @@ export function LocalWorkspaceProvider({ children }: { children: ReactNode }) {
   }
 
   if (!contextValue) {
+    const wasCleared = lifecycle?.valueJson.state === 'cleared'
     return (
       <BootstrapScreen
-        actionLabel="Create a new fictional workspace"
-        detail="This device has no local planning data. Creating a workspace adds only fictional starter records."
+        actionLabel={wasCleared ? 'Create a new fictional workspace' : 'Create a new fictional workspace'}
+        detail={wasCleared ? 'All RM Calendar records and local sync state were cleared from this browser. Creating a workspace adds only fictional starter records.' : 'This device has no local planning data. Creating a workspace adds only fictional starter records.'}
         onAction={() => void restoreWorkspace()}
-        title="Start fresh on this device"
+        title={wasCleared ? 'Local data cleared' : 'Start fresh on this device'}
       />
     )
+  }
+
+  if (privacyNotice?.valueJson.version !== PRIVACY_NOTICE_VERSION) {
+    return <PrivacyOnboarding />
   }
 
   return <LocalWorkspaceContext.Provider value={contextValue}>{children}</LocalWorkspaceContext.Provider>

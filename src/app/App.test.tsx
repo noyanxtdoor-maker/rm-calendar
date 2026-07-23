@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { deleteRmCalendarDatabase } from '../data/local/RmCalendarDatabase'
@@ -19,6 +19,10 @@ describe('Milestone 1 route shell', () => {
         <AppRoutes />
       </MemoryRouter>
     )
+
+    expect(await screen.findByRole('heading', { name: 'Before you begin' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'I understand this local-only privacy boundary.' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to my planning space' }))
 
     expect(await screen.findByRole('heading', { name: 'Calendar' })).toBeInTheDocument()
     expect(await screen.findByText('Day plan')).toBeInTheDocument()
