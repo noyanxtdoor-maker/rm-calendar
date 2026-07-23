@@ -1,6 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { ActivityDetailScreen } from '../features/activities/ActivityDetailScreen'
+import { ActivityFormScreen } from '../features/activities/ActivityFormScreen'
 import { CalendarScreen } from '../features/calendar/CalendarScreen'
+import { HouseholdFormScreen } from '../features/people/HouseholdFormScreen'
+import { PersonDetailScreen } from '../features/people/PersonDetailScreen'
+import { PersonFormScreen } from '../features/people/PersonFormScreen'
 import { PeopleScreen } from '../features/people/PeopleScreen'
+import { PlaceFormScreen } from '../features/places/PlaceFormScreen'
 import { PlacesScreen } from '../features/places/PlacesScreen'
 import { ToolsScreen } from '../features/settings/ToolsScreen'
 import { TodayScreen } from '../features/today/TodayScreen'
@@ -14,8 +20,15 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route index element={<TodayScreen />} />
           <Route path="calendar" element={<CalendarScreen />} />
+          <Route path="calendar/new" element={<ActivityFormScreen />} />
+          <Route path="calendar/:activityId" element={<ActivityDetailScreen />} />
+          <Route path="calendar/:activityId/edit" element={<ActivityFormScreen />} />
           <Route path="people" element={<PeopleScreen />} />
+          <Route path="people/new" element={<PersonFormScreen />} />
+          <Route path="people/household/new" element={<HouseholdFormScreen />} />
+          <Route path="people/:contactId" element={<PersonDetailScreen />} />
           <Route path="map" element={<PlacesScreen />} />
+          <Route path="map/new" element={<PlaceFormScreen />} />
           <Route path="tools" element={<ToolsScreen />} />
         </Route>
         <Route path="*" element={<Navigate replace to="/" />} />

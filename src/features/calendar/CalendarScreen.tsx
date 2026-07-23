@@ -52,9 +52,9 @@ export function CalendarScreen() {
             {displayDate(resolvedSelectedDate, snapshot.workspace.timezone, { weekday: 'long', month: 'long', day: 'numeric' })}
           </h2>
         </div>
-        <span className="rounded-full border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--rm-teal)]">
-          Local plan
-        </span>
+        <Link className="rounded-full border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--rm-teal)]" to={'/calendar/new?date=' + resolvedSelectedDate}>
+          Plan visit
+        </Link>
       </div>
 
       <div aria-label="Date ribbon" className="mt-5 grid grid-cols-7 gap-1.5">
@@ -85,7 +85,7 @@ export function CalendarScreen() {
 
       <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/[0.08] bg-[var(--rm-surface-raised)] px-4 py-3">
         <span className="text-xs text-slate-300">Activities and planned visits</span>
-        <Link className="text-xs font-semibold text-[var(--rm-teal)]" to="/tools">Filters soon</Link>
+        <span className="text-xs font-semibold text-[var(--rm-teal)]">{activities.length} on this day</span>
       </div>
 
       <div className="mt-4 space-y-3">
@@ -95,7 +95,7 @@ export function CalendarScreen() {
             const contact = link ? contactsById.get(link.contactId) : undefined
             const place = activity.primaryPlaceId ? placesById.get(activity.primaryPlaceId) : undefined
             return (
-              <article className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-4 shadow-[var(--rm-shadow-card)]" key={activity.id}>
+              <Link className="relative block overflow-hidden rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-4 shadow-[var(--rm-shadow-card)] transition hover:border-[var(--rm-teal)]/35" key={activity.id} to={'/calendar/' + activity.id}>
                 <span aria-hidden="true" className={activity.activityType === 'visit' ? 'absolute inset-y-0 left-0 w-1 bg-[var(--rm-teal)]' : 'absolute inset-y-0 left-0 w-1 bg-[var(--rm-violet)]'} />
                 <div className="ml-2 flex gap-4">
                   <time className="w-16 shrink-0 text-xs font-semibold text-[var(--rm-gold)]">
@@ -111,13 +111,14 @@ export function CalendarScreen() {
                     )}
                   </div>
                 </div>
-              </article>
+              </Link>
             )
           })
         ) : (
           <div className="rounded-3xl border border-dashed border-white/[0.14] bg-[var(--rm-surface)] p-6 text-center">
             <p className="text-sm font-semibold text-white">An open day.</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Activity creation arrives in the next workflow milestone. This view is already reading from the local workspace.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Plan an activity for this date and it will stay available on this device, even after a reload.</p>
+            <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)]" to={'/calendar/new?date=' + resolvedSelectedDate}>Plan a visit</Link>
           </div>
         )}
       </div>

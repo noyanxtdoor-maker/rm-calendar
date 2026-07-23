@@ -65,21 +65,21 @@ export function TodayScreen() {
       <div className="grid grid-cols-3 gap-2">
         <Link
           className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-teal)]/40"
-          to="/calendar"
+          to="/calendar/new"
         >
           Plan day
         </Link>
         <Link
           className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-gold)]/40"
-          to="/people"
+          to="/people/new"
         >
           People
         </Link>
         <Link
           className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-violet)]/40"
-          to="/tools"
+          to="/calendar/new"
         >
-          Quick note
+          Plan visit
         </Link>
       </div>
 

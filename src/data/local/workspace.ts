@@ -1,6 +1,7 @@
 import { createLocalDemoContactInputSchema, normalizeDisplayName } from '../../domain/schemas'
 import type {
   ActivityContactRecord,
+  ActivityHistoryRecord,
   ActivityRecord,
   ContactRecord,
   PlaceRecord,
@@ -100,6 +101,15 @@ function createFictionalSeed(workspace: WorkspaceRecord, timestamp: string) {
     }
   ]
 
+  const activityHistory: ActivityHistoryRecord[] = activities.map((activity) => ({
+    ...localEnvelope('history-' + activity.id, workspace.id, timestamp),
+    activityId: activity.id,
+    eventType: 'scheduled',
+    newState: 'scheduled',
+    eventAt: timestamp,
+    eventPayloadJson: { source: 'fictional-starter-data' }
+  }))
+
   const tasks: TaskRecord[] = [
     {
       ...localEnvelope('task-jordan-next-step', workspace.id, timestamp),
@@ -111,7 +121,7 @@ function createFictionalSeed(workspace: WorkspaceRecord, timestamp: string) {
     }
   ]
 
-  return { people, place, activities, activityContacts, tasks }
+  return { people, place, activities, activityContacts, activityHistory, tasks }
 }
 
 async function workspaceLifecycle() {
@@ -152,13 +162,14 @@ export async function bootstrapLocalWorkspace() {
 
   await rmCalendarDb.transaction(
     'rw',
-    ['workspaces', 'contacts', 'places', 'activities', 'activityContacts', 'tasks', 'localSettings', 'syncMetadata'],
+    ['workspaces', 'contacts', 'places', 'activities', 'activityContacts', 'activityHistory', 'tasks', 'localSettings', 'syncMetadata'],
     async () => {
       await rmCalendarDb.workspaces.put(workspace)
       await rmCalendarDb.contacts.bulkPut(seed.people)
       await rmCalendarDb.places.put(seed.place)
       await rmCalendarDb.activities.bulkPut(seed.activities)
       await rmCalendarDb.activityContacts.bulkPut(seed.activityContacts)
+      await rmCalendarDb.activityHistory.bulkPut(seed.activityHistory)
       await rmCalendarDb.tasks.bulkPut(seed.tasks)
       await rmCalendarDb.localSettings.put({
         key: WORKSPACE_LIFECYCLE_KEY,

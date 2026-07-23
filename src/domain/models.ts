@@ -42,6 +42,12 @@ export type OrganizationRecord = RecordEnvelope & {
   kind: 'household' | 'group' | 'other'
 }
 
+export type ContactOrganizationRecord = RecordEnvelope & {
+  contactId: string
+  organizationId: string
+  relationshipLabel?: string
+}
+
 export type PlaceRecord = RecordEnvelope & {
   name: string
   nameNormalized: string
@@ -77,6 +83,15 @@ export type ActivityContactRecord = RecordEnvelope & {
   contactDisplayNameSnapshot?: string
 }
 
+export type ActivityHistoryRecord = RecordEnvelope & {
+  activityId: string
+  eventType: 'created' | 'scheduled' | 'rescheduled' | 'saved_as_draft' | 'updated'
+  previousState?: ActivityState
+  newState: ActivityState
+  eventAt: string
+  eventPayloadJson: Record<string, unknown>
+}
+
 export type TaskState = 'open' | 'completed' | 'cancelled'
 
 export type TaskRecord = RecordEnvelope & {
@@ -95,6 +110,15 @@ export type TaskRecord = RecordEnvelope & {
 }
 
 export type GenericWorkspaceRecord = RecordEnvelope & Record<string, unknown>
+
+export type DraftRecord = {
+  id: string
+  workspaceId: string
+  draftKind: 'activity-form'
+  routeContextJson: Record<string, unknown>
+  payloadJson: Record<string, unknown>
+  updatedAt: string
+}
 
 export type OutboxOperationRecord = {
   operationId: string
@@ -129,8 +153,11 @@ export type LocalSettingRecord = {
 export type WorkspaceSnapshot = {
   workspace: WorkspaceRecord
   contacts: ContactRecord[]
+  organizations: OrganizationRecord[]
+  contactOrganizations: ContactOrganizationRecord[]
   places: PlaceRecord[]
   activities: ActivityRecord[]
   tasks: TaskRecord[]
   activityContacts: ActivityContactRecord[]
+  activityHistory: ActivityHistoryRecord[]
 }

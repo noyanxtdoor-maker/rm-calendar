@@ -45,3 +45,37 @@ test('the Milestone 1 local workspace stays usable at phone width and reopens of
   await expect(page.getByText('Practice person 4')).toBeVisible()
   await page.context().setOffline(false)
 })
+
+test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
+  const pageErrors: string[] = []
+  page.on('pageerror', (error) => pageErrors.push(error.message))
+  await page.goto('/people')
+
+  await page.getByRole('link', { name: 'Add person', exact: true }).click()
+  await page.getByLabel('Person name').fill('Morgan Local')
+  await page.getByRole('button', { name: 'Save person' }).click()
+  await expect(page.getByRole('heading', { name: 'Morgan Local' })).toBeVisible()
+
+  await page.getByRole('link', { name: 'Plan a visit' }).click()
+  expect(pageErrors).toEqual([])
+  await page.getByLabel('Visit title').fill('Morgan local visit')
+  await page.screenshot({ path: testInfo.outputPath('milestone-2-activity-form.png'), fullPage: true, animations: 'disabled' })
+  const formLayout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(formLayout.scrollWidth).toBeLessThanOrEqual(formLayout.clientWidth)
+  await page.getByRole('button', { name: 'Save plan' }).click()
+  await expect(page.getByRole('heading', { name: 'Morgan local visit' })).toBeVisible()
+
+  await page.getByRole('link', { name: 'Calendar', exact: true }).click()
+  await expect(page.getByText('Morgan local visit')).toBeVisible()
+
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+  })
+  await page.context().setOffline(true)
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(page.getByText('Morgan local visit')).toBeVisible()
+  await page.context().setOffline(false)
+})

@@ -18,5 +18,27 @@ export const navigationDestinations: NavigationDestination[] = [
 ]
 
 export function destinationTitle(pathname: string) {
+  if (pathname.startsWith('/calendar/new')) {
+    return 'Plan visit'
+  }
+  if (pathname.startsWith('/calendar/') && pathname.endsWith('/edit')) {
+    return 'Edit visit'
+  }
+  if (pathname.startsWith('/calendar/')) {
+    return 'Visit'
+  }
+  if (pathname.startsWith('/people/household/new')) {
+    return 'Household'
+  }
+  if (pathname.startsWith('/people/new')) {
+    return 'Add person'
+  }
+  if (pathname.startsWith('/people/')) {
+    return 'Person'
+  }
+  if (pathname.startsWith('/map/new')) {
+    return 'Add place'
+  }
+
   return navigationDestinations.find((destination) => destination.path === pathname)?.label ?? 'RM Calendar'
 }

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 
@@ -14,7 +15,9 @@ export function PlacesScreen() {
       <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white" id="area-board-title">Places without tracking.</h2>
       <p className="mt-2 text-sm leading-6 text-slate-400">Locations are typed locally. RM Calendar does not use live maps or background location in this beta foundation.</p>
 
-      <div className="relative mt-5 min-h-64 overflow-hidden rounded-3xl border border-white/[0.08] bg-[linear-gradient(145deg,#142a3b,#102033_48%,#1b1c3d)] p-5 shadow-[var(--rm-shadow-card)]">
+      <Link className="mt-5 flex min-h-12 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)]" to="/map/new">Add a place</Link>
+
+      <div className="relative mt-3 min-h-64 overflow-hidden rounded-3xl border border-white/[0.08] bg-[linear-gradient(145deg,#142a3b,#102033_48%,#1b1c3d)] p-5 shadow-[var(--rm-shadow-card)]">
         <span aria-hidden="true" className="absolute -left-10 top-10 h-36 w-36 rounded-full border border-[var(--rm-teal)]/15" />
         <span aria-hidden="true" className="absolute right-2 top-4 h-28 w-28 rounded-full border border-[var(--rm-gold)]/15" />
         <span aria-hidden="true" className="absolute bottom-5 left-1/3 h-40 w-40 rotate-12 rounded-[2.5rem] border border-[var(--rm-violet)]/15" />

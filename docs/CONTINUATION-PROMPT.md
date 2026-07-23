@@ -11,10 +11,11 @@ Start by reading these files in this exact order:
 5. docs/Database-Schema-Plan.md
 6. docs/Phase-4-Milestone-0.md
 7. docs/Phase-4-Milestone-1.md
-8. docs/Domain-Model.md
-9. docs/Business-Rules.md
-10. docs/Critical-Workflows.md
-11. docs/Data-Sync-Architecture.md
+8. docs/Phase-4-Milestone-2.md
+9. docs/Domain-Model.md
+10. docs/Business-Rules.md
+11. docs/Critical-Workflows.md
+12. docs/Data-Sync-Architecture.md
 
 If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
@@ -50,18 +51,20 @@ Completed implementation:
 - M0: React + TypeScript + Vite + React Router, Tailwind 3.4.17, static PWA app shell, original mobile route shell, testing and CI baseline.
 - M1: Dexie versioned local schema/migration, fictional private on-device workspace, local settings, data-driven Home/Calendar/People/Map/Tools screens, local data controls, privacy/disclaimer surfaces, and persistence verification.
 - M1 test proof: a fictional local person is created, the production PWA reloads while offline, and the same person remains visible.
+- M2: validated local Person/Household/Place commands, original forms, People context/history, Calendar Activity create/edit/reschedule, durable form drafts, non-blocking overlap warning, and durable local outbox-operation intents.
+- M2 test proof: the production PWA creates a person, plans a linked visit, reloads while offline, and retains the linked visit at phone width.
 - No live user data, Supabase client/project, authentication, email, remote sync, live maps, sharing, or official-data integration exists.
 
-Do not redo M0 or M1. The next permitted implementation slice is Phase 4 Milestone 2:
+Do not redo M0, M1, or M2. The next permitted implementation slice is Phase 4 Milestone 3:
 
-1. Add validated local Contact/Household and Place commands with original forms.
-2. Add reusable local queries, People detail/context/history, and search/group presentation.
-3. Add Calendar Activity create, edit, and reschedule flows with linked person/place context.
-4. Add durable local drafts and a non-blocking overlap warning.
-5. Prove a user can create a person, plan a linked activity, reload offline, and see the same linked data.
+1. Add Activity and Task lifecycle/history commands and original Completion and Quick Capture flows.
+2. Add Notes and local Tasks with clear Today/weekly derivation.
+3. Implement the atomic local Follow-up command: exactly one newly-created target plus exactly one source link.
+4. Preserve planned schedule separately from actual completion time and support correction/reopen behavior.
+5. Prove the person -> outcome -> follow-up loop survives an offline browser reload.
 6. Run typecheck, lint, unit tests, production build, and a phone-width Playwright flow before publishing.
 
-Do not start M3 completion/follow-up workflows until M2 is complete. Do not create a hosted Supabase project, configure email, use a real domain, invite users, or add credentials without explicit founder authorization. Preserve the local-first command boundary and keep no sensitive content in diagnostics.
+Do not start M4 authentication/remote-sync work until M3 is complete. Do not create a hosted Supabase project, configure email, use a real domain, invite users, or add credentials without explicit founder authorization. Preserve the local-first command boundary and keep no sensitive content in diagnostics.
 
 Workspace constraints:
 

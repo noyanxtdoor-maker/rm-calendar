@@ -14,7 +14,7 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Current status
 
-Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 1 (the local-first fictional workspace and data-driven shell) is complete.
+Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 2 (the local People, Places, Calendar, and Planning flow) is complete.
 
 Start with these source-of-truth documents:
 
@@ -24,7 +24,8 @@ Start with these source-of-truth documents:
 4. [Database schema plan](docs/Database-Schema-Plan.md)
 5. [Phase 4 Milestone 0 evidence](docs/Phase-4-Milestone-0.md)
 6. [Phase 4 Milestone 1 evidence](docs/Phase-4-Milestone-1.md)
-7. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+7. [Phase 4 Milestone 2 evidence](docs/Phase-4-Milestone-2.md)
+8. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 

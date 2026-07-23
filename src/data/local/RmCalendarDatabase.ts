@@ -1,8 +1,11 @@
 import Dexie, { type Table } from 'dexie'
 import type {
   ActivityContactRecord,
+  ActivityHistoryRecord,
   ActivityRecord,
+  ContactOrganizationRecord,
   ContactRecord,
+  DraftRecord,
   GenericWorkspaceRecord,
   LocalSettingRecord,
   OrganizationRecord,
@@ -22,17 +25,17 @@ export class RmCalendarDatabase extends Dexie {
   places!: Table<PlaceRecord, string>
   activities!: Table<ActivityRecord, string>
   tasks!: Table<TaskRecord, string>
-  contactOrganizations!: Table<GenericWorkspaceRecord, string>
+  contactOrganizations!: Table<ContactOrganizationRecord, string>
   contactPlaces!: Table<GenericWorkspaceRecord, string>
   activityContacts!: Table<ActivityContactRecord, string>
   followUps!: Table<GenericWorkspaceRecord, string>
   notes!: Table<GenericWorkspaceRecord, string>
-  activityHistory!: Table<GenericWorkspaceRecord, string>
+  activityHistory!: Table<ActivityHistoryRecord, string>
   taskHistory!: Table<GenericWorkspaceRecord, string>
   reminders!: Table<GenericWorkspaceRecord, string>
   tags!: Table<GenericWorkspaceRecord, string>
   tagAssignments!: Table<GenericWorkspaceRecord, string>
-  drafts!: Table<GenericWorkspaceRecord, string>
+  drafts!: Table<DraftRecord, string>
   outboxOperations!: Table<OutboxOperationRecord, string>
   syncMetadata!: Table<SyncMetadataRecord, string>
   conflicts!: Table<GenericWorkspaceRecord, string>
