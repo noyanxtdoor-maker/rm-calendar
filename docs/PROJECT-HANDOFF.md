@@ -1,10 +1,12 @@
 # RM Calendar — Complete Project Handoff
 
-**Status:** Phase 2 in progress (UX/prototype)  
+**Status:** Phase 2 complete (UX/prototype); next: Phase 3 technical implementation planning  
 **Last updated:** 2026-07-23  
 **Repository:** https://github.com/noyanxtdoor-maker/rm-calendar  
 **Product owner:** User / founder  
 **Handoff purpose:** Give a new ChatGPT/Codex session enough context to continue without rediscovering the product, decisions, architecture, or design direction.
+
+> **Current-scope override — read first:** RM Calendar is now specifically for LDS members and returned missionaries, not a general-purpose field-work platform. This supersedes every earlier contrary statement in this handoff and the first-draft architecture. The authoritative decision is [Scope-Decision-LDS.md](Scope-Decision-LDS.md); the authoritative UX result is [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md). The product is independent, must never claim Church affiliation or official data access, and must not copy PMG's proprietary brand, assets, code, or exact screens.
 
 ## 1. The project in one paragraph
 
@@ -86,6 +88,8 @@ All documents below exist locally in `docs/` and, as of this handoff, were publi
 | `Information-Architecture.md` | Mobile-first navigation and screen responsibilities | Complete and audited |
 | `Business-Rules.md` | Lifecycle, permissions, reminder, deletion, and consistency rules | Complete and audited |
 | `Data-Sync-Architecture.md` | Local-first sync, outbox, conflicts, revisions, and security | Complete and audited |
+| `Scope-Decision-LDS.md` | Canonical LDS/RM audience, positioning, and product boundaries | Current scope authority |
+| `Phase-2-UX-Spec.md` | Original LDS/RM visual system, screens, flows, and Phase 2 exit criteria | Phase 2 authority |
 | `PROJECT-HANDOFF.md` | This file | Current handoff |
 | `CONTINUATION-PROMPT.md` | Copy/paste prompt for the next account | Current handoff |
 
@@ -118,6 +122,8 @@ Design direction was selected: **Quiet Command**—a calm dark operational inter
 
 ## 8. Design references and current design direction
 
+> **Current design status:** The active artifact is `design/RM Calendar — Mission Companion Prototype.html`. It is an original LDS/RM planning-companion prototype with Home, Calendar, People, Map, Tools, side drawer, Quick Add, person context, and outcome-to-follow-up flow. The older design files below are retained as history only.
+
 ### Local reference material
 
 User-provided folder (read-only reference):
@@ -134,7 +140,7 @@ It contains PMG screenshots and screen recordings, plus a BetterCalendar recordi
 - A left drawer for secondary tools
 - Strong task/plan distinction
 
-Do not reuse church labels, icons, colors, missions, key indicators, or visual assets.
+Do not reuse PMG branding, labels, icons, colors, missions, key indicators, visual assets, code, or exact screen composition. LDS/RM-oriented content may be designed independently under the current scope.
 
 ### User-owned Google AI Studio prototype reference
 
@@ -158,6 +164,10 @@ The active prototype is published at: https://github.com/noyanxtdoor-maker/rm-ca
 
 ### Current visual system
 
+**Current active prototype:** `design/RM Calendar — Mission Companion Prototype.html`. The older “Reference-Informed Prototype” link in the historical table is not the active design and should not be refined further.
+
+**Current visual system:** deep navy/charcoal base, teal primary action/state, gold planning emphasis, violet context color, system typography, original layout and icon treatment. It replaces the older Quiet Command/copper description below.
+
 - Dark near-black background
 - Slate/blue-green elevated surfaces
 - Warm copper action color (`#e38a5d`), not PMG’s magenta
@@ -178,7 +188,19 @@ The active prototype is published at: https://github.com/noyanxtdoor-maker/rm-ca
 | Area map | Places / route context |
 | PMG drawer tools | Weekly summary, tasks, notes, places, sync status, settings |
 
-## 9. Exactly where Phase 2 paused
+## 9. Phase 2 completion
+
+Phase 2 is complete. The founder changed the scope from general field work to an LDS/RM planning companion, the reference material was reanalyzed, and the original Mission Companion prototype was created. It covers Home, Calendar, People, Map, Tools, the drawer, Quick Add, person context, and the completed-activity → outcome → linked follow-up/task/no-follow-up loop.
+
+Validation completed:
+
+- The prototype's embedded JavaScript passed Node syntax validation.
+- Structural checks confirmed all five primary screens, drawer, quick-add, outcome/follow-up path, and independent-product disclaimer.
+- A fresh-reader review correctly identified the audience, product boundary, flow, and PMG-copy boundary. Its clarifications were applied to [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md).
+
+**Next step:** Phase 3 technical implementation planning. Start with the component/state inventory, schema mapping, local-first web technology decision, privacy decisions, and functional-beta milestones. Do not start production implementation until that plan is approved.
+
+## 9A. Historical record of the earlier Phase 2 pause — superseded
 
 The user opened the current prototype in the in-app browser and approved the general direction: “yes thats okay for now.” They then explicitly said they still love the PMG UI and Google AI Studio mockup UI and asked the project to follow the latter’s layout/design/workflow/UI while removing missionary and church feature content for general use.
 
@@ -219,6 +241,15 @@ The user opened the current prototype in the in-app browser and approved the gen
 - The approved UX spec and prototype are uploaded to `noyanxtdoor-maker/rm-calendar`.
 
 ## 10. Recommended future roadmap
+
+### Current roadmap — start here
+
+1. **Phase 3:** approve the implementation-ready component/state inventory, data/schema mapping, web-first stack, local-first persistence/sync design, privacy decisions, and beta milestones.
+2. **Phase 4:** build the private single-user web beta in vertical slices: local data, people/households, calendar/activities, outcome/follow-up, tasks/notes, sync status, then privacy/export/delete controls.
+3. **Phase 5:** invite a small consented beta of LDS members and returned missionaries; validate planning, capture, follow-up recovery, and offline restart. Do not build roles, shared workspaces, official-data integration, or native packaging yet.
+4. **Phase 6:** consider native mobile only after beta validation and budget approval.
+
+The older roadmap text below is historical; where it refers to general field workers, it is superseded by [Scope-Decision-LDS.md](Scope-Decision-LDS.md).
 
 ### Finish Phase 2 — UX/UI
 
