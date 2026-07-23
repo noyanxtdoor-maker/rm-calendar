@@ -49,7 +49,6 @@ The suite uses two fictional local Auth users and proves:
 To reproduce the local verification:
 
 ```powershell
-supabase init
 supabase start
 supabase db reset
 supabase db lint --local --fail-on error
