@@ -154,6 +154,8 @@ Inspected structure:
 | `design/RM Calendar — Quiet Command Prototype.html` | First interactive direction prototype | Superseded as a structural reference; too simple |
 | `design/RM Calendar — Reference-Informed Prototype.html` | Current prototype to refine | Current starting point |
 
+The active prototype is published at: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/design/RM%20Calendar%20%E2%80%94%20Reference-Informed%20Prototype.html
+
 ### Current visual system
 
 - Dark near-black background
@@ -303,6 +305,7 @@ Only after web beta validates the loop and budget permits Android/Google Play de
 ## 15. How the next agent should work
 
 1. Read this file and all source-of-truth documents listed in Section 6 first.
+   If the local workspace does not contain it, open the public copy first: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/docs/PROJECT-HANDOFF.md
 2. Inspect the current prototype file and the user-owned reference repository; do not duplicate PMG or the reference app.
 3. Begin by refining the active prototype, not by changing the product scope or jumping into production code.
 4. Communicate each design decision plainly and show the user an artifact early.
@@ -322,4 +325,3 @@ Only after web beta validates the loop and budget permits Android/Google Play de
 - [ ] User approves Phase 2 prototype
 - [ ] Create and publish UX specification
 - [ ] Start technical implementation phase
-
