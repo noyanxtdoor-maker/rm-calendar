@@ -217,7 +217,7 @@ The production build must demonstrate more than prototype clicks:
 ## 10. Publishing and workspace facts
 
 - The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
-- The Phase 0–2 documents and active prototype were published previously.
+- The Phase 0–2 documents and active prototype were published previously; the Phase 3 implementation plan, database schema plan, updated handoff, and continuation prompt are now published too.
 - The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
 - `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
 - Use `apply_patch` for project edits. Preserve unrelated changes and never reset/clean destructively.
