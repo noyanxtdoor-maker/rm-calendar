@@ -1,0 +1,9 @@
+:root {
+  --rm-ink: #09111f;
+  --rm-surface: #101d30;
+  --rm-surface-raised: #15263c;
+  --rm-teal: #5ad7cc;
+  --rm-gold: #f4c66f;
+  --rm-violet: #aa9af8;
+  --rm-shadow-card: 0 18px 44px rgba(0, 0, 0, 0.22);
+}

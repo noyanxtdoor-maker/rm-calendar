@@ -396,15 +396,17 @@ The build cannot declare its offline promise complete until the critical scenari
 
 Before Milestone 0 begins, confirm these implementation choices:
 
-- [ ] Fresh React/Vite/TypeScript scaffold, not a fork of the reference mockup.
-- [ ] Tailwind CSS locked to 3.4.17.
-- [ ] Static PWA app-shell cache only; no authenticated API cache or closed-browser sync promise.
-- [ ] Dexie/IndexedDB local-first data layer.
-- [ ] Supabase Auth/Postgres/RLS/RPC remote sync approach.
-- [ ] Six-digit email OTP authentication with custom SMTP as an invited-beta gate.
-- [ ] Private single-owner workspace for beta; no sharing.
-- [ ] No live maps/attachments/contact import/background location in the first functional beta.
-- [ ] Proposed 30-day tombstone engineering window, subject to final product/privacy policy approval.
+**Founder approval recorded: 2026-07-23.**
+
+- [x] Fresh React/Vite/TypeScript scaffold, not a fork of the reference mockup.
+- [x] Tailwind CSS locked to 3.4.17.
+- [x] Static PWA app-shell cache only; no authenticated API cache or closed-browser sync promise.
+- [x] Dexie/IndexedDB local-first data layer.
+- [x] Supabase Auth/Postgres/RLS/RPC remote sync approach.
+- [x] Six-digit email OTP authentication with custom SMTP as an invited-beta gate.
+- [x] Private single-owner workspace for beta; no sharing.
+- [x] No live maps/attachments/contact import/background location in the first functional beta.
+- [x] Proposed 30-day tombstone engineering window, subject to final product/privacy policy approval.
 
 ## 15. Phase 3 completion criteria
 

@@ -13,7 +13,7 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Current status
 
-Phases 0–2 are complete: product discovery, domain/workflow architecture, and the original clickable Mission Companion prototype. Phase 3 technical planning is complete and awaits founder approval before production implementation begins.
+Phases 0–3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 0 (the web scaffold and guardrails) is complete.
 
 Start with these source-of-truth documents:
 
@@ -21,17 +21,27 @@ Start with these source-of-truth documents:
 2. [Phase 2 UX specification](docs/Phase-2-UX-Spec.md)
 3. [Phase 3 implementation plan](docs/Phase-3-Implementation-Plan.md)
 4. [Database schema plan](docs/Database-Schema-Plan.md)
-5. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+5. [Phase 4 Milestone 0 evidence](docs/Phase-4-Milestone-0.md)
+6. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 
-## Planned technical direction
+## Technical direction
 
 - React, TypeScript, Vite, React Router, and Tailwind CSS **3.4.17**.
-- Dexie/IndexedDB as the local-first source of truth; a durable foreground-sync outbox.
-- A tightly scoped PWA app-shell cache, never a promise of closed-browser background sync.
-- Supabase Postgres/Auth/RLS/RPC for the authenticated beta once the founder approves configuration and privacy gates.
+- A production PWA static app shell; it deliberately does not cache private API data or promise closed-browser sync.
+- Dexie/IndexedDB as the future local-first source of truth; a durable foreground-sync outbox comes in later milestones.
+- Supabase Postgres/Auth/RLS/RPC only for the future authenticated beta, after the approved local-first workflow exists.
 - Private single-owner workspaces in the first functional beta; no sharing, attachments, contact import, live maps, or background location.
+
+## Run the scaffold
+
+```bash
+npm ci
+npm run dev
+```
+
+Use `npm run verify` for typecheck, lint, unit tests, and a production build. `npm run test:e2e` additionally tests the production PWA shell at phone width and verifies it reopens offline after the first load.
 
 ## References
 

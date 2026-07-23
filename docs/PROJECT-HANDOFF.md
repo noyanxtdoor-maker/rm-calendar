@@ -3,7 +3,7 @@
 **Last updated:** 2026-07-23  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 technical planning is complete and fresh-reader validated. Production implementation must wait for founder approval of the Phase 3 checklist.
+**Current status:** Phase 3 is founder-approved and Phase 4 Milestone 0 is complete and verified. The next planned slice is Milestone 1: local private workspace and design shell.
 
 ## 1. Read this first
 
@@ -27,8 +27,9 @@ When documents disagree, use this order:
 2. [Phase 2 UX Specification](Phase-2-UX-Spec.md) — authoritative experience, navigation, and workflow behavior.
 3. [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md) — selected stack, component/state model, privacy gates, and build milestones.
 4. [Database Schema Plan](Database-Schema-Plan.md) — table, RLS, RPC, history, and sync contract blueprint.
-5. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
-6. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
+5. [Phase 4 Milestone 0](Phase-4-Milestone-0.md) — implemented scaffold, guardrails, and verification evidence.
+6. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+7. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
 Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
@@ -107,14 +108,18 @@ The prototype establishes:
 
 Phase 2 validation passed embedded-JavaScript syntax checks, structural interaction checks, and a fresh-reader review. The detailed specification is [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md).
 
-### Phase 3 — Technical implementation planning: complete; founder approval pending
+### Phase 3 — Technical implementation planning: complete and founder-approved
 
 The implementation-ready plans are:
 
 - [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md)
 - [Database Schema Plan](Database-Schema-Plan.md)
 
-They turn the approved UX/domain material into a concrete web beta architecture, component inventory, persistence model, sync contract, privacy guardrails, and milestones. Do not begin production implementation until the founder approves the checklist in Section 11 of this handoff.
+They turn the approved UX/domain material into a concrete web beta architecture, component inventory, persistence model, sync contract, privacy guardrails, and milestones. The founder approved these choices on 2026-07-23; see the completed checklist in [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md).
+
+### Phase 4 — Milestone 0: scaffold and guardrails: complete
+
+The repository now contains the fresh React/Vite/TypeScript application, Tailwind CSS 3.4.17, original mobile route shell, static PWA app shell, fictional fixtures, unit/e2e testing, and GitHub Actions CI baseline. It contains no Dexie schema, product records, live account, Supabase configuration, or remote data service. The authoritative implementation and verification record is [Phase-4-Milestone-0.md](Phase-4-Milestone-0.md).
 
 ## 6. Approved Phase 3 technical direction
 
@@ -217,37 +222,33 @@ The production build must demonstrate more than prototype clicks:
 ## 10. Publishing and workspace facts
 
 - The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
-- The Phase 0–2 documents and active prototype were published previously; the Phase 3 implementation plan, database schema plan, updated handoff, and continuation prompt are now published too.
+- The Phase 0–2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestone 0 scaffold/evidence are the current publication set.
 - The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
 - `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
 - Use `apply_patch` for project edits. Preserve unrelated changes and never reset/clean destructively.
 - If a future code repository has `.codegraph/`, use CodeGraph before grep/find when locating or understanding source code.
 - GitHub publication in the prior session used the authenticated local GitHub CLI. A new account/session must authenticate separately and must not assume inherited access.
 
-## 11. Immediate next action: founder approval, then Phase 4
+## 11. Current execution gate: Milestone 1 only
 
-Before M0 begins, the founder needs to approve or amend these choices:
+The founder approved the Phase 3 decisions and M0 delivered the scaffold without exceeding its boundary:
 
-- [ ] Fresh React/Vite/TypeScript scaffold, not a fork of either reference.
-- [ ] Tailwind CSS locked to 3.4.17.
-- [ ] Mobile-first original Mission Companion design system.
-- [ ] Dexie/IndexedDB as local-first source of truth and custom foreground outbox sync.
-- [ ] PWA static app-shell cache only; no closed-browser sync promise.
-- [ ] Supabase Auth/Postgres/RLS/RPC remote architecture.
-- [ ] Six-digit email OTP and custom SMTP before non-team invites.
-- [ ] Private single-owner workspace for the first beta; no sharing.
-- [ ] No live maps, attachments, imports, background location, AI, or official data in the first functional beta.
-- [ ] Proposed 30-day tombstone engineering window, subject to final privacy/retention policy.
+- [x] Fresh React/Vite/TypeScript scaffold, not a fork of either reference.
+- [x] Tailwind CSS locked to 3.4.17.
+- [x] Mobile-first original Mission Companion shell direction.
+- [x] Static PWA app-shell cache only; no closed-browser sync promise.
+- [x] CI baseline and clean-install verification.
+- [x] No live Supabase project, email service, production domain, account flow, or real-user data.
 
-After the checklist is approved, begin M0 only. Do not provision a hosted Supabase project, email service, production domain, or invite real users without separate founder authorization.
+The next implementation work is M1: add only the local Dexie workspace/data foundation, original shell data binding, local settings, and privacy/disclaimer surfaces. Do not start M2 workflows, create a hosted Supabase project, or invite real users without separate founder direction.
 
 ## 12. Continuation instructions for another account/session
 
 1. Read the source-of-truth documents in Section 2 in order.
 2. Open the active Mission Companion prototype before changing UI behavior.
 3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
-4. Confirm Phase 3 approval before production code. If approval has not been given, discuss/adjust the approval checklist rather than scaffolding code.
-5. After approval, execute M0, validate it, and report evidence before moving to M1.
+4. Do not redo M0. Review [Phase-4-Milestone-0.md](Phase-4-Milestone-0.md) and retain its no-live-service boundary.
+5. If the founder asks to continue, execute M1 only and validate local persistence across a browser reload before moving to M2.
 6. Keep the public repository and local handoff synchronized only after local validation succeeds.
 
 For a ready-to-paste starting instruction, use [CONTINUATION-PROMPT.md](CONTINUATION-PROMPT.md).

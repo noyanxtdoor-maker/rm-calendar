@@ -9,10 +9,11 @@ Start by reading these files in this exact order:
 3. docs/Phase-2-UX-Spec.md
 4. docs/Phase-3-Implementation-Plan.md
 5. docs/Database-Schema-Plan.md
-6. docs/Domain-Model.md
-7. docs/Business-Rules.md
-8. docs/Critical-Workflows.md
-9. docs/Data-Sync-Architecture.md
+6. docs/Phase-4-Milestone-0.md
+7. docs/Domain-Model.md
+8. docs/Business-Rules.md
+9. docs/Critical-Workflows.md
+10. docs/Data-Sync-Architecture.md
 
 If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
@@ -37,23 +38,22 @@ It establishes the original mobile-first structure:
 Home → Calendar → People → Map → Tools
 with a side drawer, quick add, person context, and the core completed-activity → outcome → linked follow-up/task flow.
 
-Phase 3 technical planning is complete. Its selected direction is:
-- React + TypeScript + Vite + React Router.
-- Tailwind CSS 3.4.17 only, plus project-owned tokens.
-- Dexie/IndexedDB local-first source of truth and durable foreground outbox.
-- Static PWA app-shell cache only; do not promise closed-browser sync.
-- Supabase Postgres/Auth/RLS/RPC for the future authenticated beta.
-- Six-digit email OTP and custom SMTP before non-team beta invites.
-- Private single-owner workspaces for functional beta.
-- No attachments, imports, live maps, background location, sharing, official data, AI, or native packaging in the first functional beta.
+Phase 3 is founder-approved. Phase 4 Milestone 0 is complete and verified:
+- Fresh React + TypeScript + Vite + React Router app at the repository root.
+- Tailwind CSS 3.4.17 only, plus original project-owned tokens.
+- Static PWA app-shell cache only; no API/data cache or closed-browser sync promise.
+- Original mobile route shell and fictional preview fixtures only.
+- `npm ci`, `npm run verify`, and `npm run test:e2e` all pass.
+- The Playwright mobile test verifies phone-width layout and offline reopening of the production app shell after first load.
+- No Dexie schema, user data, authentication, Supabase client/project, email, or remote service exists yet.
 
-Before writing production code, confirm whether the founder has explicitly approved the Phase 3 checklist in docs/PROJECT-HANDOFF.md. If approval is missing, present the checklist and resolve only the founder’s decisions; do not scaffold the app or provision external services.
-
-After approval, begin Phase 4 Milestone 0 only:
-1. Create a fresh React/Vite/TypeScript app in this repository—never fork the reference mockup.
-2. Configure Tailwind 3.4.17, the static app-shell service worker, routes, CSS tokens, fake-data fixtures, lint/type/test commands, and CI baseline.
-3. Do not create a live Supabase project, email configuration, domain, or real-user data without explicit additional authorization.
-4. Validate typecheck, unit tests, production build, and a phone-width visual smoke test before moving to Milestone 1.
+Do not redo Milestone 0 and do not add live services. The next permitted implementation slice is Phase 4 Milestone 1 only:
+1. Add Dexie and the local schema/migration layer according to the approved domain/database plans.
+2. Create a fictional private local workspace and local settings; use no real user data.
+3. Bind the original app shell to local data rather than hard-coded screen state.
+4. Add privacy/disclaimer surfaces and local data-clearing behavior appropriate to this stage.
+5. Prove a newly created local record survives a browser reload, with typecheck, lint, unit tests, production build, and a phone-width Playwright check.
+6. Do not begin People/Calendar creation workflows (Milestone 2), Supabase, email, maps, sharing, or real beta data until M1 is complete and the founder directs the next slice.
 
 Workspace constraints:
 - `sources/` is read-only reference material.

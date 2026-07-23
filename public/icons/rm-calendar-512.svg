@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="RM Calendar">
+  <rect width="512" height="512" rx="118" fill="#09111f"/>
+  <rect x="101" y="120" width="310" height="293" rx="56" fill="#101d30" stroke="#5ad7cc" stroke-width="22"/>
+  <path d="M171 88v72M341 88v72M152 211h208" fill="none" stroke="#f4c66f" stroke-linecap="round" stroke-width="25"/>
+  <circle cx="208" cy="289" r="27" fill="#5ad7cc"/>
+  <circle cx="304" cy="289" r="27" fill="#aa9af8"/>
+  <circle cx="208" cy="367" r="27" fill="#f4c66f"/>
+</svg>
