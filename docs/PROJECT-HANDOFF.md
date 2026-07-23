@@ -1,360 +1,253 @@
 # RM Calendar — Complete Project Handoff
 
-**Status:** Phase 2 complete (UX/prototype); next: Phase 3 technical implementation planning  
 **Last updated:** 2026-07-23  
-**Repository:** https://github.com/noyanxtdoor-maker/rm-calendar  
-**Product owner:** User / founder  
-**Handoff purpose:** Give a new ChatGPT/Codex session enough context to continue without rediscovering the product, decisions, architecture, or design direction.
+**Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
+**Product owner:** Founder / user  
+**Current status:** Phase 3 technical planning is complete and fresh-reader validated. Production implementation must wait for founder approval of the Phase 3 checklist.
 
-> **Current-scope override — read first:** RM Calendar is now specifically for LDS members and returned missionaries, not a general-purpose field-work platform. This supersedes every earlier contrary statement in this handoff and the first-draft architecture. The authoritative decision is [Scope-Decision-LDS.md](Scope-Decision-LDS.md); the authoritative UX result is [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md). The product is independent, must never claim Church affiliation or official data access, and must not copy PMG's proprietary brand, assets, code, or exact screens.
+## 1. Read this first
 
-## 1. The project in one paragraph
+RM Calendar is an **independent, web-first, mobile-first planning companion for LDS members and returned missionaries**. It helps a person organize people/households, visits, activities, places, notes, tasks, and follow-ups with a familiar mission-planning rhythm.
 
-RM Calendar is an original, general-purpose, field-work productivity platform. It is aimed initially at returned missionaries (RMs) and people who miss the clarity of Preach My Gospel-style planning, but it is **not** a church or missionary app and it must not contain church-specific concepts by default. It helps people plan time, manage contacts and places, capture what happened, and reliably create follow-ups. The first release is a web-first beta with a phone-sized, mobile-first UI; native mobile applications come later, after workflow validation and budget are available.
+It is **not**:
 
-## 2. Non-negotiable product direction
+- an official Church product, affiliated product, or replacement for official Church systems;
+- a source of official Church/member data;
+- a PMG clone or pixel-for-pixel remake;
+- a generic calendar with disconnected contacts and tasks;
+- a shared ward, missionary, supervisor, or organization-management system in the first beta.
 
-### Build this
+The intended feeling is: *“I remember how to use this immediately.”* That familiarity comes from the job flow and planning clarity—not copied PMG visuals, words, branding, assets, source code, colors, or exact screen layouts.
 
-- A calendar-centered field-work application for general use.
-- Core objects: Contacts, Organizations, Places, Activities, Tasks, Notes, Reminders, Follow-ups, Tags, Routes (later).
-- Primary daily loop: know people/places → plan work → complete/capture outcome → create follow-up → review.
-- Web beta optimized for handheld use, with responsive browser access on larger screens.
-- Original code, visual design, copy, assets, terminology, and data model.
+## 2. Source-of-truth order
 
-### Do not build this
+When documents disagree, use this order:
 
-- A PMG clone, an LDS/church app, or a pharmaceutical-only app.
-- A generic personal calendar with disconnected contacts and tasks.
-- A full CRM, accounting system, inventory tool, or enterprise reporting suite in v1.
-- A product that requires reliable connectivity to plan or record work.
+1. [Scope Decision — LDS](Scope-Decision-LDS.md) — canonical product scope and legal/design boundary.
+2. [Phase 2 UX Specification](Phase-2-UX-Spec.md) — authoritative experience, navigation, and workflow behavior.
+3. [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md) — selected stack, component/state model, privacy gates, and build milestones.
+4. [Database Schema Plan](Database-Schema-Plan.md) — table, RLS, RPC, history, and sync contract blueprint.
+5. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+6. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
-### Inspiration boundary
+Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
-The user has permission/control over the Google AI Studio prototype repository listed below. Use it as a reference for app-shell quality and interaction structure. The PMG screenshots/recordings are references for familiarity and workflow analysis only. Do **not** copy PMG branding, artwork, icons, church language, proprietary screen layouts, or code.
+## 3. Founder decisions already made
 
-## 3. Naming and positioning
-
-- Chosen name: **RM Calendar**.
-- “RM” initially resonates with returned missionaries, but the product itself is intentionally general-purpose.
-- Suggested positioning: “The field-work planner that keeps people, places, plans, and follow-ups connected.”
-- Long-term category: field productivity platform, with Calendar as the flagship module.
-
-## 4. Target users
-
-### Initial emotional audience
-
-Returned missionaries who remember the operational clarity of PMG: daily plans, people context, follow-ups, activity history, and an always-visible next action.
-
-### Broader product audience
-
-- Field and territory representatives
-- Relationship/account managers
-- Insurance and real-estate agents
-- Field technicians and service workers
-- Community, NGO, and faith-based field workers
-
-### Core jobs to be done
-
-1. What should I do today?
-2. Who should I see next, and where are they?
-3. What happened during the last interaction?
-4. What follow-up is due or at risk of being forgotten?
-5. What did I accomplish this week?
-
-## 5. Product principles
-
-1. Offline-first/local-first.
-2. Plan work, not merely time.
-3. Fast frequent actions; capture should never become a long form.
-4. Field-friendly, one-handed, readable, with 44px minimum touch targets.
-5. Generic core with configurable language later.
-6. AI may assist later but must never block core work.
-7. Connected context: people, places, activities, tasks, notes, and follow-ups link naturally.
-8. Reliability and speed over visual effects.
-9. Trustworthy history and visible corrections.
-10. Original implementation; borrow needs, not proprietary expression.
-
-## 6. Completed work and source-of-truth documents
-
-All documents below exist locally in `docs/` and, as of this handoff, were published to the public RM Calendar repository.
-
-| File | Purpose | Status |
-| --- | --- | --- |
-| `Product-Bible.md` | Vision, users, scope, principles, feature boundary, risks | Complete |
-| `Phase-0-Discovery.md` | Personas, feature inventory, positioning, assumptions, beta research | Complete |
-| `Domain-Model.md` | Product entities, relationships, lifecycle, invariants | Complete and audited |
-| `Critical-Workflows.md` | Plan, complete/capture, and follow-up flows with acceptance criteria | Complete and audited |
-| `Information-Architecture.md` | Mobile-first navigation and screen responsibilities | Complete and audited |
-| `Business-Rules.md` | Lifecycle, permissions, reminder, deletion, and consistency rules | Complete and audited |
-| `Data-Sync-Architecture.md` | Local-first sync, outbox, conflicts, revisions, and security | Complete and audited |
-| `Scope-Decision-LDS.md` | Canonical LDS/RM audience, positioning, and product boundaries | Current scope authority |
-| `Phase-2-UX-Spec.md` | Original LDS/RM visual system, screens, flows, and Phase 2 exit criteria | Phase 2 authority |
-| `PROJECT-HANDOFF.md` | This file | Current handoff |
-| `CONTINUATION-PROMPT.md` | Copy/paste prompt for the next account | Current handoff |
-
-## 7. Phase history
-
-### Phase 0 — Product discovery: complete
-
-Completed deliverables: vision, user hypotheses, product boundaries, principles, product vocabulary, feature inventory, competitor/category analysis, universal field-work loop, beta assumptions, and research plan.
-
-Key decision: RM Calendar is not medical/pharmaceutical-only. It is general field-work software.
-
-### Architecture package / original roadmap phases 1–7: complete
-
-The original conversation described Domain Architecture, Business Rules, Information Architecture, Workflows, Database Design, API Design, and Offline Architecture as separate sequential phases. The project has already completed the planning-level portions of all of these through the Domain Model, Critical Workflows, Information Architecture, Business Rules, and Data/Sync Architecture documents.
-
-Important resolved details:
-
-- Activities have `Draft`, `Scheduled`, `Completed`, and `Cancelled` states.
-- Draft Activities may be unscheduled; Scheduled Activities are all-day or time-ranged.
-- Tasks have `Open`, `Completed`, and `Cancelled` states.
-- An Activity can have many contacts but at most one primary Contact; it has one primary Place.
-- A Follow-up starts from a **Completed** Activity and targets exactly one Task **or** Activity.
-- Creating a follow-up target and link is one atomic local and backend transaction.
-- Records are workspace-scoped. Existing-record mutations carry `base_revision`; meaningful conflicts become visible `needs attention`, never silent last-write-wins.
-- Web beta sync is active/resumed-browser sync plus manual Sync Status fallback; it does not promise background sync when the browser is closed.
-
-### Phase 2 — UX/UI prototype: in progress
-
-Design direction was selected: **Quiet Command**—a calm dark operational interface. The first simple prototype was intentionally only a direction canvas and was judged too rough by the user. A more relevant reference-informed prototype has been created and should be the current starting point.
-
-## 8. Design references and current design direction
-
-> **Current design status:** The active artifact is `design/RM Calendar — Mission Companion Prototype.html`. It is an original LDS/RM planning-companion prototype with Home, Calendar, People, Map, Tools, side drawer, Quick Add, person context, and outcome-to-follow-up flow. The older design files below are retained as history only.
-
-### Local reference material
-
-User-provided folder (read-only reference):
-
-`C:\Users\sherl\Downloads\Preach My Gospel Reference`
-
-It contains PMG screenshots and screen recordings, plus a BetterCalendar recording. Key visual/workflow takeaways:
-
-- Dense day timeline and compact date ribbon
-- Clear bottom navigation
-- Obvious floating add action
-- Home screen that answers “what matters now?”
-- People/progress context connected to planning
-- A left drawer for secondary tools
-- Strong task/plan distinction
-
-Do not reuse PMG branding, labels, icons, colors, missions, key indicators, visual assets, code, or exact screen composition. LDS/RM-oriented content may be designed independently under the current scope.
-
-### User-owned Google AI Studio prototype reference
-
-Repository: https://github.com/noyanxtdoor-maker/Calendar
-
-Inspected structure:
-
-- React/Vite app with `HomeView`, `CalendarView`, `PeopleView`, `MapView`, `MenuView`, `BottomNav`, `LeftDrawer`, and add/detail modals.
-- Its strongest ideas are the fixed mobile app shell, dashboard → people → calendar → map → tools flow, date ribbon, dense timeline, drawer for secondary functions, and context-specific creation flows.
-- Its church/missionary domain and exact design are **not** to be transferred. Translate its structure to generic concepts only.
-
-### Current design files
-
-| File | Purpose | Status |
-| --- | --- | --- |
-| `design/RM Calendar — Design Directions.html` | Three rough original visual directions | Direction 2 selected; historical reference |
-| `design/RM Calendar — Quiet Command Prototype.html` | First interactive direction prototype | Superseded as a structural reference; too simple |
-| `design/RM Calendar — Reference-Informed Prototype.html` | Current prototype to refine | Current starting point |
-
-The active prototype is published at: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/design/RM%20Calendar%20%E2%80%94%20Reference-Informed%20Prototype.html
-
-### Current visual system
-
-**Current active prototype:** `design/RM Calendar — Mission Companion Prototype.html`. The older “Reference-Informed Prototype” link in the historical table is not the active design and should not be refined further.
-
-Public copy: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html
-
-**Current visual system:** deep navy/charcoal base, teal primary action/state, gold planning emphasis, violet context color, system typography, original layout and icon treatment. It replaces the older Quiet Command/copper description below.
-
-- Dark near-black background
-- Slate/blue-green elevated surfaces
-- Warm copper action color (`#e38a5d`), not PMG’s magenta
-- Soft mint for positive/completed states
-- Georgia-style display headings plus readable system UI body font
-- 8px spacing rhythm, 44px touch-target minimum
-- No gradients, no copied iconography, no church imagery
-
-### Generic translation of the reference dashboard
-
-| Reference idea | RM Calendar equivalent |
+| Topic | Decision |
 | --- | --- |
-| Weekly key indicators | Today’s Focus: planned visits, follow-ups, contacts, completed work |
-| Progressing people | People needing attention |
-| Missionary/area | User/workspace/territory or personal workspace |
-| Teaching/finding events | Visits, meetings, calls, route planning, focus blocks |
-| Referrals/baptism forms | Contacts, follow-ups, notes, files (later) |
-| Area map | Places / route context |
-| PMG drawer tools | Weekly summary, tasks, notes, places, sync status, settings |
+| Product name | **RM Calendar** |
+| Primary audience | LDS members and returned missionaries with first-hand familiarity with mission planning |
+| Product position | Independent planning companion; familiar rhythm, original execution |
+| First platform | Web beta, designed from the outset for phone-width/mobile use |
+| Native applications | Later, after workflow validation and budget for Android/Google Play and native development |
+| Repository | Public GitHub repository: `noyanxtdoor-maker/rm-calendar` |
+| Privacy model for beta | Private, single-owner workspace; no shared groups or roles yet |
+| Reference repository | Founder-owned Google AI Studio mockup may inform structure and interaction quality, not be copied as a codebase/template |
+| PMG reference | Local screenshots/recordings may inform workflow and nostalgia only; never copy proprietary expression |
+| Design direction | Original dark “Mission Companion” workbench: calm, dense, mobile-first, and field-ready |
+| Initial feature focus | People + plan + calendar + outcome + follow-up + task + local reliability |
+| Explicit deferrals | Live maps, route optimization, background location, attachments, imports, sharing, official-data integrations, AI, and native packaging |
 
-## 9. Phase 2 completion
+## 4. Reference materials and use boundaries
 
-Phase 2 is complete. The founder changed the scope from general field work to an LDS/RM planning companion, the reference material was reanalyzed, and the original Mission Companion prototype was created. It covers Home, Calendar, People, Map, Tools, the drawer, Quick Add, person context, and the completed-activity → outcome → linked follow-up/task/no-follow-up loop.
+### Founder-owned mockup
 
-Validation completed:
+- Repository: <https://github.com/noyanxtdoor-maker/Calendar>
+- Its useful patterns: fixed phone app shell; Home → Calendar → People → Map → Tools flow; compact date ribbon; dense timeline; drawer for secondary tools; person context; contextual quick creation.
+- Do **not** fork it, transplant its source files, use its Tailwind 4 setup, or transfer its exact visual expression. RM Calendar is locked to Tailwind **3.4.17**.
 
-- The prototype's embedded JavaScript passed Node syntax validation.
-- Structural checks confirmed all five primary screens, drawer, quick-add, outcome/follow-up path, and independent-product disclaimer.
-- A fresh-reader review correctly identified the audience, product boundary, flow, and PMG-copy boundary. Its clarifications were applied to [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md).
+### Local PMG/BetterCalendar material
 
-**Next step:** Phase 3 technical implementation planning. Start with the component/state inventory, schema mapping, local-first web technology decision, privacy decisions, and functional-beta milestones. Do not start production implementation until that plan is approved.
+- Folder: `C:\Users\sherl\Downloads\Preach My Gospel Reference`
+- Treat it as read-only source material on the founder’s local machine.
+- Retain only abstract workflow lessons: daily planning density, clear next action, people context, history, follow-up discipline, fast field interaction, and a calm command-center feel.
+- Never reproduce PMG’s name, logo, colors, copy, icons, assets, proprietary screen design, source code, or official data workflow.
 
-## 9A. Historical record of the earlier Phase 2 pause — superseded
+## 5. Completed phases and artifacts
 
-The user opened the current prototype in the in-app browser and approved the general direction: “yes thats okay for now.” They then explicitly said they still love the PMG UI and Google AI Studio mockup UI and asked the project to follow the latter’s layout/design/workflow/UI while removing missionary and church feature content for general use.
+### Phase 0 — Discovery and product foundation: complete
 
-**Next required work:** refine `design/RM Calendar — Reference-Informed Prototype.html` rather than restarting from scratch. It should become a genuinely polished, original clickable prototype with these screens/flows:
+The project captured vision, target users, jobs to be done, terminology, core loop, risks, and product boundaries. The original broader field-work direction is retained as historical context only; the LDS/RM scope supersedes it.
 
-1. Home dashboard
-   - Today’s Focus metrics
-   - People needing attention
-   - Quick tools
-   - Clear current sync status
-2. Calendar
-   - Day ribbon/date selection
-   - Dense but readable timeline
-   - Multiple activity types, without church terminology
-   - Add Activity flow
-3. People
-   - Search, contact list, contact detail
-   - Activity history, notes, place, next action
-4. Map/Places
-   - Place pins, route context, not turn-by-turn navigation
-5. More/Drawer
-   - Weekly summary, tasks, notes, sync status, settings
-6. Critical interaction flows
-   - Add Activity
-   - Create Contact inline
-   - Complete Activity + capture outcome
-   - Create linked follow-up
-   - Offline/pending-sync feedback
+### Phase 1 — Domain and workflow architecture: complete
 
-### Phase 2 definition of done
+The domain model, business rules, critical flows, information architecture, and local-first sync principles are documented. Important decisions include:
 
-- The reference-informed prototype is visually polished and consistent at phone width.
-- It is clearly original in colors, copy, iconography, and screen composition.
-- A user can click through plan → complete → follow up.
-- It includes Today, Calendar, People/contact detail, Places, More, Quick Add, and Sync feedback.
-- It is reviewed by the user and adjusted at least once.
-- A `UX-Specification.md` documents the approved design system, component states, screen responsibilities, and critical flow acceptance criteria.
-- The approved UX spec and prototype are uploaded to `noyanxtdoor-maker/rm-calendar`.
+- Activity lifecycle: `Draft` → `Scheduled` → `Completed` or `Cancelled`.
+- Task lifecycle: `Open` → `Completed` or `Cancelled`.
+- An Activity may link several Contacts but has at most one primary Contact and one primary Place.
+- A Follow-up is a **separate link**, created from a completed Activity, that targets exactly one newly created Task or Activity.
+- A follow-up target and its source link must be created atomically, locally and remotely.
+- Every Activity and Task lifecycle change has immutable history.
+- Updates are workspace-scoped, versioned, conflict-aware, and never silently resolved with last-write-wins.
 
-## 10. Recommended future roadmap
+### Phase 2 — UX/UI specification and clickable prototype: complete
 
-### Current roadmap — start here
+The active original clickable prototype is:
 
-1. **Phase 3:** approve the implementation-ready component/state inventory, data/schema mapping, web-first stack, local-first persistence/sync design, privacy decisions, and beta milestones.
-2. **Phase 4:** build the private single-user web beta in vertical slices: local data, people/households, calendar/activities, outcome/follow-up, tasks/notes, sync status, then privacy/export/delete controls.
-3. **Phase 5:** invite a small consented beta of LDS members and returned missionaries; validate planning, capture, follow-up recovery, and offline restart. Do not build roles, shared workspaces, official-data integration, or native packaging yet.
-4. **Phase 6:** consider native mobile only after beta validation and budget approval.
+- [Mission Companion Prototype](../design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html)
 
-The older roadmap text below is historical; where it refers to general field workers, it is superseded by [Scope-Decision-LDS.md](Scope-Decision-LDS.md).
+Its principal destinations are:
 
-### Finish Phase 2 — UX/UI
+```text
+Home → Calendar → People → Map → Tools
+           ↘ Quick Add / person context / outcome → linked follow-up
+```
 
-Refine and validate the clickable prototype as described above. Do not write production app code until the user approves the core screens and interactions.
+The prototype establishes:
 
-### Phase 3 — Technical implementation decision and scaffold
+- a dark navy/charcoal operational surface with original teal, gold, and violet semantic accents;
+- a compact date ribbon and dense day-planning timeline;
+- bottom navigation for the five primary destinations and a drawer for secondary tools;
+- an obvious quick-add path;
+- person/household context linked to notes, history, activities, and next steps;
+- the critical completed activity → outcome → task/follow-up/no-follow-up loop;
+- a clear independent-product/non-affiliation disclaimer.
 
-Choose the concrete web stack and backend only after the prototype is accepted. The local project instructions describe InsForge as the intended backend platform. Before writing any InsForge integration code, the next agent **must** fetch current InsForge documentation using the required MCP documentation tool. Use Tailwind CSS **3.4**, never v4, if Tailwind is used.
+Phase 2 validation passed embedded-JavaScript syntax checks, structural interaction checks, and a fresh-reader review. The detailed specification is [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md).
 
-Expected decisions:
+### Phase 3 — Technical implementation planning: complete; founder approval pending
 
-- React/Vite or another web framework
-- PWA/local database approach (IndexedDB-capable)
-- InsForge project/backend configuration
-- Authentication and workspace model
-- Sync engine implementation consistent with `Data-Sync-Architecture.md`
-- Map provider and cost limits
+The implementation-ready plans are:
 
-### Phase 4 — Build the beta loop
+- [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md)
+- [Database Schema Plan](Database-Schema-Plan.md)
 
-Implement in vertical slices:
+They turn the approved UX/domain material into a concrete web beta architecture, component inventory, persistence model, sync contract, privacy guardrails, and milestones. Do not begin production implementation until the founder approves the checklist in Section 11 of this handoff.
 
-1. Authentication, personal workspace, local data store
-2. Contacts and Places
-3. Calendar/Activities and Today dashboard
-4. Completion capture and linked Follow-ups
-5. Tasks, weekly summary, search
-6. Offline outbox, sync status, conflict UI
-7. Manual beta testing with 10–20 field-work users
+## 6. Approved Phase 3 technical direction
 
-### Phase 5 — Beta and learning
+### Client and user experience
 
-- Recruit former PMG users and general field workers.
-- Test real daily planning, interaction capture, offline restart, and follow-up recovery.
-- Measure repeat weekly use and qualitative confidence in the workflow.
-- Avoid adding team collaboration, heavy reporting, integrations, or AI until the core loop is habitual.
+- **React + TypeScript + Vite** single-page application.
+- **React Router** with route-backed sheets/details, so browser Back and deep links remain reliable.
+- **Tailwind CSS 3.4.17** plus project-owned CSS design tokens. Never introduce Tailwind 4.
+- **`vite-plugin-pwa`** with a generated Workbox service worker for static app-shell availability after the first successful visit.
+- App-shell caching contains only versioned static UI assets/navigation fallback. It must not cache authenticated API responses, notes/outcomes, sessions, or sync work.
+- The mobile-first Mission Companion shell remains the design starting point. It is not a desktop-first CRUD dashboard.
 
-### Phase 6 — Native mobile
+### Local-first data model
 
-Only after web beta validates the loop and budget permits Android/Google Play development. Reuse the data/sync contract; do not rewrite the business rules or domain model.
+- **Dexie + IndexedDB + `dexie-react-hooks`** is the browser’s source of truth for domain data and queries.
+- React components do not write directly to a remote API. They invoke domain commands.
+- A command validates input, writes records/history/outbox entries in one Dexie transaction, then returns local success.
+- Domain data must survive a browser reload and continue to work without connectivity.
+- `navigator.storage.persist()` can be requested after meaningful user data exists, but storage persistence is never promised as a security or durability guarantee.
+- The foreground app may sync when signed in, resumed, online, manually retried, or open on a conservative interval. It does **not** promise to sync while the browser/app is closed.
 
-## 11. Repository and publishing state
+### Remote beta architecture
 
-- GitHub account connected in this session: `noyanxtdoor-maker`.
-- RM Calendar public repository successfully created: `noyanxtdoor-maker/rm-calendar`.
-- The architecture documents were uploaded and final remote confirmation was made for the Data Sync architecture commit: `docs: strengthen concurrency and web sync contract`.
-- GitHub connector could read but not write to the new repository; the local authenticated `gh` CLI was used to create/publish files.
-- If continuing on another account, authenticate GitHub before publishing. Do not assume the new account has the same connector or CLI access.
+- **Supabase** is planned for hosted beta only: Postgres, Auth, Row Level Security, migrations, and database RPC/functions.
+- Authentication choice: **six-digit email OTP**. Custom SMTP and an approved sender domain are mandatory before inviting non-team users.
+- The browser uses only a publishable client key plus the authenticated session. Never expose service-role credentials.
+- Each beta workspace is private and has one owner. The owner workspace/membership relationship is constrained so exactly one owner membership matches `workspaces.owner_user_id`; every workspace-scoped domain row is protected by RLS.
+- Domain mutations use explicit authenticated RPC operations—not unrestricted browser-side table writes and not a hidden last-write-wins sync library.
 
-## 12. Important workspace instructions
+### Sync and conflict contract
 
-- Current workspace: `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`
-- `sources/` is read-only reference material. Never modify, rename, move, or delete it.
-- Use `apply_patch` for file edits.
-- If `.codegraph/` exists in a future repository, use CodeGraph before grep/find for code understanding.
-- Preserve existing user changes; do not reset or destructively clean the worktree.
-- Use direct, original implementation rather than copying code from any reference.
+- Device-generated `crypto.randomUUID()` IDs and durable immutable operation IDs.
+- Local outbox persists `kind`, payload, expected/base revision, dependencies, attempts, and error state.
+- `pull_changes(workspace_id, after_cursor, page_size)` supplies ordered remote changes.
+- `apply_sync_batch(workspace_id, operations[])` validates each operation, uses receipt-based idempotency, and returns the previous result for retrying the same operation ID.
+- Stale edits become visible `needs_attention` conflicts; they are never silently overwritten.
+- A remote tombstone is not silently undone by an offline edit.
+- Restoring a deleted record is an explicit, revision-checked operation; it never quietly restores separately deleted related records.
+- `create_follow_up` is one compound operation: target + source link + history + change log + receipt, all committed or none committed.
 
-## 13. Questions already answered
+### Domain records planned for the functional beta
 
-| Question | Answer |
-| --- | --- |
-| Product name | RM Calendar |
-| Medical/pharma-only? | No; general field work |
-| First delivery platform | Web-first beta, mobile-first UI |
-| Native mobile | Later, after validation and budget |
-| GitHub repository | Public `noyanxtdoor-maker/rm-calendar` |
-| Visual direction | Quiet Command / dark operational UI |
-| Primary UI reference | User-owned `noyanxtdoor-maker/Calendar` structure and usability |
-| Church/missionary features | Remove completely from RM Calendar default product |
-| UI inspiration from PMG | Preserve operational clarity and familiarity, never copy proprietary expression |
+```text
+Identity/workspace: profiles, workspaces, workspace_memberships
+People/context: contacts, organizations/households, contact_organizations,
+                places, contact_places
+Work: activities, activity_contacts, activity_history,
+      tasks, task_history, follow_ups, notes, reminders
+Organization: tags, tag_assignments
+Local-only reliability: drafts, outbox_operations, sync_metadata,
+                        conflicts, local_settings
+Remote sync support: change_log, mutation_receipts
+```
 
-## 14. Decisions still open
+All workspace-scoped synchronizable records use ID, workspace ID, timestamps including `client_updated_at`, revision, soft-delete marker, and local sync state. `activity_history` and `task_history` are append-only and store lifecycle/schedule metadata, never note or outcome body text. Terminal Activities capture immutable linked Contact-name snapshots so completed history stays readable after a Contact is deleted/purged. See [Database-Schema-Plan.md](Database-Schema-Plan.md) for the exact constraints and indexing plan.
 
-- Exact web framework and local database library
-- Exact InsForge configuration and backend schema deployment
-- Mapping provider/cost ceiling
-- Responsive desktop scope during beta
-- Brand logo, font licensing, and final icon set
-- User-configurable vocabulary timing
-- Beta geography, languages, privacy/retention requirements
-- Whether the public repo should contain only docs/prototype now or move into a normal implementation structure after Phase 2 approval
+## 7. Privacy, security, and scope gates
 
-## 15. How the next agent should work
+Before real beta data or non-team beta invites:
 
-1. Read this file and all source-of-truth documents listed in Section 6 first.
-   If the local workspace does not contain it, open the public copy first: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/docs/PROJECT-HANDOFF.md
-2. Inspect the current prototype file and the user-owned reference repository; do not duplicate PMG or the reference app.
-3. Begin by refining the active prototype, not by changing the product scope or jumping into production code.
-4. Communicate each design decision plainly and show the user an artifact early.
-5. Ask the user for feedback on the refined prototype before treating Phase 2 as complete.
-6. Once approved, write `UX-Specification.md`, publish it and the prototype, and then begin Phase 3.
+1. Deploy over HTTPS with approved production redirect URLs.
+2. Implement and test RLS workspace isolation in migrations.
+3. Configure custom SMTP, sender domain, rate controls, and the final email OTP flow.
+4. Present onboarding consent plus independent/non-affiliation language.
+5. Add export and account-delete request behavior.
+6. If the outbox contains unsynced work, sign-out must offer **Sync now** or **Remove local data and sign out**—never silently discard it.
+7. Clear the active workspace’s local IndexedDB and in-memory state after an intentional completed sign-out.
+8. Keep diagnostics to operation ID, record type/ID, and error codes; never log note/outcome/body text.
+9. Use fictional/consented data only in development, tests, screenshots, and demos.
 
-## 16. Current handoff checklist
+The proposed 30-day remote tombstone window is an engineering safety mechanism for stale offline devices, not an approved public privacy policy. Founder approval is needed for final retention, export, deletion, hosting, and jurisdictional wording.
 
-- [x] Product vision and scope captured
-- [x] Architecture and critical workflows specified and independently audited
-- [x] Public GitHub repository created and documentation published
-- [x] Web-first/mobile-first strategy decided
-- [x] UI references analyzed
-- [x] Design direction selected
-- [x] Initial reference-informed prototype created
-- [ ] Refine prototype from user feedback
-- [ ] User approves Phase 2 prototype
-- [ ] Create and publish UX specification
-- [ ] Start technical implementation phase
+## 8. What Phase 4 implementation will build, in order
+
+Implementation begins only after the founder accepts the Phase 3 decisions. Build vertical slices, not a large set of disconnected screens.
+
+| Milestone | Deliverable | Exit evidence |
+| --- | --- | --- |
+| M0 — Scaffold/guardrails | React/Vite/TS shell, Tailwind 3.4.17, static app shell, routes, tokens, fixtures, lint/type/test/CI baseline | Typecheck, unit tests, production build, phone-width smoke check pass |
+| M1 — Local workspace/shell | Dexie schema/migrations, fake private workspace, settings, original app shell, privacy/disclaimer surfaces | New local records survive browser reload; no hard-coded view state masquerades as data |
+| M2 — People/places/planning | People/households, places, Calendar day view/date ribbon, create/edit/reschedule Activity, drafts | User creates a person, plans a linked activity, reloads, and sees the local linked data |
+| M3 — Completion/follow-up | Activity/Task history, outcome capture, notes, tasks, atomic linked follow-up, Today derivation | Complete/capture/follow-up works offline after restart; no orphan follow-up exists |
+| M4 — Auth/sync | Supabase migrations/RLS/RPC tests, owner workspace, outbox processor, pull/apply, conflict view | Two signed-in browser profiles sync exactly once; intentional conflict is visible with no data loss |
+| M5 — Beta readiness | Export/delete flows, sign-out safety, storage-persistence request, deployment/auth config, manual beta script | Privacy/recovery checklist passes using fictional data; no public invite before final approval |
+
+Deferred until the beta loop is actually validated: live map tiles, routing, turn-by-turn navigation, background location, attachments/photos, contact imports, shared workspaces/roles, official-data integrations, AI, push claims while closed, and native Android/iOS packaging.
+
+## 9. Testing and acceptance model
+
+The production build must demonstrate more than prototype clicks:
+
+- **Domain tests:** Activity/Task transitions, time rules, deletion rules, and Follow-up invariants.
+- **Dexie/local persistence tests:** atomic rollback, reload survival, drafts, outbox, and offline work.
+- **Sync contract tests:** operation receipt idempotency, cursors, tombstones, stale revision conflicts.
+- **Database tests:** Supabase migrations, RLS owner isolation, and atomic remote follow-up creation.
+- **Browser-flow tests:** plan offline → reload → complete/capture/follow-up → reconnect → resolve a conflict.
+- **Accessibility review:** keyboard/focus, 44px targets, contrast, and no color-only meanings.
+- **Privacy review:** absence of note/outcome text in diagnostics and absence of cross-workspace results.
+
+## 10. Publishing and workspace facts
+
+- The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
+- The Phase 0–2 documents and active prototype were published previously.
+- The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
+- `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
+- Use `apply_patch` for project edits. Preserve unrelated changes and never reset/clean destructively.
+- If a future code repository has `.codegraph/`, use CodeGraph before grep/find when locating or understanding source code.
+- GitHub publication in the prior session used the authenticated local GitHub CLI. A new account/session must authenticate separately and must not assume inherited access.
+
+## 11. Immediate next action: founder approval, then Phase 4
+
+Before M0 begins, the founder needs to approve or amend these choices:
+
+- [ ] Fresh React/Vite/TypeScript scaffold, not a fork of either reference.
+- [ ] Tailwind CSS locked to 3.4.17.
+- [ ] Mobile-first original Mission Companion design system.
+- [ ] Dexie/IndexedDB as local-first source of truth and custom foreground outbox sync.
+- [ ] PWA static app-shell cache only; no closed-browser sync promise.
+- [ ] Supabase Auth/Postgres/RLS/RPC remote architecture.
+- [ ] Six-digit email OTP and custom SMTP before non-team invites.
+- [ ] Private single-owner workspace for the first beta; no sharing.
+- [ ] No live maps, attachments, imports, background location, AI, or official data in the first functional beta.
+- [ ] Proposed 30-day tombstone engineering window, subject to final privacy/retention policy.
+
+After the checklist is approved, begin M0 only. Do not provision a hosted Supabase project, email service, production domain, or invite real users without separate founder authorization.
+
+## 12. Continuation instructions for another account/session
+
+1. Read the source-of-truth documents in Section 2 in order.
+2. Open the active Mission Companion prototype before changing UI behavior.
+3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
+4. Confirm Phase 3 approval before production code. If approval has not been given, discuss/adjust the approval checklist rather than scaffolding code.
+5. After approval, execute M0, validate it, and report evidence before moving to M1.
+6. Keep the public repository and local handoff synchronized only after local validation succeeds.
+
+For a ready-to-paste starting instruction, use [CONTINUATION-PROMPT.md](CONTINUATION-PROMPT.md).
