@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test'
 
-test('the Milestone 0 shell stays usable at phone width and reopens offline', async ({ page }, testInfo) => {
+test('the Milestone 1 local workspace stays usable at phone width and reopens offline with saved data', async ({ page }, testInfo) => {
   await page.goto('/')
 
-  await expect(page.getByRole('heading', { name: 'Home' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'A reliable starting point' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Start with what matters.' })).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
-  await expect(page.getByRole('link', { name: 'Calendar' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('link', { name: 'Calendar', exact: true })).toBeVisible()
 
   const layout = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
@@ -19,21 +19,29 @@ test('the Milestone 0 shell stays usable at phone width and reopens offline', as
   await page.waitForTimeout(200)
 
   await page.screenshot({
-    path: testInfo.outputPath('milestone-0-mobile-shell.png'),
+    path: testInfo.outputPath('milestone-1-mobile-shell.png'),
     fullPage: false,
     animations: 'disabled'
   })
 
-  await page.getByRole('link', { name: 'Calendar' }).click()
-  await expect(page.getByRole('heading', { name: 'Calendar' })).toBeVisible()
+  await page.getByRole('link', { name: 'Calendar', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Calendar', exact: true })).toBeVisible()
+  await expect(page.getByText('Avery visit')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Tools', exact: true }).click()
+  await page.getByRole('button', { name: 'Add fictional person' }).click()
+  await expect(page.getByText('Practice person 4 was saved on this device.')).toBeVisible()
+
+  await page.getByRole('link', { name: 'People', exact: true }).click()
+  await expect(page.getByText('Practice person 4')).toBeVisible()
 
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready
   })
-  await page.reload()
 
   await page.context().setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await expect(page.getByRole('heading', { name: 'Calendar' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'People', exact: true })).toBeVisible()
+  await expect(page.getByText('Practice person 4')).toBeVisible()
   await page.context().setOffline(false)
 })

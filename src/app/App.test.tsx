@@ -1,18 +1,28 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { deleteRmCalendarDatabase } from '../data/local/RmCalendarDatabase'
 import { AppRoutes } from './routes'
 
-describe('Milestone 0 route shell', () => {
-  it('renders a phone-first destination and the five primary routes', () => {
+describe('Milestone 1 route shell', () => {
+  beforeEach(async () => {
+    await deleteRmCalendarDatabase()
+  })
+
+  afterEach(async () => {
+    await deleteRmCalendarDatabase()
+  })
+
+  it('opens the calendar from a local workspace and preserves the five primary routes', async () => {
     render(
       <MemoryRouter initialEntries={['/calendar']}>
         <AppRoutes />
       </MemoryRouter>
     )
 
-    expect(screen.getByRole('heading', { name: 'Calendar' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Planning route is connected' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Calendar' })).toBeInTheDocument()
+    expect(await screen.findByText('Day plan')).toBeInTheDocument()
+    expect(await screen.findByText('Avery visit')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument()
 
     for (const label of ['Home', 'Calendar', 'People', 'Map', 'Tools']) {

@@ -1,9 +1,11 @@
 # RM Calendar — Complete Project Handoff
 
+> **Latest implementation update - 2026-07-23:** Phase 4 Milestone 1 is complete and verified locally. Read [Phase 4 Milestone 1](Phase-4-Milestone-1.md) immediately after the Milestone 0 record; it supersedes every older statement in this handoff that says Milestone 1 is pending or that implementation must stop at Milestone 1. The next planned local slice is Milestone 2. Dayflow Calendar is an additional interaction reference only; see the M1 record for its license and non-copying boundary.
+
 **Last updated:** 2026-07-23  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 is founder-approved and Phase 4 Milestone 0 is complete and verified. The next planned slice is Milestone 1: local private workspace and design shell.
+**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0 and 1 are complete and locally verified. The next planned slice is Milestone 2: People, Places, Calendar, and Planning.
 
 ## 1. Read this first
 
@@ -28,8 +30,9 @@ When documents disagree, use this order:
 3. [Phase 3 Implementation Plan](Phase-3-Implementation-Plan.md) — selected stack, component/state model, privacy gates, and build milestones.
 4. [Database Schema Plan](Database-Schema-Plan.md) — table, RLS, RPC, history, and sync contract blueprint.
 5. [Phase 4 Milestone 0](Phase-4-Milestone-0.md) — implemented scaffold, guardrails, and verification evidence.
-6. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
-7. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
+6. [Phase 4 Milestone 1](Phase-4-Milestone-1.md) — versioned local workspace, data-driven shell, privacy surfaces, and persistence verification.
+7. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+8. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
 Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
@@ -57,6 +60,13 @@ Older documents can contain earlier “general field-work” language. The curre
 - Repository: <https://github.com/noyanxtdoor-maker/Calendar>
 - Its useful patterns: fixed phone app shell; Home → Calendar → People → Map → Tools flow; compact date ribbon; dense timeline; drawer for secondary tools; person context; contextual quick creation.
 - Do **not** fork it, transplant its source files, use its Tailwind 4 setup, or transfer its exact visual expression. RM Calendar is locked to Tailwind **3.4.17**.
+
+### Dayflow Calendar
+
+- Repository: <https://github.com/dayflow-js/calendar>
+- License and scope reviewed: MIT-licensed calendar component library, used only as an interaction reference.
+- Useful patterns: day-first planning, quick date movement, native-feeling event editing, consistent calendar behavior across views, and mobile support.
+- Do **not** import it, copy its source, reproduce its visual expression, or use it to bypass RM Calendar's own command/domain/data architecture.
 
 ### Local PMG/BetterCalendar material
 
@@ -120,6 +130,10 @@ They turn the approved UX/domain material into a concrete web beta architecture,
 ### Phase 4 — Milestone 0: scaffold and guardrails: complete
 
 The repository now contains the fresh React/Vite/TypeScript application, Tailwind CSS 3.4.17, original mobile route shell, static PWA app shell, fictional fixtures, unit/e2e testing, and GitHub Actions CI baseline. It contains no Dexie schema, product records, live account, Supabase configuration, or remote data service. The authoritative implementation and verification record is [Phase-4-Milestone-0.md](Phase-4-Milestone-0.md).
+
+### Phase 4 — Milestone 1: local workspace and design shell: complete
+
+Milestone 1 adds the versioned Dexie/IndexedDB database, a fictional single-owner local workspace, local settings, data-driven Home/Calendar/People/Map/Tools screens, a local-data clear/restore path, and an independent-product privacy surface. The new date ribbon, day-plan timeline, and Area Board are original RM Calendar UI. The precise schema, non-deliveries, reference boundary, and verification evidence are in [Phase-4-Milestone-1.md](Phase-4-Milestone-1.md).
 
 ## 6. Approved Phase 3 technical direction
 
@@ -222,7 +236,7 @@ The production build must demonstrate more than prototype clicks:
 ## 10. Publishing and workspace facts
 
 - The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
-- The Phase 0–2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestone 0 scaffold/evidence are the current publication set.
+- The Phase 0–2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestones 0 and 1 implementation/evidence are the current publication set.
 - The current public `Verify scaffold` GitHub Actions workflow is green; its first verified run is [30021188368](https://github.com/noyanxtdoor-maker/rm-calendar/actions/runs/30021188368).
 - The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
 - `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
@@ -230,7 +244,7 @@ The production build must demonstrate more than prototype clicks:
 - If a future code repository has `.codegraph/`, use CodeGraph before grep/find when locating or understanding source code.
 - GitHub publication in the prior session used the authenticated local GitHub CLI. A new account/session must authenticate separately and must not assume inherited access.
 
-## 11. Current execution gate: Milestone 1 only
+## 11. Current execution gate: Milestone 2 next
 
 The founder approved the Phase 3 decisions and M0 delivered the scaffold without exceeding its boundary:
 
@@ -241,15 +255,15 @@ The founder approved the Phase 3 decisions and M0 delivered the scaffold without
 - [x] CI baseline and clean-install verification.
 - [x] No live Supabase project, email service, production domain, account flow, or real-user data.
 
-The next implementation work is M1: add only the local Dexie workspace/data foundation, original shell data binding, local settings, and privacy/disclaimer surfaces. Do not start M2 workflows, create a hosted Supabase project, or invite real users without separate founder direction.
+Milestone 1 is complete. The next implementation work is M2: add validated People/Household and Place commands, a person context/detail surface, calendar Activity create/edit/reschedule, local drafts, and a non-blocking overlap warning. Do not create a hosted Supabase project, invite real users, or implement M4 remote sync without separate founder direction.
 
 ## 12. Continuation instructions for another account/session
 
 1. Read the source-of-truth documents in Section 2 in order.
 2. Open the active Mission Companion prototype before changing UI behavior.
 3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
-4. Do not redo M0. Review [Phase-4-Milestone-0.md](Phase-4-Milestone-0.md) and retain its no-live-service boundary.
-5. If the founder asks to continue, execute M1 only and validate local persistence across a browser reload before moving to M2.
+4. Do not redo M0 or M1. Review [Phase-4-Milestone-1.md](Phase-4-Milestone-1.md) and retain its no-live-service boundary.
+5. If the founder asks to continue, execute M2 locally and validate person-plus-linked-activity persistence across a browser reload before moving to M3.
 6. Keep the public repository and local handoff synchronized only after local validation succeeds.
 
 For a ready-to-paste starting instruction, use [CONTINUATION-PROMPT.md](CONTINUATION-PROMPT.md).

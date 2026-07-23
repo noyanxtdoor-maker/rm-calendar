@@ -1,10 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { AppIcon } from '../design-system/AppIcon'
-import { navigationDestinations } from '../test/fixtures/scaffold'
-
-function destinationTitle(pathname: string) {
-  return navigationDestinations.find((destination) => destination.path === pathname)?.label ?? 'RM Calendar'
-}
+import { destinationTitle, navigationDestinations } from './navigation'
 
 export function AppShell() {
   const location = useLocation()
@@ -19,11 +15,11 @@ export function AppShell() {
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">{title}</h1>
           </div>
           <div
-            aria-label="Scaffold status: local preview"
+            aria-label="Data status: stored on this device"
             className="flex h-10 items-center gap-2 rounded-full border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/10 px-3 text-xs font-medium text-[var(--rm-teal)]"
           >
             <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--rm-teal)]" />
-            Local preview
+            On this device
           </div>
         </header>
 

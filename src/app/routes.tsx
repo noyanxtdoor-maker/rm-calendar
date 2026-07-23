@@ -1,18 +1,25 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { CalendarScreen } from '../features/calendar/CalendarScreen'
+import { PeopleScreen } from '../features/people/PeopleScreen'
+import { PlacesScreen } from '../features/places/PlacesScreen'
+import { ToolsScreen } from '../features/settings/ToolsScreen'
+import { TodayScreen } from '../features/today/TodayScreen'
+import { LocalWorkspaceProvider } from '../features/workspace/LocalWorkspaceProvider'
 import { AppShell } from './AppShell'
-import { ScaffoldDestinationScreen } from './ScaffoldDestinationScreen'
 
 export function AppRoutes() {
   return (
-    <Routes>
-      <Route element={<AppShell />}>
-        <Route index element={<ScaffoldDestinationScreen destinationId="today" />} />
-        <Route path="calendar" element={<ScaffoldDestinationScreen destinationId="calendar" />} />
-        <Route path="people" element={<ScaffoldDestinationScreen destinationId="people" />} />
-        <Route path="map" element={<ScaffoldDestinationScreen destinationId="places" />} />
-        <Route path="tools" element={<ScaffoldDestinationScreen destinationId="tools" />} />
-      </Route>
-      <Route path="*" element={<Navigate replace to="/" />} />
-    </Routes>
+    <LocalWorkspaceProvider>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route index element={<TodayScreen />} />
+          <Route path="calendar" element={<CalendarScreen />} />
+          <Route path="people" element={<PeopleScreen />} />
+          <Route path="map" element={<PlacesScreen />} />
+          <Route path="tools" element={<ToolsScreen />} />
+        </Route>
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
+    </LocalWorkspaceProvider>
   )
 }

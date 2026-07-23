@@ -6,14 +6,15 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Product boundary
 
-- It is **not** an official Church product, a replacement for Church systems, or an affiliated version of *Preach My Gospel*.
+- It is **not** an official Church product, a replacement for Church systems, or an affiliated version of Preach My Gospel.
 - It does not use official Church/member data.
 - It is original software. PMG material informs workflow familiarity only; we do not copy branding, assets, source code, text, or exact screens.
 - The user-owned Google AI Studio prototype is a structural and interaction reference, not a code/template baseline.
+- Dayflow Calendar informs only abstract calendar interaction patterns. RM Calendar neither imports nor copies its source or visual expression.
 
 ## Current status
 
-Phases 0–3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 0 (the web scaffold and guardrails) is complete.
+Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 1 (the local-first fictional workspace and data-driven shell) is complete.
 
 Start with these source-of-truth documents:
 
@@ -22,7 +23,8 @@ Start with these source-of-truth documents:
 3. [Phase 3 implementation plan](docs/Phase-3-Implementation-Plan.md)
 4. [Database schema plan](docs/Database-Schema-Plan.md)
 5. [Phase 4 Milestone 0 evidence](docs/Phase-4-Milestone-0.md)
-6. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+6. [Phase 4 Milestone 1 evidence](docs/Phase-4-Milestone-1.md)
+7. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 
@@ -30,25 +32,24 @@ The active clickable artifact is [Mission Companion Prototype](design/RM%20Calen
 
 - React, TypeScript, Vite, React Router, and Tailwind CSS **3.4.17**.
 - A production PWA static app shell; it deliberately does not cache private API data or promise closed-browser sync.
-- Dexie/IndexedDB as the future local-first source of truth; a durable foreground-sync outbox comes in later milestones.
+- Dexie/IndexedDB as the current local-first source of truth; a durable foreground-sync outbox processor comes in a later milestone.
 - Supabase Postgres/Auth/RLS/RPC only for the future authenticated beta, after the approved local-first workflow exists.
 - Private single-owner workspaces in the first functional beta; no sharing, attachments, contact import, live maps, or background location.
 
-## Run the scaffold
+## Run the application
 
-```bash
-npm ci
-npm run dev
-```
+    npm ci
+    npm run dev
 
-Use `npm run verify` for typecheck, lint, unit tests, and a production build. `npm run test:e2e` additionally tests the production PWA shell at phone width and verifies it reopens offline after the first load.
+Use npm run verify for typecheck, lint, unit tests, and a production build. npm run test:e2e additionally tests the production PWA at phone width and verifies a newly saved fictional local record survives an offline browser reload.
 
 ## References
 
 - Public project repository: <https://github.com/noyanxtdoor-maker/rm-calendar>
 - User-owned mockup reference: <https://github.com/noyanxtdoor-maker/Calendar>
-- Local PMG reference material (read-only; available only on the founder’s machine): `C:\Users\sherl\Downloads\Preach My Gospel Reference`
+- Calendar interaction reference: <https://github.com/dayflow-js/calendar> (ideas only; no code or visual copying)
+- Local PMG reference material (read-only; available only on the founder’s machine): C:\Users\sherl\Downloads\Preach My Gospel Reference
 
 ## Workspace rule
 
-Everything under `sources/` is synced reference material and must remain read-only.
+Everything under sources/ is synced reference material and must remain read-only.

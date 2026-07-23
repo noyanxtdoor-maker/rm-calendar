@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { NavigationIcon } from '../test/fixtures/scaffold'
+import type { NavigationIcon } from '../app/navigation'
 
 type AppIconProps = {
   name: NavigationIcon
