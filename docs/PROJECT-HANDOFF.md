@@ -223,6 +223,7 @@ The production build must demonstrate more than prototype clicks:
 
 - The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
 - The Phase 0–2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestone 0 scaffold/evidence are the current publication set.
+- The current public `Verify scaffold` GitHub Actions workflow is green; its first verified run is [30021188368](https://github.com/noyanxtdoor-maker/rm-calendar/actions/runs/30021188368).
 - The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
 - `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
 - Use `apply_patch` for project edits. Preserve unrelated changes and never reset/clean destructively.

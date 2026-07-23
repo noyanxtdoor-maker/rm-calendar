@@ -43,6 +43,8 @@ npm run test:e2e
   verifies phone-width layout, primary navigation, route change, and offline reopen
 ```
 
+The same workflow passed in the public repository through [GitHub Actions run 30021188368](https://github.com/noyanxtdoor-maker/rm-calendar/actions/runs/30021188368): clean install, typecheck, lint, unit test, production build, Chromium setup, and the production PWA browser check all completed successfully.
+
 The generated phone-width screenshot was inspected locally. It shows a readable, original dark RM Calendar shell with no horizontal overflow, obvious primary navigation, and no copied PMG assets or layouts.
 
 ## 5. Deliberate non-deliveries
