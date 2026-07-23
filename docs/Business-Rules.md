@@ -46,7 +46,7 @@ Every state change is appended to immutable history with actor, timestamp, previ
 2. Each Follow-up has exactly one source Activity and exactly one target: a Task **or** an Activity.
 3. Creating a Follow-up carries forward the primary Contact and Place only when they exist; the user can remove or change either.
 4. The source Activity always displays the target and its current state.
-5. Creating the target and its Follow-up link is atomic: both succeed or neither is visible.
+5. Creating the target and its Follow-up link is executed by one atomic backend transaction/command: both succeed or neither is visible.
 
 ## 6. Contact, organization, and place rules
 
