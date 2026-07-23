@@ -3,6 +3,7 @@ import identityMigration from '../../../supabase/migrations/20260724090000_ident
 import peoplePlacesMigration from '../../../supabase/migrations/20260724091000_people_places.sql?raw'
 import activitiesTasksMigration from '../../../supabase/migrations/20260724092000_activities_tasks.sql?raw'
 import followUpsSyncMigration from '../../../supabase/migrations/20260724093000_followups_sync_schema.sql?raw'
+import pullChangesMigration from '../../../supabase/migrations/20260724094000_pull_changes.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -21,7 +22,7 @@ describe('Supabase identity migration guardrails', () => {
   })
 
   it('keeps each currently migrated workspace table behind RLS and browser read-only grants', () => {
-    const sql = [identityMigration, peoplePlacesMigration, activitiesTasksMigration, followUpsSyncMigration]
+    const sql = [identityMigration, peoplePlacesMigration, activitiesTasksMigration, followUpsSyncMigration, pullChangesMigration]
       .join('\n')
       .toLocaleLowerCase()
 
@@ -43,5 +44,16 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).not.toContain('grant insert on table public.contacts to authenticated')
     expect(sql).not.toContain('grant update on table public.activities to authenticated')
     expect(sql).not.toContain('grant delete on table public.tasks to authenticated')
+  })
+
+  it('keeps pull access owner-scoped, cursor-bounded, and inaccessible to public callers', () => {
+    const sql = pullChangesMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.pull_changes')
+    expect(sql).toContain('if not public.is_active_workspace_owner(p_workspace_id)')
+    expect(sql).toContain('limit v_limit + 1')
+    expect(sql).toContain("'nextcursor'")
+    expect(sql).toContain('revoke all on function public.pull_changes(uuid, bigint, integer) from public')
+    expect(sql).toContain('grant execute on function public.pull_changes(uuid, bigint, integer) to authenticated')
   })
 })

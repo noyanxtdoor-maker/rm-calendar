@@ -1,6 +1,6 @@
 # RM Calendar - Phase 4, Milestone 4: Local Sync Contract Preparation
 
-**Status:** Local preparation complete; authenticated remote sync not started  
+**Status:** Local preparation and Supabase foundation verified; authenticated remote sync not started  
 **Completed:** 2026-07-24  
 **Depends on:** [Phase 4 Milestone 3](Phase-4-Milestone-3.md), [Sync Contract](Sync-Contract.md), [Data and Sync Architecture](Data-Sync-Architecture.md), and [Database Schema Plan](Database-Schema-Plan.md)
 
@@ -18,6 +18,10 @@ durable outbox
   -> apply / retry / conflict / rejection result
   -> safe local acknowledgement
 ~~~
+
+It also has a clean-local-Supabase migration foundation for private owner
+workspaces, current domain tables, RLS, and owner-scoped change pulls. No
+hosted project has been linked or contacted.
 
 ## 2. Delivered implementation
 
@@ -42,6 +46,12 @@ durable outbox
 - Added a phone-width Sync Status screen.
   - It transparently states that cloud sync is not configured.
   - It displays only safe operation metadata, never person/note/outcome content.
+- Added versioned local Supabase migrations for:
+  - authenticated profiles and exactly-one-owner private workspaces;
+  - contacts, organizations, places, activities, tasks, notes, reminders, histories, follow-ups, change logs, and mutation receipts;
+  - same-workspace relationship triggers, RLS read policies, and no direct browser write grants;
+  - `bootstrap_private_workspace(name, timezone)` and bounded owner-scoped `pull_changes` RPCs.
+- Added a local pgTAP owner-isolation suite with two fictional Auth users.
 
 ## 3. Verification evidence
 
@@ -61,42 +71,49 @@ Commands run successfully:
 npm run verify
   typecheck: pass
   lint: pass
-  Vitest: 15 passed
+  Vitest: 28 passed
   production Vite build: pass
   PWA service worker and manifest: emitted
 
 npm run test:e2e
-  Playwright Chromium mobile: 4 passed
+  Playwright Chromium mobile: 6 passed
   M1, M2, and M3 offline flows remain green
   M4-prep Sync Status shows queued local work without exposing private record text
   no horizontal overflow is observed at phone width
+
+supabase db reset --local
+supabase db lint --local --fail-on error
+supabase test db --local supabase/tests
+  clean local migration replay: pass
+  schema lint: pass
+  pgTAP owner-isolation checks: 12 passed
 ~~~
 
 ## 4. What this does not do
 
 This is **not** completed M4 authenticated sync. It does not:
 
-- create or contact a Supabase project;
+- create or contact a hosted Supabase project;
 - contain a Supabase SDK, URL, publishable key, service-role key, email provider, or account screen;
 - perform a real pull/apply network request;
-- authenticate a user, create a remote workspace, execute RLS, or invite a beta user;
+- authenticate a browser user, create a hosted workspace, or invite a beta user;
 - claim that local records have been backed up or synchronized.
 
 The local screen intentionally says “Cloud sync is not set up.”
 
 ## 5. Required authority before M4 can finish
 
-The founder must explicitly authorize all of the following before external M4 work begins:
+The founder must explicitly identify or authorize all of the following before external M4 work begins:
 
 1. the named Supabase project/environment and where beta data may be stored;
 2. the authentication/OTP email approach, sender, and redirect policy;
-3. creating remote migrations/RLS/RPC resources;
+3. applying the reviewed migrations/RLS/RPC resources to that named project;
 4. use of a domain/hosting environment for authenticated testing.
 
 After approval, the next implementation sequence is:
 
-1. write and test Supabase migrations/RLS with fictional data;
-2. implement the remote RPC adapter against [Sync Contract](Sync-Contract.md);
-3. add authenticated workspace bootstrap and foreground pull/push;
+1. implement and locally test `apply_sync_batch` against [Sync Contract](Sync-Contract.md);
+2. add the remote RPC adapter and authenticated browser bootstrap;
+3. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;
 5. finish the remaining account-aware and deployment portions of beta readiness. The safe local privacy/recovery preparation is already documented in [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md).

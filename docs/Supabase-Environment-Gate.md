@@ -1,6 +1,6 @@
 # RM Calendar — Supabase Environment Gate
 
-**Status:** Local migration foundation only — no RM Calendar cloud project is linked or configured  
+**Status:** Local migration foundation verified — no RM Calendar cloud project is linked or configured  
 **Last updated:** 2026-07-24
 
 ## What is in this repository now
@@ -9,7 +9,7 @@
 - Row-level security (RLS) that lets an authenticated beta owner read only their own profile, root workspace, and membership.
 - A narrowly scoped `bootstrap_private_workspace(name, timezone)` RPC. It binds ownership to `auth.uid()`, validates an IANA timezone, and atomically creates or recovers one private workspace.
 - A guarded browser configuration reader. Remote sync remains off when configuration is missing or partial.
-- No `pull_changes` or `apply_sync_batch` RPC has been added yet; domain table writes remain denied to browser clients.
+- A reviewed, locally executed `pull_changes` migration exists; `apply_sync_batch` does not exist yet and domain table writes remain denied to browser clients.
 - No Supabase URL, browser key, service-role key, SMTP secret, user, user-owned content, or live database connection.
 
 ## Explicitly out of scope until a dedicated project is approved
@@ -34,11 +34,19 @@ Before any cloud connection, the founder must either create a new RM Calendar Su
 6. Keep all privileged credentials server-side. A `VITE_*` setting is public to browser users and must never contain a service-role key, database password, SMTP password, or other secret.
 7. Configure email OTP, custom SMTP, redirect URLs, privacy copy, and deployment only after the data layer/RLS tests pass.
 
-## Current local verification limitation
+## Local verification evidence
 
-The Supabase CLI is installed, but Docker Desktop is not running on this workstation. Therefore the migration is source-controlled and covered by static guardrail tests, but it has **not** yet been applied to a local Postgres/Supabase stack. This is intentionally not represented as a deployed or production-ready remote sync feature.
+On 2026-07-24, a clean local RM Calendar Supabase stack applied every migration, passed `supabase db lint --local --fail-on error`, and passed the 12-test pgTAP suite in `supabase/tests/001_identity_workspace.pgtap.sql`.
 
-When Docker is available, the next verification commands are:
+The suite uses two fictional local Auth users and proves:
+
+- unauthenticated bootstrap is rejected;
+- a private workspace is bootstrap-idempotent;
+- an owner can see only their own profile, workspace, and membership;
+- a second owner cannot enumerate or pull the first owner's workspace;
+- direct browser-role workspace mutation is denied.
+
+To reproduce the local verification:
 
 ```powershell
 supabase init
@@ -48,4 +56,4 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
 ```
 
-The next migration will add `pull_changes` and `apply_sync_batch` only after those tests can run against this private-owner foundation. It must prove owner isolation, idempotent receipts, revision conflicts, and atomic follow-up creation with fictional data before it is connected to a hosted project.
+The next migration will add `apply_sync_batch`. It must prove owner isolation, idempotent receipts, revision conflicts, and atomic follow-up creation with fictional data before it is connected to a hosted project.
