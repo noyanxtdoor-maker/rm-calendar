@@ -10,7 +10,7 @@ RM Calendar is **local-first**. The web application keeps a durable local copy o
 
 ## 2. Why this is required
 
-Field work happens in lifts, basements, rural areas, public transport, and buildings with poor reception. A cloud-only design would make the central product promise unreliable. The web beta must therefore support phone-sized use with browser-local persistence; the later native apps reuse the same synchronization contract.
+Field work happens in lifts, basements, rural areas, public transport, and buildings with poor reception. A cloud-only design would make the central product promise unreliable. The web beta is web-first with a phone-sized, mobile-first interface and browser-local persistence; it remains usable on larger screens but does not initially optimize desktop workflows. Later native apps reuse the same synchronization contract.
 
 ## 3. Logical architecture
 
@@ -39,6 +39,7 @@ Every synchronized record carries these conceptual fields in addition to domain 
 | `created_at`, `updated_at`, `deleted_at` | Lifecycle and tombstone information. |
 | `created_by`, `updated_by` | Accountability. |
 | `revision` | Server-issued concurrency marker. |
+| `base_revision` | Revision a client last observed before mutating an existing server record; sent with the outbox operation as a concurrency precondition. |
 | `client_updated_at` | Supports diagnosis and user-facing ordering; it is not the sole conflict authority. |
 | `sync_state` | Local-only status: synced, pending, failed, or needs attention. |
 
@@ -56,7 +57,7 @@ Every create, update, completion, cancellation, restoration, or follow-up uses o
 6. Commit the local transaction.
 7. Update the UI immediately.
 
-For compound actions—especially Follow-up creation—the target record, Follow-up link, and outbox entries are committed together. A browser/app restart may delay sync but must never leave only half of the action visible.
+For compound actions—especially Follow-up creation—the target record, Follow-up link, and outbox entries are committed together. The server processes the compound action in one atomic transaction/command: it either persists every linked record or none. A browser/app restart may delay sync but must never leave only half of the action visible.
 
 ## 6. Synchronization cycle
 
@@ -75,8 +76,9 @@ Pull-before-push minimizes avoidable conflicts; push must still work when the de
 - Every outbox operation has an immutable operation ID.
 - The backend treats a repeated operation ID as the same request, not a second mutation.
 - A Contact or Place must synchronize before a newly linked Activity when the backend requires the referenced record.
-- Follow-up target and source-link operations are sent as one atomic server command where possible; otherwise the backend supports an idempotent transaction key.
+- Follow-up target and source-link operations are always sent as one atomic server transaction/command; an idempotent transaction key makes retries safe without weakening all-or-nothing persistence.
 - The client never removes an outbox operation solely because a network request timed out.
+- Every mutation of an existing record carries its `base_revision`. The server rejects a stale semantic edit with conflict data rather than silently applying last-write-wins.
 
 ## 8. Conflict policy
 
@@ -102,7 +104,7 @@ Deletion creates a synchronized tombstone rather than immediately erasing data. 
 
 ## 10. Browser and native implementation boundary
 
-The web beta needs a durable browser database, background-friendly retry where browser limits permit, and an obvious manual Sync Status fallback. It must not claim guaranteed background sync after the browser is closed.
+The web beta needs a durable browser database, synchronization while active or resumed where browser limits permit, and an obvious manual Sync Status fallback. It must not claim guaranteed background sync after the browser is closed.
 
 Native applications later implement the same envelopes, outbox semantics, conflict rules, and backend API. They may add more reliable background scheduling and local notifications without changing user data or workflow rules.
 
