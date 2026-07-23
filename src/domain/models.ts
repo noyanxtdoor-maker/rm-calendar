@@ -1,3 +1,5 @@
+import type { SyncEntityType, SyncOperationKind } from './sync'
+
 export const syncStates = ['synced', 'pending', 'failed', 'needs_attention'] as const
 
 export type SyncState = (typeof syncStates)[number]
@@ -150,7 +152,7 @@ export type OutboxOperationRecord = {
   operationId: string
   workspaceId: string
   sequence: number
-  kind: string
+  kind: SyncOperationKind
   payloadJson: Record<string, unknown>
   baseRevision?: number
   dependsOnJson: string[]
@@ -159,6 +161,17 @@ export type OutboxOperationRecord = {
   nextRetryAt?: string
   lastErrorCode?: string
   createdAt: string
+}
+
+export type SyncConflictRecord = RecordEnvelope & {
+  entityType: SyncEntityType
+  entityId: string
+  operationId: string
+  state: 'needs_attention' | 'resolved'
+  detectedAt: string
+  errorCode: string
+  localRecordJson: Record<string, unknown>
+  remoteRecordJson?: Record<string, unknown>
 }
 
 export type SyncMetadataRecord = {

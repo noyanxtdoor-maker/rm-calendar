@@ -13,10 +13,12 @@ Start by reading these files in this exact order:
 7. docs/Phase-4-Milestone-1.md
 8. docs/Phase-4-Milestone-2.md
 9. docs/Phase-4-Milestone-3.md
-10. docs/Domain-Model.md
-11. docs/Business-Rules.md
-12. docs/Critical-Workflows.md
-13. docs/Data-Sync-Architecture.md
+10. docs/Sync-Contract.md
+11. docs/Phase-4-Milestone-4-Prep.md
+12. docs/Domain-Model.md
+13. docs/Business-Rules.md
+14. docs/Critical-Workflows.md
+15. docs/Data-Sync-Architecture.md
 
 If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
@@ -56,9 +58,11 @@ Completed implementation:
 - M2 test proof: the production PWA creates a person, plans a linked visit, reloads while offline, and retains the linked visit at phone width.
 - M3: Activity and Task lifecycle/history, completion/outcome capture, correction/reopen, Quick Capture, Activity-private Notes, local Tasks, atomic local Follow-up creation, derived Today and Weekly Review.
 - M3 test proof: the production PWA completes a visit, creates its linked follow-up Task, reloads while offline, and retains that next action at phone width. The unit suite proves no partial follow-up is created from an incomplete source.
+- M4 local preparation: typed sync operation contract, durable dependency/base-revision behavior, canonical payload builder, retry/conflict coordinator, and a privacy-safe Sync Status screen. No network adapter or account flow exists.
+- M4-prep test proof: 15 unit tests cover ordered dispatch, idempotent acknowledgement, retries, conflicts, follow-up source revision, and safe diagnostics; 4 phone-width browser flows include Sync Status privacy behavior.
 - No live user data, Supabase client/project, authentication, email, remote sync, live maps, sharing, or official-data integration exists.
 
-Do not redo M0, M1, M2, or M3. The next planned milestone is Phase 4 Milestone 4, authenticated sync, but it may not start until the founder explicitly authorizes external services. Until then, only local-only usability, accessibility, documentation, or founder-approved prototype refinement is permitted.
+Do not redo M0-M3 or M4 local preparation. The remaining M4 authenticated-sync work may not start until the founder explicitly authorizes external services. Until then, only local-only usability, accessibility, documentation, or founder-approved prototype refinement is permitted.
 
 Before M4 begins, obtain explicit founder authorization for:
 

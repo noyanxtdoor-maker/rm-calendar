@@ -14,7 +14,7 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Current status
 
-Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestones 0-3 are complete locally: the product now supports people, places, planning, completion/outcomes, private notes, tasks, linked follow-ups, and a derived weekly review.
+Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 4 Milestones 0-3 are complete locally. M4 local preparation is also complete: the app has a testable sync contract, durable dependency/retry/conflict rules, and a transparent Sync Status screen. Cloud authentication and remote sync remain intentionally unconfigured.
 
 Start with these source-of-truth documents:
 
@@ -26,7 +26,9 @@ Start with these source-of-truth documents:
 6. [Phase 4 Milestone 1 evidence](docs/Phase-4-Milestone-1.md)
 7. [Phase 4 Milestone 2 evidence](docs/Phase-4-Milestone-2.md)
 8. [Phase 4 Milestone 3 evidence](docs/Phase-4-Milestone-3.md)
-9. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+9. [Sync contract](docs/Sync-Contract.md)
+10. [Phase 4 Milestone 4 preparation](docs/Phase-4-Milestone-4-Prep.md)
+11. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 
@@ -34,7 +36,7 @@ The active clickable artifact is [Mission Companion Prototype](design/RM%20Calen
 
 - React, TypeScript, Vite, React Router, and Tailwind CSS **3.4.17**.
 - A production PWA static app shell; it deliberately does not cache private API data or promise closed-browser sync.
-- Dexie/IndexedDB as the current local-first source of truth; a durable foreground-sync outbox processor comes in a later milestone.
+- Dexie/IndexedDB as the current local-first source of truth; an unprovisioned foreground-sync coordinator and transport contract are locally tested but cannot transmit data until an approved remote adapter exists.
 - Supabase Postgres/Auth/RLS/RPC only for the future authenticated beta, after the approved local-first workflow exists.
 - Private single-owner workspaces in the first functional beta; no sharing, attachments, contact import, live maps, or background location.
 
@@ -43,7 +45,7 @@ The active clickable artifact is [Mission Companion Prototype](design/RM%20Calen
     npm ci
     npm run dev
 
-Use npm run verify for typecheck, lint, unit tests, and a production build. npm run test:e2e additionally tests the production PWA at phone width and verifies a newly saved fictional local record and a completed-visit follow-up both survive an offline browser reload.
+Use npm run verify for typecheck, lint, unit tests, and a production build. npm run test:e2e additionally tests the production PWA at phone width, offline persistence, and the privacy-safe local Sync Status screen.
 
 ## References
 

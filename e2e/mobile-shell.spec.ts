@@ -120,3 +120,27 @@ test('a user can complete a visit, create a linked next action, and retain it of
   await expect(page.getByText('Send Avery a gentle reminder')).toBeVisible()
   await page.context().setOffline(false)
 })
+
+test('sync status exposes queued local work without exposing private record text', async ({ page }, testInfo) => {
+  await page.goto('/people')
+  await page.getByRole('link', { name: 'Add person', exact: true }).click()
+  await page.getByLabel('Person name').fill('Private queue person')
+  await page.getByRole('button', { name: 'Save person' }).click()
+
+  await page.getByRole('link', { name: 'Tools', exact: true }).click()
+  await page.getByRole('link', { name: /Sync status/ }).click()
+  await expect(page.getByRole('heading', { name: 'Cloud sync is not set up.' })).toBeVisible()
+  await expect(page.getByText('create contact', { exact: true })).toBeVisible()
+  await expect(page.getByText('Private queue person')).toHaveCount(0)
+
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
+  await page.screenshot({
+    path: testInfo.outputPath('milestone-4-prep-sync-status.png'),
+    fullPage: true,
+    animations: 'disabled'
+  })
+})

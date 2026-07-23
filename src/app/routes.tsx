@@ -15,6 +15,7 @@ import { ToolsScreen } from '../features/settings/ToolsScreen'
 import { TaskFormScreen } from '../features/tasks/TaskFormScreen'
 import { TodayScreen } from '../features/today/TodayScreen'
 import { WeeklyReviewScreen } from '../features/review/WeeklyReviewScreen'
+import { SyncStatusScreen } from '../features/sync/SyncStatusScreen'
 import { LocalWorkspaceProvider } from '../features/workspace/LocalWorkspaceProvider'
 import { AppShell } from './AppShell'
 
@@ -39,6 +40,7 @@ export function AppRoutes() {
           <Route path="tools" element={<ToolsScreen />} />
           <Route path="tools/tasks/new" element={<TaskFormScreen />} />
           <Route path="tools/weekly-review" element={<WeeklyReviewScreen />} />
+          <Route path="tools/sync-status" element={<SyncStatusScreen />} />
           <Route path="capture" element={<QuickCaptureScreen />} />
         </Route>
         <Route path="*" element={<Navigate replace to="/" />} />

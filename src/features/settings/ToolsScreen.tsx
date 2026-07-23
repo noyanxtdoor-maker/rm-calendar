@@ -5,10 +5,11 @@ import { displayDate } from '../../lib/time'
 import { clearAllLocalData, createLocalDemoContact, resetFictionalWorkspace } from '../../data/local/workspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
-import { useLocalWorkspace, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
+import { useLocalSyncStatus, useLocalWorkspace, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 
 export function ToolsScreen() {
   const snapshot = useWorkspaceSnapshot()
+  const sync = useLocalSyncStatus()
   const { restoreWorkspace } = useLocalWorkspace()
   const [message, setMessage] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -98,6 +99,10 @@ export function ToolsScreen() {
       <Link className="flex min-h-12 items-center justify-between rounded-2xl border border-[var(--rm-violet)]/25 bg-[var(--rm-violet)]/[0.06] px-4 text-sm font-semibold text-[var(--rm-violet)] transition hover:border-[var(--rm-violet)]/50" to="/tools/weekly-review">
         <span>Weekly review</span>
         <span className="text-xs font-medium text-slate-400">See your local planning picture</span>
+      </Link>
+      <Link className="flex min-h-12 items-center justify-between rounded-2xl border border-[var(--rm-gold)]/25 bg-[var(--rm-gold)]/[0.06] px-4 text-sm font-semibold text-[var(--rm-gold)] transition hover:border-[var(--rm-gold)]/50" to="/tools/sync-status">
+        <span>Sync status</span>
+        <span className="text-xs font-medium text-slate-400">{sync ? sync.queued + sync.retrying + sync.blocked + ' local changes' : 'Checking local changes'}</span>
       </Link>
 
       <section>

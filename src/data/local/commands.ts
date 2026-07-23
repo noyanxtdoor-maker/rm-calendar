@@ -34,6 +34,7 @@ import type {
   TaskRecord,
   WorkspaceRecord
 } from '../../domain/models'
+import { outboxEntityId, syncEntityTypeForOperation, type SyncOperationKind } from '../../domain/sync'
 import { createLocalId } from '../../lib/ids'
 import { zonedDateTimeToUtcIso } from '../../lib/time'
 import { rmCalendarDb } from './RmCalendarDatabase'
@@ -86,25 +87,49 @@ async function activeWorkspace() {
 
 async function enqueueOperation(
   workspaceId: string,
-  kind: string,
+  kind: SyncOperationKind,
   entityId: string,
-  dependencies: string[] = []
+  dependencies: string[] = [],
+  baseRevision = 0,
+  payloadContext: Record<string, unknown> = {}
 ) {
   const prior = await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspaceId).toArray()
   const sequence = prior.reduce((highest, operation) => Math.max(highest, operation.sequence), 0) + 1
+  const priorSameEntity = prior
+    .filter((operation) => outboxEntityId(operation.payloadJson) === entityId)
+    .sort((left, right) => right.sequence - left.sequence)[0]
+  const dependsOnJson = [...new Set([...dependencies, priorSameEntity?.operationId].filter((operationId): operationId is string => Boolean(operationId)))]
   const operation: OutboxOperationRecord = {
     operationId: createLocalId(),
     workspaceId,
     sequence,
     kind,
-    payloadJson: { entityId },
-    dependsOnJson: dependencies,
+    payloadJson: {
+      ...payloadContext,
+      entityId,
+      entityType: syncEntityTypeForOperation(kind)
+    },
+    baseRevision,
+    dependsOnJson,
     status: 'ready',
     attemptCount: 0,
     createdAt: nowIso()
   }
   await rmCalendarDb.outboxOperations.add(operation)
   return operation
+}
+
+async function latestPendingOperationForEntity(workspaceId: string, entityId: string) {
+  const operations = await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspaceId).toArray()
+  return operations
+    .filter((operation) => outboxEntityId(operation.payloadJson) === entityId)
+    .sort((left, right) => right.sequence - left.sequence)[0]
+}
+
+function dependencyIds(...operations: Array<OutboxOperationRecord | undefined>) {
+  return operations
+    .map((operation) => operation?.operationId)
+    .filter((operationId): operationId is string => Boolean(operationId))
 }
 
 function scheduleFields(schedule: ActivityScheduleInput, workspace: WorkspaceRecord): Pick<
@@ -164,7 +189,7 @@ async function resolveContact(
       throw new Error('The selected person is not available in this workspace.')
     }
 
-    return { contact: existing, operation: undefined as OutboxOperationRecord | undefined }
+    return { contact: existing, operation: await latestPendingOperationForEntity(workspace.id, existing.id) }
   }
 
   const name = cleanedOptional(inlineContactName)
@@ -195,7 +220,7 @@ async function resolvePlace(
       throw new Error('The selected place is not available in this workspace.')
     }
 
-    return { place: existing, operation: undefined as OutboxOperationRecord | undefined }
+    return { place: existing, operation: await latestPendingOperationForEntity(workspace.id, existing.id) }
   }
 
   const name = cleanedOptional(inlinePlaceName)
@@ -246,11 +271,13 @@ export async function createContact(input: { displayName: string; householdId?: 
   }
 
   await rmCalendarDb.transaction('rw', ['contacts', 'organizations', 'contactOrganizations', 'outboxOperations'], async () => {
+    let householdOperation: OutboxOperationRecord | undefined
     if (data.householdId) {
       const household = await rmCalendarDb.organizations.get(data.householdId)
       if (!household || household.workspaceId !== workspace.id || household.deletedAt || household.kind !== 'household') {
         throw new Error('The selected household is not available in this workspace.')
       }
+      householdOperation = await latestPendingOperationForEntity(workspace.id, household.id)
     }
 
     await rmCalendarDb.contacts.add(contact)
@@ -263,7 +290,7 @@ export async function createContact(input: { displayName: string; householdId?: 
       }
       await rmCalendarDb.contactOrganizations.add(link)
     }
-    await enqueueOperation(workspace.id, 'create_contact', contact.id)
+    await enqueueOperation(workspace.id, 'create_contact', contact.id, dependencyIds(householdOperation))
   })
 
   return contact
@@ -379,7 +406,7 @@ export async function updateActivity(input: UpdateActivityInput) {
     updatedAt: timestamp,
     clientUpdatedAt: timestamp,
     revision: activity.revision + 1,
-    pendingBaseRevision: activity.revision,
+    pendingBaseRevision: activity.pendingBaseRevision ?? activity.revision,
     syncState: 'pending'
   }
   Object.assign(updated, scheduleFields(data.schedule, workspace))
@@ -412,7 +439,8 @@ export async function updateActivity(input: UpdateActivityInput) {
         updated.id,
         [contactResult.operation?.operationId, placeResult.operation?.operationId].filter(
           (operationId): operationId is string => Boolean(operationId)
-        )
+        ),
+        activity.pendingBaseRevision ?? activity.revision
       )
     }
   )
@@ -512,7 +540,7 @@ export async function completeActivity(input: { activityId: string; outcomeText?
         updatedAt: timestamp,
         clientUpdatedAt: timestamp,
         revision: activity.revision + 1,
-        pendingBaseRevision: activity.revision,
+        pendingBaseRevision: activity.pendingBaseRevision ?? activity.revision,
         syncState: 'pending'
       }
       await rmCalendarDb.activities.put(completed)
@@ -530,7 +558,13 @@ export async function completeActivity(input: { activityId: string; outcomeText?
       }
 
       await rmCalendarDb.activityHistory.add(historyFor(completed, 'completed', timestamp, activity.state))
-      await enqueueOperation(workspace.id, 'complete_activity', completed.id)
+      await enqueueOperation(
+        workspace.id,
+        'complete_activity',
+        completed.id,
+        [],
+        activity.pendingBaseRevision ?? activity.revision
+      )
     }
   )
 }
@@ -557,12 +591,18 @@ export async function reopenActivity(activityId: string) {
       updatedAt: timestamp,
       clientUpdatedAt: timestamp,
       revision: activity.revision + 1,
-      pendingBaseRevision: activity.revision,
+      pendingBaseRevision: activity.pendingBaseRevision ?? activity.revision,
       syncState: 'pending'
     }
     await rmCalendarDb.activities.put(reopened)
     await rmCalendarDb.activityHistory.add(historyFor(reopened, 'reopened', timestamp, activity.state))
-    await enqueueOperation(workspace.id, 'reopen_activity', reopened.id)
+    await enqueueOperation(
+      workspace.id,
+      'reopen_activity',
+      reopened.id,
+      [],
+      activity.pendingBaseRevision ?? activity.revision
+    )
   })
 }
 
@@ -613,17 +653,28 @@ export async function createTask(input: CreateTaskInput) {
     'rw',
     ['contacts', 'places', 'activities', 'tasks', 'taskHistory', 'outboxOperations'],
     async () => {
-      await requireWorkspaceContact(workspace, data.contactId)
-      await requireWorkspacePlace(workspace, data.placeId)
+      const contact = await requireWorkspaceContact(workspace, data.contactId)
+      const place = await requireWorkspacePlace(workspace, data.placeId)
+      let linkedActivity: ActivityRecord | undefined
       if (data.activityId) {
         const activity = await rmCalendarDb.activities.get(data.activityId)
         if (!activity || activity.workspaceId !== workspace.id || activity.deletedAt) {
           throw new Error('The linked activity is not available in this workspace.')
         }
+        linkedActivity = activity
       }
       await rmCalendarDb.tasks.add(task)
       await rmCalendarDb.taskHistory.add(taskHistoryFor(task, 'created', timestamp))
-      await enqueueOperation(workspace.id, 'create_task', task.id)
+      await enqueueOperation(
+        workspace.id,
+        'create_task',
+        task.id,
+        dependencyIds(
+          contact ? await latestPendingOperationForEntity(workspace.id, contact.id) : undefined,
+          place ? await latestPendingOperationForEntity(workspace.id, place.id) : undefined,
+          linkedActivity ? await latestPendingOperationForEntity(workspace.id, linkedActivity.id) : undefined
+        )
+      )
     }
   )
 
@@ -649,12 +700,18 @@ export async function completeTask(taskId: string) {
       updatedAt: timestamp,
       clientUpdatedAt: timestamp,
       revision: task.revision + 1,
-      pendingBaseRevision: task.revision,
+      pendingBaseRevision: task.pendingBaseRevision ?? task.revision,
       syncState: 'pending'
     }
     await rmCalendarDb.tasks.put(completed)
     await rmCalendarDb.taskHistory.add(taskHistoryFor(completed, 'completed', timestamp, task.state))
-    await enqueueOperation(workspace.id, 'complete_task', completed.id)
+    await enqueueOperation(
+      workspace.id,
+      'complete_task',
+      completed.id,
+      [],
+      task.pendingBaseRevision ?? task.revision
+    )
   })
 }
 
@@ -677,28 +734,42 @@ export async function createNote(input: CreateNoteInput) {
     'rw',
     ['contacts', 'organizations', 'places', 'activities', 'tasks', 'notes', 'outboxOperations'],
     async () => {
-      await requireWorkspaceContact(workspace, data.contactId)
-      await requireWorkspacePlace(workspace, data.placeId)
+      const contact = await requireWorkspaceContact(workspace, data.contactId)
+      const place = await requireWorkspacePlace(workspace, data.placeId)
+      let organization: OrganizationRecord | undefined
+      let activity: ActivityRecord | undefined
+      let task: TaskRecord | undefined
       if (data.organizationId) {
-        const organization = await rmCalendarDb.organizations.get(data.organizationId)
+        organization = await rmCalendarDb.organizations.get(data.organizationId)
         if (!organization || organization.workspaceId !== workspace.id || organization.deletedAt) {
           throw new Error('The note household or group is not available in this workspace.')
         }
       }
       if (data.activityId) {
-        const activity = await rmCalendarDb.activities.get(data.activityId)
+        activity = await rmCalendarDb.activities.get(data.activityId)
         if (!activity || activity.workspaceId !== workspace.id || activity.deletedAt) {
           throw new Error('The note activity is not available in this workspace.')
         }
       }
       if (data.taskId) {
-        const task = await rmCalendarDb.tasks.get(data.taskId)
+        task = await rmCalendarDb.tasks.get(data.taskId)
         if (!task || task.workspaceId !== workspace.id || task.deletedAt) {
           throw new Error('The note task is not available in this workspace.')
         }
       }
       await rmCalendarDb.notes.add(note)
-      await enqueueOperation(workspace.id, 'create_note', note.id)
+      await enqueueOperation(
+        workspace.id,
+        'create_note',
+        note.id,
+        dependencyIds(
+          contact ? await latestPendingOperationForEntity(workspace.id, contact.id) : undefined,
+          organization ? await latestPendingOperationForEntity(workspace.id, organization.id) : undefined,
+          place ? await latestPendingOperationForEntity(workspace.id, place.id) : undefined,
+          activity ? await latestPendingOperationForEntity(workspace.id, activity.id) : undefined,
+          task ? await latestPendingOperationForEntity(workspace.id, task.id) : undefined
+        )
+      )
     }
   )
 
@@ -724,6 +795,9 @@ export async function createFollowUp(input: CreateFollowUpInput) {
       const placeId = data.placeId === null ? undefined : data.placeId ?? source.primaryPlaceId
       const contact = await requireWorkspaceContact(workspace, contactId)
       const place = await requireWorkspacePlace(workspace, placeId)
+      const sourceOperation = await latestPendingOperationForEntity(workspace.id, source.id)
+      const contactOperation = contact ? await latestPendingOperationForEntity(workspace.id, contact.id) : undefined
+      const placeOperation = place ? await latestPendingOperationForEntity(workspace.id, place.id) : undefined
       const followUpId = createLocalId()
 
       if (data.targetKind === 'task') {
@@ -769,7 +843,17 @@ export async function createFollowUp(input: CreateFollowUpInput) {
       }
 
       await rmCalendarDb.activityHistory.add(historyFor(source, 'follow_up_created', timestamp, source.state))
-      await enqueueOperation(workspace.id, 'create_follow_up', followUpId)
+      await enqueueOperation(
+        workspace.id,
+        'create_follow_up',
+        followUpId,
+        dependencyIds(sourceOperation, contactOperation, placeOperation),
+        0,
+        {
+          sourceActivityId: source.id,
+          sourceBaseRevision: source.pendingBaseRevision ?? source.revision
+        }
+      )
     }
   )
 

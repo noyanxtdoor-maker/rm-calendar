@@ -13,6 +13,7 @@ import type {
   OrganizationRecord,
   OutboxOperationRecord,
   PlaceRecord,
+  SyncConflictRecord,
   SyncMetadataRecord,
   TaskHistoryRecord,
   TaskRecord,
@@ -41,7 +42,7 @@ export class RmCalendarDatabase extends Dexie {
   drafts!: Table<DraftRecord, string>
   outboxOperations!: Table<OutboxOperationRecord, string>
   syncMetadata!: Table<SyncMetadataRecord, string>
-  conflicts!: Table<GenericWorkspaceRecord, string>
+  conflicts!: Table<SyncConflictRecord, string>
   localSettings!: Table<LocalSettingRecord, string>
 
   constructor(name = RM_CALENDAR_DATABASE_NAME) {
