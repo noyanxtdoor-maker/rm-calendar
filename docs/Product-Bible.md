@@ -80,7 +80,7 @@ When I review my work, I want a trustworthy history of visits and follow-ups, so
 | Calendar event | The time-based scheduling representation of an activity. |
 | Task | A discrete action that can stand alone or be linked to an activity. |
 | Follow-up | A future action or activity created because of an earlier interaction. |
-| Note | Context or outcome captured against one or more records. |
+| Note | Context or outcome captured against one primary record (Contact, Organization, Place, Activity, or Task). |
 | Route | An ordered plan of activities and places for a day or field session. |
 
 These definitions are deliberately neutral. Labels can change by workspace; the underlying meaning does not.
@@ -100,7 +100,7 @@ At the end of a working day, a user should be able to plan tomorrow, know who th
 - Places with map-ready addresses and coordinates
 - Tasks, reminders, and follow-ups
 - Daily agenda that combines scheduled and unscheduled work
-- Offline local data store, durable outbox, and background synchronization
+- Offline local data store, durable outbox, and synchronization while the web app is active or resumed, plus a manual Sync Status fallback
 - Clear sync state and recoverable conflict handling
 - Basic search and filters
 - A simple weekly activity summary
@@ -191,7 +191,7 @@ The user can see previously synced data and create or modify core records while 
 
 ## 16. Open decisions
 
-- Is the v1 experience mobile-only, or is a companion web view required from launch?
+- How broad should responsive desktop support be during the web beta, beyond reliable browser access?
 - Which user segment will be recruited for the first 10–20 beta users?
 - Is single-user ownership sufficient for beta, or must a supervisor view exist?
 - What types of reminders are essential: in-app, local-device, push, email, or all of them?
