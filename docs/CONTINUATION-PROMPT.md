@@ -6,6 +6,9 @@ Continue the RM Calendar project as the product architect and UX collaborator.
 First, read this complete handoff file in the project workspace:
 docs/PROJECT-HANDOFF.md
 
+If that file is not available locally, start from its public copy and then clone/download the repository:
+https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/docs/PROJECT-HANDOFF.md
+
 Then read the source-of-truth architecture documents in docs/:
 - Product-Bible.md
 - Phase-0-Discovery.md
