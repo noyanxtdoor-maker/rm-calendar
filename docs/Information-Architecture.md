@@ -4,6 +4,8 @@
 **Status:** Phase 1 draft  
 **Depends on:** [Product Bible](Product-Bible.md), [Domain Model](Domain-Model.md), [Critical Workflows](Critical-Workflows.md)
 
+> **Scope amendment:** This navigation remains the architectural base, but its first content model and labels are LDS/RM focused. See [Scope-Decision-LDS.md](Scope-Decision-LDS.md) and [Phase-2-UX-Spec.md](Phase-2-UX-Spec.md).
+
 ## 1. Purpose
 
 This document defines where users go to plan, execute, capture, and review field work. It assigns a clear responsibility to each surface before visual design begins.

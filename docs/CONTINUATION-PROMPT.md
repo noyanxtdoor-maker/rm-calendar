@@ -12,10 +12,11 @@ Start by reading these files in this exact order:
 6. docs/Phase-4-Milestone-0.md
 7. docs/Phase-4-Milestone-1.md
 8. docs/Phase-4-Milestone-2.md
-9. docs/Domain-Model.md
-10. docs/Business-Rules.md
-11. docs/Critical-Workflows.md
-12. docs/Data-Sync-Architecture.md
+9. docs/Phase-4-Milestone-3.md
+10. docs/Domain-Model.md
+11. docs/Business-Rules.md
+12. docs/Critical-Workflows.md
+13. docs/Data-Sync-Architecture.md
 
 If local files are unavailable, use the public project repository:
 https://github.com/noyanxtdoor-maker/rm-calendar
@@ -53,18 +54,20 @@ Completed implementation:
 - M1 test proof: a fictional local person is created, the production PWA reloads while offline, and the same person remains visible.
 - M2: validated local Person/Household/Place commands, original forms, People context/history, Calendar Activity create/edit/reschedule, durable form drafts, non-blocking overlap warning, and durable local outbox-operation intents.
 - M2 test proof: the production PWA creates a person, plans a linked visit, reloads while offline, and retains the linked visit at phone width.
+- M3: Activity and Task lifecycle/history, completion/outcome capture, correction/reopen, Quick Capture, Activity-private Notes, local Tasks, atomic local Follow-up creation, derived Today and Weekly Review.
+- M3 test proof: the production PWA completes a visit, creates its linked follow-up Task, reloads while offline, and retains that next action at phone width. The unit suite proves no partial follow-up is created from an incomplete source.
 - No live user data, Supabase client/project, authentication, email, remote sync, live maps, sharing, or official-data integration exists.
 
-Do not redo M0, M1, or M2. The next permitted implementation slice is Phase 4 Milestone 3:
+Do not redo M0, M1, M2, or M3. The next planned milestone is Phase 4 Milestone 4, authenticated sync, but it may not start until the founder explicitly authorizes external services. Until then, only local-only usability, accessibility, documentation, or founder-approved prototype refinement is permitted.
 
-1. Add Activity and Task lifecycle/history commands and original Completion and Quick Capture flows.
-2. Add Notes and local Tasks with clear Today/weekly derivation.
-3. Implement the atomic local Follow-up command: exactly one newly-created target plus exactly one source link.
-4. Preserve planned schedule separately from actual completion time and support correction/reopen behavior.
-5. Prove the person -> outcome -> follow-up loop survives an offline browser reload.
-6. Run typecheck, lint, unit tests, production build, and a phone-width Playwright flow before publishing.
+Before M4 begins, obtain explicit founder authorization for:
 
-Do not start M4 authentication/remote-sync work until M3 is complete. Do not create a hosted Supabase project, configure email, use a real domain, invite users, or add credentials without explicit founder authorization. Preserve the local-first command boundary and keep no sensitive content in diagnostics.
+1. creating/using the named Supabase project and hosting environment;
+2. configuring the email/OTP provider, sender, and redirect policy;
+3. storing beta data outside the browser;
+4. a production domain and invite process.
+
+Do not create a hosted Supabase project, configure email, use a real domain, invite users, or add credentials without that authorization. Preserve the local-first command boundary and keep no sensitive content in diagnostics.
 
 Workspace constraints:
 

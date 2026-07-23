@@ -18,8 +18,17 @@ export const navigationDestinations: NavigationDestination[] = [
 ]
 
 export function destinationTitle(pathname: string) {
+  if (pathname === '/capture') {
+    return 'Quick capture'
+  }
   if (pathname.startsWith('/calendar/new')) {
     return 'Plan visit'
+  }
+  if (pathname.startsWith('/calendar/') && pathname.endsWith('/complete')) {
+    return 'Complete visit'
+  }
+  if (pathname.startsWith('/calendar/') && pathname.endsWith('/follow-up')) {
+    return 'Follow-up'
   }
   if (pathname.startsWith('/calendar/') && pathname.endsWith('/edit')) {
     return 'Edit visit'
@@ -38,6 +47,12 @@ export function destinationTitle(pathname: string) {
   }
   if (pathname.startsWith('/map/new')) {
     return 'Add place'
+  }
+  if (pathname === '/tools/tasks/new') {
+    return 'Add task'
+  }
+  if (pathname === '/tools/weekly-review') {
+    return 'Weekly review'
   }
 
   return navigationDestinations.find((destination) => destination.path === pathname)?.label ?? 'RM Calendar'

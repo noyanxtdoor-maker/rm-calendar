@@ -85,7 +85,7 @@ export type ActivityContactRecord = RecordEnvelope & {
 
 export type ActivityHistoryRecord = RecordEnvelope & {
   activityId: string
-  eventType: 'created' | 'scheduled' | 'rescheduled' | 'saved_as_draft' | 'updated'
+  eventType: 'created' | 'scheduled' | 'rescheduled' | 'saved_as_draft' | 'updated' | 'completed' | 'reopened' | 'follow_up_created'
   previousState?: ActivityState
   newState: ActivityState
   eventAt: string
@@ -107,6 +107,32 @@ export type TaskRecord = RecordEnvelope & {
   placeId?: string
   activityId?: string
   parentTaskId?: string
+}
+
+export type TaskHistoryRecord = RecordEnvelope & {
+  taskId: string
+  eventType: 'created' | 'completed' | 'cancelled' | 'reopened'
+  previousState?: TaskState
+  newState: TaskState
+  eventAt: string
+  eventPayloadJson: Record<string, unknown>
+}
+
+export type NoteRecord = RecordEnvelope & {
+  body: string
+  isPinned: boolean
+  contactId?: string
+  organizationId?: string
+  placeId?: string
+  activityId?: string
+  taskId?: string
+}
+
+export type FollowUpRecord = RecordEnvelope & {
+  sourceActivityId: string
+  targetKind: 'task' | 'activity'
+  targetTaskId?: string
+  targetActivityId?: string
 }
 
 export type GenericWorkspaceRecord = RecordEnvelope & Record<string, unknown>
@@ -160,4 +186,7 @@ export type WorkspaceSnapshot = {
   tasks: TaskRecord[]
   activityContacts: ActivityContactRecord[]
   activityHistory: ActivityHistoryRecord[]
+  taskHistory: TaskHistoryRecord[]
+  notes: NoteRecord[]
+  followUps: FollowUpRecord[]
 }

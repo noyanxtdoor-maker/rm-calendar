@@ -4,6 +4,8 @@
 **Status:** Complete working baseline  
 **Depends on:** [Product Bible](Product-Bible.md), [Domain Model](Domain-Model.md)
 
+> **Scope amendment:** The broad field-work audience in this historical discovery draft is superseded by [Scope-Decision-LDS.md](Scope-Decision-LDS.md). Retain the planning-loop insights, but apply them first to LDS members and returned missionaries.
+
 ## 1. Discovery conclusion
 
 RM Calendar should begin as a focused mobile field-work planner—not an all-purpose calendar or a full CRM. Its first useful loop is simple:

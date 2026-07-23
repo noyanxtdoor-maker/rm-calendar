@@ -79,3 +79,44 @@ test('a user can create a person, plan a linked visit, and retain it offline aft
   await expect(page.getByText('Morgan local visit')).toBeVisible()
   await page.context().setOffline(false)
 })
+
+test('a user can complete a visit, create a linked next action, and retain it offline', async ({ page }, testInfo) => {
+  const pageErrors: string[] = []
+  page.on('pageerror', (error) => pageErrors.push(error.message))
+  await page.goto('/calendar')
+
+  await page.getByRole('link', { name: 'Avery visit' }).click()
+  await expect(page.getByRole('heading', { name: 'Avery visit' })).toBeVisible()
+  await page.getByRole('link', { name: 'Complete visit' }).click()
+  await page.getByLabel('Outcome (optional)').fill('Shared a clear next step.')
+  await page.getByRole('button', { name: 'Save and create follow-up' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Create follow-up' })).toBeVisible()
+  await expect(page.getByLabel('Title')).toHaveValue('Follow up: Avery visit')
+  await page.getByLabel('Title').fill('Send Avery a gentle reminder')
+  await page.getByRole('button', { name: 'Save follow-up' }).click()
+  await expect(page.getByText('Send Avery a gentle reminder')).toBeVisible()
+  expect(pageErrors).toEqual([])
+
+  await page.getByRole('link', { name: 'Tools', exact: true }).click()
+  await expect(page.getByText('Send Avery a gentle reminder')).toBeVisible()
+  await page.screenshot({
+    path: testInfo.outputPath('milestone-3-complete-follow-up.png'),
+    fullPage: true,
+    animations: 'disabled'
+  })
+
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
+
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+  })
+  await page.context().setOffline(true)
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(page.getByText('Send Avery a gentle reminder')).toBeVisible()
+  await page.context().setOffline(false)
+})

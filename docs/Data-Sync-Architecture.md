@@ -4,6 +4,8 @@
 **Status:** Phase 1 draft  
 **Depends on:** [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md)
 
+> **Scope amendment:** Local-first behavior remains required. Because the initial audience is LDS members and returned missionaries, treat people, household, location, and pastoral notes as sensitive data per [Scope-Decision-LDS.md](Scope-Decision-LDS.md).
+
 ## 1. Decision
 
 RM Calendar is **local-first**. The web application keeps a durable local copy of the active Workspace and records every change locally before reporting success. The backend synchronizes, secures, and shares data; it is not the only place a field worker’s current work exists.

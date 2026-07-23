@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { localIsoDate } from '../../lib/time'
-import { useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
+import { useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 
 function activityDate(activity: { scheduledDate?: string; scheduledStartAt?: string }, timeZone: string) {
   if (activity.scheduledDate) {
@@ -22,7 +22,9 @@ export function TodayScreen() {
   const today = localIsoDate(new Date(), snapshot.workspace.timezone)
   const activeActivities = snapshot.activities.filter((activity) => activity.state === 'scheduled')
   const todayActivities = activeActivities.filter((activity) => activityDate(activity, snapshot.workspace.timezone) === today)
-  const openTasks = snapshot.tasks.filter((task) => task.state === 'open')
+  const openTasks = snapshot.tasks
+    .filter((task) => task.state === 'open')
+    .sort((left, right) => (left.dueDate ?? '9999-12-31').localeCompare(right.dueDate ?? '9999-12-31'))
   const contactsWithPlan = new Set([
     ...snapshot.activityContacts
       .filter((link) => activeActivities.some((activity) => activity.id === link.activityId))
@@ -52,12 +54,12 @@ export function TodayScreen() {
             <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">People planned</p>
           </div>
           <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
-            <p className="text-xl font-semibold text-white">{activeActivities.length}</p>
-            <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">Visits planned</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
             <p className="text-xl font-semibold text-white">{todayActivities.length}</p>
             <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">Today</p>
+          </div>
+          <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
+            <p className="text-xl font-semibold text-white">{openTasks.length}</p>
+            <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">Next actions</p>
           </div>
         </div>
       </div>
@@ -77,9 +79,9 @@ export function TodayScreen() {
         </Link>
         <Link
           className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-violet)]/40"
-          to="/calendar/new"
+          to="/capture"
         >
-          Plan visit
+          Capture
         </Link>
       </div>
 
@@ -91,13 +93,13 @@ export function TodayScreen() {
           {plannedPeople.length ? (
             plannedPeople.map((person) => {
               const task = openTasks.find((candidate) => candidate.contactId === person.id)
-              const plannedVisit = snapshot.activityContacts.find((link) => link.contactId === person.id)
-              const visit = plannedVisit ? snapshot.activities.find((activity) => activity.id === plannedVisit.activityId) : undefined
+              const plannedVisitLink = snapshot.activityContacts.find((link) => link.contactId === person.id && activeActivities.some((activity) => activity.id === link.activityId))
+              const visit = plannedVisitLink ? activeActivities.find((activity) => activity.id === plannedVisitLink.activityId) : undefined
               return (
                 <Link
                   className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30"
                   key={person.id}
-                  to="/people"
+                  to={'/people/' + person.id}
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">
                     {person.displayName.slice(0, 1)}
@@ -126,7 +128,7 @@ export function TodayScreen() {
               <Link
                 className="flex gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-gold)]/30"
                 key={activity.id}
-                to="/calendar"
+                to={'/calendar/' + activity.id}
               >
                 <span className="mt-1 h-9 w-1 shrink-0 rounded-full bg-[var(--rm-gold)]" />
                 <span>
@@ -138,6 +140,24 @@ export function TodayScreen() {
           ) : (
             <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Nothing is planned for today.</p>
           )}
+        </div>
+      </section>
+
+      <section>
+        <SectionLabel action={<Link className="text-xs font-semibold text-[var(--rm-teal)]" to="/tools">Open tasks</Link>}>
+          Next actions
+        </SectionLabel>
+        <div className="mt-3 space-y-2">
+          {openTasks.slice(0, 3).map((task) => (
+            <Link className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30" key={task.id} to="/tools">
+              <span className={task.priority === 'high' ? 'h-8 w-1 shrink-0 rounded-full bg-red-300' : 'h-8 w-1 shrink-0 rounded-full bg-[var(--rm-teal)]'} />
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold text-white">{task.title}</span>
+                <span className="mt-1 block text-xs text-slate-400">{task.dueDate ? 'Due ' + task.dueDate : 'No due date'}</span>
+              </span>
+            </Link>
+          ))}
+          {!openTasks.length ? <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Your next actions will appear here.</p> : null}
         </div>
       </section>
     </section>

@@ -1,5 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createActivity, createContact, createHousehold, createPlace, loadActivityDraft, saveActivityDraft, updateActivity } from './commands'
+import {
+  completeActivity,
+  completeTask,
+  createActivity,
+  createContact,
+  createFollowUp,
+  createHousehold,
+  createNote,
+  createPlace,
+  createTask,
+  loadActivityDraft,
+  quickCaptureActivity,
+  reopenActivity,
+  saveActivityDraft,
+  updateActivity
+} from './commands'
 import { deleteRmCalendarDatabase, rmCalendarDb } from './RmCalendarDatabase'
 import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID } from './workspace'
 import { localIsoDate } from '../../lib/time'
@@ -122,5 +137,118 @@ describe('Milestone 2 local planning commands', () => {
     await rmCalendarDb.open()
 
     expect((await loadActivityDraft(draftId))?.payloadJson.title).toBe('Unfinished local visit')
+  })
+
+  it('records completion separately from the planned time and can reopen a scheduled visit', async () => {
+    const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+    if (!workspace) {
+      throw new Error('Expected the fictional local workspace.')
+    }
+    const date = localIsoDate(new Date(), workspace.timezone)
+    const planned = await createActivity({
+      title: 'Completion preservation visit',
+      activityType: 'visit',
+      schedule: { kind: 'timed', date, startTime: '09:00', endTime: '09:45' }
+    })
+
+    await completeActivity({ activityId: planned.id, outcomeText: 'A concise local outcome.' })
+    const completed = await rmCalendarDb.activities.get(planned.id)
+    expect(completed?.state).toBe('completed')
+    expect(completed?.scheduledStartAt).toBe(planned.scheduledStartAt)
+    expect(completed?.scheduledEndAt).toBe(planned.scheduledEndAt)
+    expect(completed?.actualCompletedAt).toBeTruthy()
+    expect(completed?.outcomeText).toBe('A concise local outcome.')
+
+    await reopenActivity(planned.id)
+    const reopened = await rmCalendarDb.activities.get(planned.id)
+    expect(reopened?.state).toBe('scheduled')
+    expect(reopened?.actualCompletedAt).toBeUndefined()
+    expect((await rmCalendarDb.activityHistory.where('[workspaceId+activityId]').equals([workspace.id, planned.id]).toArray()).map((event) => event.eventType)).toEqual(
+      expect.arrayContaining(['completed', 'reopened'])
+    )
+  })
+
+  it('creates a linked follow-up task in one local transaction and retains the source context', async () => {
+    const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+    if (!workspace) {
+      throw new Error('Expected the fictional local workspace.')
+    }
+    const date = localIsoDate(new Date(), workspace.timezone)
+    const person = await createContact({ displayName: 'Follow-up person' })
+    const place = await createPlace({ name: 'Follow-up place' })
+    const source = await createActivity({
+      title: 'Source completed visit',
+      activityType: 'visit',
+      schedule: { kind: 'all-day', date },
+      contactId: person.id,
+      placeId: place.id
+    })
+    await completeActivity({ activityId: source.id })
+
+    const result = await createFollowUp({
+      sourceActivityId: source.id,
+      targetKind: 'task',
+      title: 'Send the next message',
+      dueDate: date,
+      priority: 'high'
+    })
+
+    expect(result.targetKind).toBe('task')
+    const task = await rmCalendarDb.tasks.get(result.targetId)
+    const link = await rmCalendarDb.followUps.where('[workspaceId+sourceActivityId]').equals([workspace.id, source.id]).first()
+    expect(task).toMatchObject({
+      title: 'Send the next message',
+      state: 'open',
+      contactId: person.id,
+      placeId: place.id,
+      activityId: source.id
+    })
+    expect(link).toMatchObject({
+      sourceActivityId: source.id,
+      targetTaskId: result.targetId,
+      targetKind: 'task'
+    })
+    expect((await rmCalendarDb.activityHistory.where('[workspaceId+activityId]').equals([workspace.id, source.id]).toArray()).map((event) => event.eventType)).toContain('follow_up_created')
+  })
+
+  it('does not create a partial follow-up for an incomplete source and persists quick captures, tasks, and notes locally', async () => {
+    const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+    if (!workspace) {
+      throw new Error('Expected the fictional local workspace.')
+    }
+    const date = localIsoDate(new Date(), workspace.timezone)
+    const incomplete = await createActivity({
+      title: 'Not complete yet',
+      activityType: 'visit',
+      schedule: { kind: 'all-day', date }
+    })
+    const taskCountBefore = await rmCalendarDb.tasks.count()
+    const followUpCountBefore = await rmCalendarDb.followUps.count()
+
+    await expect(createFollowUp({
+      sourceActivityId: incomplete.id,
+      targetKind: 'task',
+      title: 'This must not be created',
+      dueDate: date,
+      priority: 'normal'
+    })).rejects.toThrow('Only a completed local activity can create a follow-up.')
+    expect(await rmCalendarDb.tasks.count()).toBe(taskCountBefore)
+    expect(await rmCalendarDb.followUps.count()).toBe(followUpCountBefore)
+
+    const capture = await quickCaptureActivity({
+      title: 'Unplanned local visit',
+      activityType: 'visit',
+      outcomeText: 'Captured without scheduling first.'
+    })
+    const task = await createTask({ title: 'Review capture', dueDate: date, priority: 'normal', activityId: capture.id })
+    const note = await createNote({ activityId: capture.id, body: 'A private local note.' })
+    await completeTask(task.id)
+
+    expect((await rmCalendarDb.activities.get(capture.id))?.state).toBe('completed')
+    expect((await rmCalendarDb.tasks.get(task.id))?.completedAt).toBeTruthy()
+    expect((await rmCalendarDb.notes.get(note.id))?.activityId).toBe(capture.id)
+    expect((await rmCalendarDb.taskHistory.where('[workspaceId+taskId]').equals([workspace.id, task.id]).toArray()).map((event) => event.eventType)).toEqual(
+      expect.arrayContaining(['created', 'completed'])
+    )
   })
 })

@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { createLocalDemoContact, clearAllLocalData, resetFictionalWorkspace } from '../../data/local/workspace'
-import { useLocalWorkspace, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
+import { Link } from 'react-router-dom'
+import { completeTask } from '../../data/local/commands'
+import { displayDate } from '../../lib/time'
+import { clearAllLocalData, createLocalDemoContact, resetFictionalWorkspace } from '../../data/local/workspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
+import { useLocalWorkspace, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 
 export function ToolsScreen() {
   const snapshot = useWorkspaceSnapshot()
@@ -15,6 +18,9 @@ export function ToolsScreen() {
   }
 
   const contactCount = snapshot.contacts.length
+  const openTasks = snapshot.tasks
+    .filter((task) => task.state === 'open')
+    .sort((left, right) => (left.dueDate ?? '9999-12-31').localeCompare(right.dueDate ?? '9999-12-31'))
 
   async function addFictionalPerson() {
     setBusy(true)
@@ -24,6 +30,19 @@ export function ToolsScreen() {
       setMessage(contact.displayName + ' was saved on this device.')
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : 'The fictional person could not be saved.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function markTaskComplete(taskId: string) {
+    setBusy(true)
+    setMessage(undefined)
+    try {
+      await completeTask(taskId)
+      setMessage('Task completed on this device.')
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : 'The task could not be completed.')
     } finally {
       setBusy(false)
     }
@@ -64,13 +83,42 @@ export function ToolsScreen() {
         <p className="mt-2 text-sm leading-6 text-slate-400">This milestone is local-only. Nothing is sent to a Church system, map provider, or cloud service.</p>
       </div>
 
-      <div aria-live="polite">
-        {message ? <p className="rounded-2xl border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/[0.08] px-4 py-3 text-sm text-[var(--rm-teal)]">{message}</p> : null}
+      {message ? <p aria-live="polite" className="rounded-2xl border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/[0.08] px-4 py-3 text-sm text-[var(--rm-teal)]">{message}</p> : null}
+
+      <div className="grid grid-cols-2 gap-2">
+        <Link className="flex min-h-20 flex-col justify-center rounded-3xl border border-[var(--rm-gold)]/25 bg-[var(--rm-gold)]/[0.07] px-4 text-left transition hover:border-[var(--rm-gold)]/50" to="/capture">
+          <span className="text-sm font-semibold text-[var(--rm-gold)]">Quick capture</span>
+          <span className="mt-1 text-xs leading-4 text-slate-400">Record an unplanned visit</span>
+        </Link>
+        <Link className="flex min-h-20 flex-col justify-center rounded-3xl border border-[var(--rm-teal)]/25 bg-[var(--rm-teal)]/[0.06] px-4 text-left transition hover:border-[var(--rm-teal)]/50" to="/tools/tasks/new">
+          <span className="text-sm font-semibold text-[var(--rm-teal)]">Add task</span>
+          <span className="mt-1 text-xs leading-4 text-slate-400">Keep a next action visible</span>
+        </Link>
       </div>
+      <Link className="flex min-h-12 items-center justify-between rounded-2xl border border-[var(--rm-violet)]/25 bg-[var(--rm-violet)]/[0.06] px-4 text-sm font-semibold text-[var(--rm-violet)] transition hover:border-[var(--rm-violet)]/50" to="/tools/weekly-review">
+        <span>Weekly review</span>
+        <span className="text-xs font-medium text-slate-400">See your local planning picture</span>
+      </Link>
+
+      <section>
+        <SectionLabel action={<span className="text-xs font-semibold text-slate-500">{openTasks.length} open</span>}>Next actions</SectionLabel>
+        <div className="mt-3 space-y-2">
+          {openTasks.length ? openTasks.map((task) => (
+            <div className="flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] p-3" key={task.id}>
+              <span className={task.priority === 'high' ? 'h-9 w-1 shrink-0 rounded-full bg-red-300' : task.priority === 'low' ? 'h-9 w-1 shrink-0 rounded-full bg-slate-600' : 'h-9 w-1 shrink-0 rounded-full bg-[var(--rm-teal)]'} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-white">{task.title}</span>
+                <span className="mt-1 block text-xs text-slate-400">{task.dueDate ? 'Due ' + displayDate(task.dueDate, snapshot.workspace.timezone) : 'No due date'} · {task.priority} priority</span>
+              </span>
+              <button aria-label={'Complete task: ' + task.title} className="min-h-10 rounded-xl border border-[var(--rm-teal)]/30 px-3 text-xs font-semibold text-[var(--rm-teal)] disabled:cursor-wait disabled:opacity-60" disabled={busy} onClick={() => void markTaskComplete(task.id)} type="button">Done</button>
+            </div>
+          )) : <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">No open tasks. Create one only when it helps you remember a next step.</p>}
+        </div>
+      </section>
 
       <section className="rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5 shadow-[var(--rm-shadow-card)]">
         <SectionLabel>Local workspace check</SectionLabel>
-        <p className="mt-2 text-sm leading-6 text-slate-400">Use one fictional person to confirm that IndexedDB survives a browser reload. The normal person form arrives in Milestone 2.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-400">Use a fictional person to confirm that IndexedDB survives a browser reload. This test data stays separate from real planning.</p>
         <button
           className="mt-4 min-h-12 w-full rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)] transition hover:bg-[#83e6de] disabled:cursor-wait disabled:opacity-60"
           disabled={busy}

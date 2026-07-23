@@ -1,11 +1,11 @@
 # RM Calendar — Complete Project Handoff
 
-> **Latest implementation update - 2026-07-23:** Phase 4 Milestone 2 is complete and verified locally. Read [Phase 4 Milestone 2](Phase-4-Milestone-2.md) after the Milestone 0 and 1 records; it supersedes every older statement in this handoff that says Milestone 2 is pending or that implementation must stop before the local planning flow. The next planned local slice is Milestone 3. Dayflow Calendar remains an interaction reference only; see the M1 record for its license and non-copying boundary.
+> **Latest implementation update - 2026-07-23:** Phase 4 Milestone 3 is complete and verified locally. Read [Phase 4 Milestone 3](Phase-4-Milestone-3.md) after the Milestone 0-2 records; it supersedes every older statement in this handoff that says Milestone 3 is pending. Completion, outcome, quick capture, private notes, tasks, atomic local follow-ups, Today derivation, and Weekly Review are now local-only features. Dayflow Calendar remains an interaction reference only; see the M1 record for its license and non-copying boundary.
 
 **Last updated:** 2026-07-23  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0, 1, and 2 are complete and locally verified. The next planned slice is Milestone 3: Completion, Outcome, Task, and Follow-up.
+**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3 are complete and locally verified. The next planned milestone, M4 authenticated sync, requires explicit founder authority before any external service is created or configured.
 
 ## 1. Read this first
 
@@ -32,8 +32,9 @@ When documents disagree, use this order:
 5. [Phase 4 Milestone 0](Phase-4-Milestone-0.md) — implemented scaffold, guardrails, and verification evidence.
 6. [Phase 4 Milestone 1](Phase-4-Milestone-1.md) — versioned local workspace, data-driven shell, privacy surfaces, and persistence verification.
 7. [Phase 4 Milestone 2](Phase-4-Milestone-2.md) — local People/Household/Place commands, calendar planning, drafts, overlap warning, and persistence verification.
-8. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
-9. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
+8. [Phase 4 Milestone 3](Phase-4-Milestone-3.md) — activity/task completion, outcome, notes, quick capture, linked follow-up, weekly derivation, and persistence verification.
+9. [Domain Model](Domain-Model.md), [Business Rules](Business-Rules.md), [Critical Workflows](Critical-Workflows.md), and [Data & Sync Architecture](Data-Sync-Architecture.md) — canonical domain invariants and acceptance behavior.
+10. [Product Bible](Product-Bible.md), [Phase 0 Discovery](Phase-0-Discovery.md), and [Information Architecture](Information-Architecture.md) — useful historical foundation, subject to the current scope above.
 
 Older documents can contain earlier “general field-work” language. The current LDS/RM scope above supersedes it.
 
@@ -140,6 +141,10 @@ Milestone 1 adds the versioned Dexie/IndexedDB database, a fictional single-owne
 
 Milestone 2 adds local Contact/Household/Place commands, original forms, People context/history, activity detail, Activity create/edit/reschedule, durable local form drafts, non-blocking overlap warnings, and durable local outbox-operation intents. It proves a user can create a person, plan a linked visit, reload the production PWA while offline, and retain the same record. The complete delivery record is [Phase-4-Milestone-2.md](Phase-4-Milestone-2.md).
 
+### Phase 4 — Milestone 3: completion, outcome, tasks, and follow-up: complete
+
+Milestone 3 adds separate actual-completion records, outcome capture, correction/reopen behavior, Quick Capture, Activity-private Notes, Tasks and Task history, atomic local Follow-up creation, Today's next-action derivation, and a derived Weekly Review. It proves a completed visit can create a linked next action and retain it through an offline production-PWA reload. The complete delivery record is [Phase-4-Milestone-3.md](Phase-4-Milestone-3.md).
+
 ## 6. Approved Phase 3 technical direction
 
 ### Client and user experience
@@ -220,8 +225,8 @@ Implementation begins only after the founder accepts the Phase 3 decisions. Buil
 | M0 — Scaffold/guardrails | React/Vite/TS shell, Tailwind 3.4.17, static app shell, routes, tokens, fixtures, lint/type/test/CI baseline | Typecheck, unit tests, production build, phone-width smoke check pass |
 | M1 — Local workspace/shell | Dexie schema/migrations, fake private workspace, settings, original app shell, privacy/disclaimer surfaces | New local records survive browser reload; no hard-coded view state masquerades as data |
 | M2 — People/places/planning | People/households, places, Calendar day view/date ribbon, create/edit/reschedule Activity, drafts | Complete locally: user creates a person, plans a linked activity, reloads offline, and sees the local linked data |
-| M3 — Completion/follow-up | Activity/Task history, outcome capture, notes, tasks, atomic linked follow-up, Today derivation | Complete/capture/follow-up works offline after restart; no orphan follow-up exists |
-| M4 — Auth/sync | Supabase migrations/RLS/RPC tests, owner workspace, outbox processor, pull/apply, conflict view | Two signed-in browser profiles sync exactly once; intentional conflict is visible with no data loss |
+| M3 — Completion/follow-up | Activity/Task history, outcome capture, notes, tasks, atomic linked follow-up, Today derivation, weekly review | Complete locally: complete/capture/follow-up works offline after restart; no orphan follow-up exists |
+| M4 — Auth/sync | Supabase migrations/RLS/RPC tests, owner workspace, outbox processor, pull/apply, conflict view | Requires explicit founder authority before any external service is provisioned; then two signed-in browser profiles sync exactly once and intentional conflict is visible with no data loss |
 | M5 — Beta readiness | Export/delete flows, sign-out safety, storage-persistence request, deployment/auth config, manual beta script | Privacy/recovery checklist passes using fictional data; no public invite before final approval |
 
 Deferred until the beta loop is actually validated: live map tiles, routing, turn-by-turn navigation, background location, attachments/photos, contact imports, shared workspaces/roles, official-data integrations, AI, push claims while closed, and native Android/iOS packaging.
@@ -241,7 +246,7 @@ The production build must demonstrate more than prototype clicks:
 ## 10. Publishing and workspace facts
 
 - The public project repository exists at <https://github.com/noyanxtdoor-maker/rm-calendar>.
-- The Phase 0–2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestones 0, 1, and 2 implementation/evidence are the current publication set.
+- The Phase 0-2 documents and active prototype were published previously; Phase 3 plans and the Phase 4 Milestones 0-3 implementation/evidence are the current publication set.
 - The current public `Verify scaffold` GitHub Actions workflow is green; its first verified run is [30021188368](https://github.com/noyanxtdoor-maker/rm-calendar/actions/runs/30021188368).
 - The local workspace is `C:\Users\sherl\.codex\.chatgpt-projects\g-p-6a6174fb5d708191b1d0fc511a31f967`.
 - `sources/` is synced, read-only project reference material. Do not edit, move, rename, or delete anything under it.
@@ -249,7 +254,7 @@ The production build must demonstrate more than prototype clicks:
 - If a future code repository has `.codegraph/`, use CodeGraph before grep/find when locating or understanding source code.
 - GitHub publication in the prior session used the authenticated local GitHub CLI. A new account/session must authenticate separately and must not assume inherited access.
 
-## 11. Current execution gate: Milestone 3 next
+## 11. Current execution gate: external authorization required for M4
 
 The founder approved the Phase 3 decisions and M0 delivered the scaffold without exceeding its boundary:
 
@@ -260,15 +265,24 @@ The founder approved the Phase 3 decisions and M0 delivered the scaffold without
 - [x] CI baseline and clean-install verification.
 - [x] No live Supabase project, email service, production domain, account flow, or real-user data.
 
-Milestone 2 is complete. The next implementation work is M3: add Activity and Task lifecycle/history, Completion and Quick Capture flows, Notes, local Tasks, and the atomic local Follow-up command. Do not create a hosted Supabase project, invite real users, or implement M4 remote sync without separate founder direction.
+Milestones 1, 2, and 3 are complete. M4 authenticated sync is architecturally specified but not started. Do not create a hosted Supabase project, configure email, store beta data remotely, invite real users, use a real domain, or implement remote sync without separate founder direction.
+
+If the founder explicitly authorizes M4, begin with the lowest-risk external setup and document every provisioned resource:
+
+1. create/use the named Supabase project and its environment boundaries;
+2. implement schema migrations and RLS tests before any real sign-in UI;
+3. configure the approved email/OTP provider and redirect policy;
+4. implement remote RPC and outbox sync only after those access controls pass;
+5. use fictional or explicitly consented data in every test and demo.
 
 ## 12. Continuation instructions for another account/session
 
 1. Read the source-of-truth documents in Section 2 in order.
 2. Open the active Mission Companion prototype before changing UI behavior.
 3. Preserve the LDS/RM scope and independent-original boundary; do not reopen audience discovery unless the founder explicitly changes scope.
-4. Do not redo M0, M1, or M2. Review [Phase-4-Milestone-2.md](Phase-4-Milestone-2.md) and retain its no-live-service boundary.
-5. If the founder asks to continue, execute M3 locally and validate person -> outcome -> follow-up persistence across a browser reload before moving to M4.
-6. Keep the public repository and local handoff synchronized only after local validation succeeds.
+4. Do not redo M0-M3. Review [Phase-4-Milestone-3.md](Phase-4-Milestone-3.md) and retain its no-live-service boundary.
+5. If the founder asks to continue without authorizing an external service, work only on local usability, accessibility, or founder-approved local features.
+6. If the founder authorizes M4, use the M4 gate in Section 11 and retain the documented Supabase/RLS/RPC contract.
+7. Keep the public repository and local handoff synchronized only after local validation succeeds.
 
 For a ready-to-paste starting instruction, use [CONTINUATION-PROMPT.md](CONTINUATION-PROMPT.md).

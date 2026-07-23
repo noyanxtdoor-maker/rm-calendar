@@ -6,12 +6,15 @@ import type {
   ContactOrganizationRecord,
   ContactRecord,
   DraftRecord,
+  FollowUpRecord,
   GenericWorkspaceRecord,
   LocalSettingRecord,
+  NoteRecord,
   OrganizationRecord,
   OutboxOperationRecord,
   PlaceRecord,
   SyncMetadataRecord,
+  TaskHistoryRecord,
   TaskRecord,
   WorkspaceRecord
 } from '../../domain/models'
@@ -28,10 +31,10 @@ export class RmCalendarDatabase extends Dexie {
   contactOrganizations!: Table<ContactOrganizationRecord, string>
   contactPlaces!: Table<GenericWorkspaceRecord, string>
   activityContacts!: Table<ActivityContactRecord, string>
-  followUps!: Table<GenericWorkspaceRecord, string>
-  notes!: Table<GenericWorkspaceRecord, string>
+  followUps!: Table<FollowUpRecord, string>
+  notes!: Table<NoteRecord, string>
   activityHistory!: Table<ActivityHistoryRecord, string>
-  taskHistory!: Table<GenericWorkspaceRecord, string>
+  taskHistory!: Table<TaskHistoryRecord, string>
   reminders!: Table<GenericWorkspaceRecord, string>
   tags!: Table<GenericWorkspaceRecord, string>
   tagAssignments!: Table<GenericWorkspaceRecord, string>

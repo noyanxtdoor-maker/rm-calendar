@@ -124,3 +124,88 @@ export const updateActivityInputSchema = activityInputFields
   })
 
 export type UpdateActivityInput = z.infer<typeof updateActivityInputSchema>
+
+export const completeActivityInputSchema = z.object({
+  activityId: z.string().trim().min(1),
+  outcomeText: optionalShortText
+})
+
+export type CompleteActivityInput = z.infer<typeof completeActivityInputSchema>
+
+export const quickCaptureActivityInputSchema = z.object({
+  title: nonEmptyText.max(140, 'Keep the title under 140 characters.'),
+  activityType: z.enum(['visit', 'planning', 'service', 'personal', 'other']),
+  contactId: z.string().trim().min(1).optional(),
+  outcomeText: optionalShortText
+})
+
+export type QuickCaptureActivityInput = z.infer<typeof quickCaptureActivityInputSchema>
+
+export const createTaskInputSchema = z.object({
+  title: nonEmptyText.max(140, 'Keep the title under 140 characters.'),
+  dueDate: localDate.optional(),
+  priority: z.enum(['low', 'normal', 'high']).default('normal'),
+  contactId: z.string().trim().min(1).optional(),
+  placeId: z.string().trim().min(1).optional(),
+  activityId: z.string().trim().min(1).optional()
+})
+
+export type CreateTaskInput = z.infer<typeof createTaskInputSchema>
+
+export const createNoteInputSchema = z
+  .object({
+    body: nonEmptyText.max(5000, 'Keep a note under 5,000 characters.'),
+    contactId: z.string().trim().min(1).optional(),
+    organizationId: z.string().trim().min(1).optional(),
+    placeId: z.string().trim().min(1).optional(),
+    activityId: z.string().trim().min(1).optional(),
+    taskId: z.string().trim().min(1).optional()
+  })
+  .superRefine((input, context) => {
+    const parentCount = [input.contactId, input.organizationId, input.placeId, input.activityId, input.taskId].filter(Boolean).length
+    if (parentCount !== 1) {
+      context.addIssue({
+        code: 'custom',
+        message: 'A note needs exactly one parent record.'
+      })
+    }
+  })
+
+export type CreateNoteInput = z.infer<typeof createNoteInputSchema>
+
+export const createFollowUpInputSchema = z.discriminatedUnion('targetKind', [
+  z.object({
+    sourceActivityId: z.string().trim().min(1),
+    targetKind: z.literal('task'),
+    title: nonEmptyText.max(140, 'Keep the title under 140 characters.'),
+    dueDate: localDate,
+    priority: z.enum(['low', 'normal', 'high']).default('normal'),
+    contactId: z.string().trim().min(1).nullable().optional(),
+    placeId: z.string().trim().min(1).nullable().optional()
+  }),
+  z.object({
+    sourceActivityId: z.string().trim().min(1),
+    targetKind: z.literal('activity'),
+    title: nonEmptyText.max(140, 'Keep the title under 140 characters.'),
+    activityType: z.enum(['visit', 'planning', 'service', 'personal', 'other']),
+    schedule: z.union([
+      z.object({
+        kind: z.literal('timed'),
+        date: localDate,
+        startTime: localTime,
+        endTime: localTime
+      }),
+      z.object({
+        kind: z.literal('all-day'),
+        date: localDate
+      })
+    ]).refine((schedule) => schedule.kind !== 'timed' || schedule.endTime > schedule.startTime, {
+      message: 'The end time needs to be after the start time.',
+      path: ['endTime']
+    }),
+    contactId: z.string().trim().min(1).nullable().optional(),
+    placeId: z.string().trim().min(1).nullable().optional()
+  })
+])
+
+export type CreateFollowUpInput = z.infer<typeof createFollowUpInputSchema>

@@ -14,7 +14,7 @@ It is a web-first beta designed for phone-sized use. Native Android/iOS packagin
 
 ## Current status
 
-Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestone 2 (the local People, Places, Calendar, and Planning flow) is complete.
+Phases 0-3 are complete: product discovery, domain/workflow architecture, the original clickable Mission Companion prototype, and the implementation plan. Phase 3 is founder-approved, and Phase 4 Milestones 0-3 are complete locally: the product now supports people, places, planning, completion/outcomes, private notes, tasks, linked follow-ups, and a derived weekly review.
 
 Start with these source-of-truth documents:
 
@@ -25,7 +25,8 @@ Start with these source-of-truth documents:
 5. [Phase 4 Milestone 0 evidence](docs/Phase-4-Milestone-0.md)
 6. [Phase 4 Milestone 1 evidence](docs/Phase-4-Milestone-1.md)
 7. [Phase 4 Milestone 2 evidence](docs/Phase-4-Milestone-2.md)
-8. [Complete project handoff](docs/PROJECT-HANDOFF.md)
+8. [Phase 4 Milestone 3 evidence](docs/Phase-4-Milestone-3.md)
+9. [Complete project handoff](docs/PROJECT-HANDOFF.md)
 
 The active clickable artifact is [Mission Companion Prototype](design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html).
 
@@ -42,7 +43,7 @@ The active clickable artifact is [Mission Companion Prototype](design/RM%20Calen
     npm ci
     npm run dev
 
-Use npm run verify for typecheck, lint, unit tests, and a production build. npm run test:e2e additionally tests the production PWA at phone width and verifies a newly saved fictional local record survives an offline browser reload.
+Use npm run verify for typecheck, lint, unit tests, and a production build. npm run test:e2e additionally tests the production PWA at phone width and verifies a newly saved fictional local record and a completed-visit follow-up both survive an offline browser reload.
 
 ## References
 

@@ -4,6 +4,8 @@
 **Status:** Draft for review  
 **Depends on:** [Product Bible](Product-Bible.md)
 
+> **Scope amendment:** Keep this reusable domain model, but implement its first visible vocabulary and workflows for LDS members and returned missionaries according to [Scope-Decision-LDS.md](Scope-Decision-LDS.md). It does not imply official Church data access.
+
 ## 1. Purpose
 
 This document defines the business objects RM Calendar understands and how they relate. It is a conceptual model—not a database schema, API contract, or screen design. Its job is to make later technical decisions coherent.
