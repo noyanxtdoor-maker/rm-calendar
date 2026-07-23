@@ -166,6 +166,8 @@ The active prototype is published at: https://github.com/noyanxtdoor-maker/rm-ca
 
 **Current active prototype:** `design/RM Calendar — Mission Companion Prototype.html`. The older “Reference-Informed Prototype” link in the historical table is not the active design and should not be refined further.
 
+Public copy: https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/design/RM%20Calendar%20%E2%80%94%20Mission%20Companion%20Prototype.html
+
 **Current visual system:** deep navy/charcoal base, teal primary action/state, gold planning emphasis, violet context color, system typography, original layout and icon treatment. It replaces the older Quiet Command/copper description below.
 
 - Dark near-black background
