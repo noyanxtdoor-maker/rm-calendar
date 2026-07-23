@@ -1,36 +1,47 @@
-# RM Calendar — Paste This Into the New Session
+# RM Calendar — Paste This Into the Next Session
 
 ```text
-Continue the RM Calendar project as the product architect and UX collaborator.
+Continue the RM Calendar project as product architect and implementation planner.
 
-First, read this complete handoff file in the project workspace:
-docs/PROJECT-HANDOFF.md
+First read these files in this order:
+1. docs/PROJECT-HANDOFF.md
+2. docs/Scope-Decision-LDS.md
+3. docs/Phase-2-UX-Spec.md
+4. docs/Product-Bible.md
+5. docs/Domain-Model.md
+6. docs/Critical-Workflows.md
+7. docs/Business-Rules.md
+8. docs/Data-Sync-Architecture.md
 
-If that file is not available locally, start from its public copy and then clone/download the repository:
-https://github.com/noyanxtdoor-maker/rm-calendar/blob/main/docs/PROJECT-HANDOFF.md
+If local files are unavailable, start from this public repository:
+https://github.com/noyanxtdoor-maker/rm-calendar
 
-Then read the source-of-truth architecture documents in docs/:
-- Product-Bible.md
-- Phase-0-Discovery.md
-- Domain-Model.md
-- Critical-Workflows.md
-- Information-Architecture.md
-- Business-Rules.md
-- Data-Sync-Architecture.md
+Project scope is now settled:
+- Product name: RM Calendar.
+- Audience: LDS members and returned missionaries who understand the planning rhythm used in missionary service.
+- Product: an independent, web-first, mobile-first planning companion for people/households, visits, activities, places, notes, tasks, and follow-ups.
+- Product positioning: familiar missionary-planning rhythm, but NOT an official Church app, NOT a PMG clone, and NOT a replacement for official Church systems.
+- No claim of Church affiliation or access to official Church/member data.
+- No copying PMG branding, assets, source code, colors, text, exact layouts, or screens.
 
-Project repository: https://github.com/noyanxtdoor-maker/rm-calendar
-UI reference repository owned by the user: https://github.com/noyanxtdoor-maker/Calendar
+References:
+- User-owned Google AI Studio prototype repository: https://github.com/noyanxtdoor-maker/Calendar
+- Local workflow/design reference, if available: C:\Users\sherl\Downloads\Preach My Gospel Reference
 
-We are in Phase 2 (UX/UI prototype). The product is RM Calendar: an original general-purpose field-work planner, initially emotionally resonant with returned missionaries but with NO church or missionary features in the default product. It is web-first for beta, with a phone-sized/mobile-first UI. Native mobile comes later after web validation and budget.
+The Phase 2 outcome is complete. The active clickable artifact is:
+design/RM Calendar — Mission Companion Prototype.html
 
-The user selected the dark “Quiet Command” visual direction, but wants the app shell, layout quality, workflow, dashboard/calendar/people/map/tools structure, and usability of the user-owned Calendar mockup. Use that structure as inspiration, but do not copy code, PMG branding, church terminology, proprietary visual assets, colors, or exact screen layouts.
+It demonstrates the intended original structure:
+Home → Calendar → People → Map → Tools, plus a side drawer, quick add, person context, and the important completed-activity → outcome → linked follow-up/task flow.
 
-Current active prototype:
-design/RM Calendar — Reference-Informed Prototype.html
+Do not restart architecture discovery. Begin Phase 3: translate the approved UX specification and domain rules into a technical implementation plan. Produce, in order:
+1. implementation-ready component inventory and state model;
+2. data/schema mapping from the existing domain model;
+3. web-first technology decision with trade-offs;
+4. local-first persistence/sync implementation plan;
+5. milestone-based build plan for the functional web beta.
 
-Start by inspecting and refining that prototype. Build an original, polished clickable flow for Today/Home, Calendar, People/contact detail, Places/Map, More/Drawer, Quick Add, Complete Activity, Create Follow-up, and offline/pending-sync feedback. Show the user the artifact early and iterate with their feedback. Do not jump into production code until the prototype is approved.
+Keep the product original, privacy-conscious, local-first, and usable in poor connectivity. Treat sensitive people/household notes and location data carefully. Do not build production code until the founder explicitly approves the Phase 3 plan.
 
-After user approval, create docs/UX-Specification.md, publish it and the approved prototype to the public RM Calendar repository, then proceed to Phase 3 technical implementation decisions.
-
-Important workspace constraints: sources/ is read-only; use apply_patch for edits; preserve existing changes; if writing InsForge integration code, fetch current InsForge SDK docs first; Tailwind must remain on 3.4, never v4.
+Workspace constraints: sources/ is read-only; use apply_patch for local edits; preserve unrelated changes; Tailwind must remain on 3.4, never v4. If implementation requires an external SDK, retrieve its current official documentation first.
 ```
