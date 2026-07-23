@@ -4,6 +4,8 @@
 **Status:** Complete specification baseline  
 **Depends on:** [Product Bible](Product-Bible.md), [Domain Model](Domain-Model.md), [Phase 0 Discovery](Phase-0-Discovery.md)
 
+> **Scope amendment:** These planning and follow-up workflows now serve the LDS/RM companion defined in [Scope-Decision-LDS.md](Scope-Decision-LDS.md), not a general field-work market.
+
 ## 1. Why these workflows are critical
 
 The first release succeeds only if a field worker can reliably do three things:
@@ -249,7 +251,7 @@ A Contact is pre-filled only when the completed source Activity has a primary Co
 | --- | --- |
 | No next action is needed. | The user dismisses the prompt; the completed activity remains valid. |
 | The next action is uncertain. | Create a Task with a due date rather than forcing a calendar time block. |
-| A reminder is due while offline. | The app uses device-local notification where enabled; the record stays visible even if delivery is unavailable. |
+| A reminder is due while offline. | The due state remains visible in the local app. Browser/device notification is optional later and must never be represented as guaranteed delivery in the first web beta. |
 | The contact is no longer relevant. | The user can clear or replace it; the Follow-up link still preserves the origin. |
 | The follow-up is deleted/cancelled. | Preserve the source link and show its final state in the source Activity history. |
 | A user creates multiple follow-ups. | Allow many; each has its own explicit source link. |
