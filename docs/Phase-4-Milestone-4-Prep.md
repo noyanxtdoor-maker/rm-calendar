@@ -57,7 +57,13 @@ hosted project has been linked or contacted.
   - Task creation inserts immutable Task history, a change-log entry, and receipt;
   - Note creation validates its single local parent, then writes its canonical record, change-log entry, and receipt;
   - retrying the same operation ID returns the original acknowledgement without duplicating a record.
-- Intentionally **not** added remote support for Activity updates/completion/reopen, Task completion, or compound Follow-ups. Their revision semantics and multi-record local acknowledgement still need an explicit next slice.
+- Extended the local RPC boundary with revision-checked lifecycle transitions:
+  - Activity update, complete, and reopen require the exact expected server revision and append immutable history;
+  - Task completion requires the exact expected server revision and appends immutable history;
+  - stale edits return a conflict instead of silently overwriting a newer canonical record;
+  - complete/reopen operations cannot smuggle unrelated title, schedule, or relationship changes;
+  - replaying the same transition operation remains exactly-once through its receipt.
+- Intentionally **not** added remote support for compound Follow-ups. Their multi-record local acknowledgement still needs an explicit next slice.
 
 ## 3. Verification evidence
 
@@ -92,7 +98,7 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
   clean local migration replay: pass
   schema lint: pass
-  pgTAP owner-isolation, simple-batch, and lifecycle-create checks: 35 passed
+  pgTAP owner-isolation, simple-batch, lifecycle-create, and revision-transition checks: 51 passed
 ~~~
 
 ## 4. What this does not do
@@ -118,7 +124,7 @@ The founder must explicitly identify or authorize all of the following before ex
 
 After approval, the next implementation sequence is:
 
-1. extend and locally test `apply_sync_batch` for revision-checked Activity/Task transitions and atomic Follow-ups against [Sync Contract](Sync-Contract.md);
+1. extend and locally test `apply_sync_batch` for atomic Follow-ups against [Sync Contract](Sync-Contract.md), including multi-record local acknowledgement;
 2. add the remote RPC adapter and authenticated browser bootstrap;
 3. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;

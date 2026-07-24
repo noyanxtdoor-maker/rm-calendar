@@ -51,6 +51,13 @@ Activity creates preserve an optional primary-person link and append immutable
 history; Task creates append immutable history. Each successful operation also
 has a change-log row and an idempotency receipt.
 
+The same local test database also proves revision-checked `update_activity`,
+`complete_activity`, `reopen_activity`, and `complete_task` operations. A stale
+base revision returns a conflict rather than overwriting canonical data.
+Completion and reopen handlers modify only the fields owned by that lifecycle
+transition, so a delayed device cannot hide a title or schedule edit inside a
+completion payload.
+
 The remaining operation kinds are intentionally rejected for now. In
 particular, a remote `create_follow_up` must not be enabled until the client can
 acknowledge the source, target, and link atomically without leaving either local
