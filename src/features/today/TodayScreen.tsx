@@ -22,6 +22,13 @@ export function TodayScreen() {
   const today = localIsoDate(new Date(), snapshot.workspace.timezone)
   const activeActivities = snapshot.activities.filter((activity) => activity.state === 'scheduled')
   const todayActivities = activeActivities.filter((activity) => activityDate(activity, snapshot.workspace.timezone) === today)
+  const weekEnd = new Date(today + 'T12:00:00')
+  weekEnd.setDate(weekEnd.getDate() + 6)
+  const weekEndDate = localIsoDate(weekEnd, snapshot.workspace.timezone)
+  const weekActivities = activeActivities.filter((activity) => {
+    const date = activityDate(activity, snapshot.workspace.timezone)
+    return Boolean(date && date >= today && date <= weekEndDate)
+  })
   const openTasks = snapshot.tasks
     .filter((task) => task.state === 'open')
     .sort((left, right) => (left.dueDate ?? '9999-12-31').localeCompare(right.dueDate ?? '9999-12-31'))
@@ -39,51 +46,50 @@ export function TodayScreen() {
 
   return (
     <section aria-labelledby="today-overview-title" className="animate-enter space-y-5">
-      <div className="rounded-3xl border border-[var(--rm-teal)]/20 bg-[linear-gradient(135deg,rgba(90,215,204,0.15),rgba(16,29,48,0.92)_46%,rgba(170,154,248,0.13))] p-5 shadow-[var(--rm-shadow-card)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rm-teal)]">Your day, in focus</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white" id="today-overview-title">
-          Start with what matters.
-        </h2>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-slate-300">
-          Your plan lives on this device first. Keep people, visits, and the next step connected.
-        </p>
-
-        <div className="mt-5 grid grid-cols-3 gap-2">
-          <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
-            <p className="text-xl font-semibold text-white">{plannedPeople.length}</p>
-            <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">People planned</p>
+      <section className="border-y border-white/[0.12] py-5">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rm-gold)]">Weekly command center</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white" id="today-overview-title">Keep the work moving.</h2>
           </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
-            <p className="text-xl font-semibold text-white">{todayActivities.length}</p>
-            <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">Today</p>
-          </div>
-          <div className="rounded-2xl border border-white/[0.08] bg-[var(--rm-ink)]/45 p-3">
-            <p className="text-xl font-semibold text-white">{openTasks.length}</p>
-            <p className="mt-1 text-[0.67rem] font-medium uppercase tracking-[0.12em] text-slate-400">Next actions</p>
-          </div>
+          <Link className="min-h-10 rounded-xl border border-[var(--rm-teal)]/30 px-3 text-xs font-semibold leading-10 text-[var(--rm-teal)]" to="/tools/weekly-review">Review week</Link>
         </div>
-      </div>
+        <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">See the people, visits, and next actions that need movement—then make the next plan.</p>
 
-      <div className="grid grid-cols-3 gap-2">
+        <div className="mt-5 grid grid-cols-2 divide-x divide-y divide-white/[0.1] border border-white/[0.1] bg-black/10">
+          <div className="p-3"><p className="text-xs font-semibold text-slate-300">People in motion</p><p className="mt-1 text-2xl font-semibold text-[var(--rm-teal)]">{plannedPeople.length}</p></div>
+          <div className="p-3"><p className="text-xs font-semibold text-slate-300">Planned this week</p><p className="mt-1 text-2xl font-semibold text-[var(--rm-gold)]">{weekActivities.length}</p></div>
+          <div className="p-3"><p className="text-xs font-semibold text-slate-300">Today’s visits</p><p className="mt-1 text-2xl font-semibold text-white">{todayActivities.length}</p></div>
+          <div className="p-3"><p className="text-xs font-semibold text-slate-300">Open next actions</p><p className="mt-1 text-2xl font-semibold text-[var(--rm-violet)]">{openTasks.length}</p></div>
+        </div>
+      </section>
+
+      <section>
+        <SectionLabel>Action hub</SectionLabel>
+        <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden border border-white/[0.1] bg-white/[0.1]">
         <Link
-          className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-teal)]/40"
+          className="min-h-20 bg-[var(--rm-surface)] px-4 py-4 text-left text-sm font-semibold text-white transition hover:bg-white/[0.06]"
           to="/calendar/new"
         >
-          Plan day
+          <span className="block text-[var(--rm-teal)]">Plan a visit</span><span className="mt-1 block text-xs font-normal text-slate-400">Add it to the day</span>
         </Link>
         <Link
-          className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-gold)]/40"
+          className="min-h-20 bg-[var(--rm-surface)] px-4 py-4 text-left text-sm font-semibold text-white transition hover:bg-white/[0.06]"
           to="/people/new"
         >
-          People
+          <span className="block text-[var(--rm-gold)]">Add a person</span><span className="mt-1 block text-xs font-normal text-slate-400">Keep context connected</span>
         </Link>
         <Link
-          className="rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-3 py-4 text-center text-xs font-semibold text-white transition hover:border-[var(--rm-violet)]/40"
+          className="min-h-20 bg-[var(--rm-surface)] px-4 py-4 text-left text-sm font-semibold text-white transition hover:bg-white/[0.06]"
           to="/capture"
         >
-          Capture
+          <span className="block text-[var(--rm-violet)]">Quick capture</span><span className="mt-1 block text-xs font-normal text-slate-400">Record an unplanned visit</span>
         </Link>
-      </div>
+        <Link className="min-h-20 bg-[var(--rm-surface)] px-4 py-4 text-left text-sm font-semibold text-white transition hover:bg-white/[0.06]" to="/tools">
+          <span className="block text-slate-200">Open tools</span><span className="mt-1 block text-xs font-normal text-slate-400">Tasks, review, sync, and data</span>
+        </Link>
+        </div>
+      </section>
 
       <section>
         <SectionLabel action={<Link className="text-xs font-semibold text-[var(--rm-teal)]" to="/people">See people</Link>}>
@@ -97,7 +103,7 @@ export function TodayScreen() {
               const visit = plannedVisitLink ? activeActivities.find((activity) => activity.id === plannedVisitLink.activityId) : undefined
               return (
                 <Link
-                  className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30"
+                  className="flex items-center gap-3 border-b border-white/[0.08] py-3 transition hover:bg-white/[0.03]"
                   key={person.id}
                   to={'/people/' + person.id}
                 >
@@ -113,7 +119,7 @@ export function TodayScreen() {
               )
             })
           ) : (
-            <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">No one needs attention right now.</p>
+            <p className="border-y border-dashed border-white/[0.12] py-4 text-sm text-slate-400">No one needs attention right now.</p>
           )}
         </div>
       </section>
@@ -126,7 +132,7 @@ export function TodayScreen() {
           {todayActivities.length ? (
             todayActivities.map((activity) => (
               <Link
-                className="flex gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-gold)]/30"
+                className="flex gap-3 border-b border-white/[0.08] py-3 transition hover:bg-white/[0.03]"
                 key={activity.id}
                 to={'/calendar/' + activity.id}
               >
@@ -138,7 +144,7 @@ export function TodayScreen() {
               </Link>
             ))
           ) : (
-            <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Nothing is planned for today.</p>
+            <p className="border-y border-dashed border-white/[0.12] py-4 text-sm text-slate-400">Nothing is planned for today.</p>
           )}
         </div>
       </section>
@@ -149,7 +155,7 @@ export function TodayScreen() {
         </SectionLabel>
         <div className="mt-3 space-y-2">
           {openTasks.slice(0, 3).map((task) => (
-            <Link className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30" key={task.id} to="/tools">
+            <Link className="flex items-center gap-3 border-b border-white/[0.08] py-3 transition hover:bg-white/[0.03]" key={task.id} to="/tools">
               <span className={task.priority === 'high' ? 'h-8 w-1 shrink-0 rounded-full bg-red-300' : 'h-8 w-1 shrink-0 rounded-full bg-[var(--rm-teal)]'} />
               <span className="min-w-0">
                 <span className="block truncate text-sm font-semibold text-white">{task.title}</span>
@@ -157,7 +163,7 @@ export function TodayScreen() {
               </span>
             </Link>
           ))}
-          {!openTasks.length ? <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Your next actions will appear here.</p> : null}
+          {!openTasks.length ? <p className="border-y border-dashed border-white/[0.12] py-4 text-sm text-slate-400">Your next actions will appear here.</p> : null}
         </div>
       </section>
     </section>

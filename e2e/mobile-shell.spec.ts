@@ -11,7 +11,7 @@ test('the Milestone 1 local workspace stays usable at phone width and reopens of
   await openLocalWorkspace(page)
 
   await expect(page.getByRole('heading', { name: 'Home', exact: true })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Start with what matters.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Keep the work moving.' })).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Home', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('link', { name: 'Calendar', exact: true })).toBeVisible()
