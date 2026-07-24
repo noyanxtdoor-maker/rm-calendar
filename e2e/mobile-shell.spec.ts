@@ -72,6 +72,13 @@ test('planning tools provides a compact secondary workflow without replacing pri
   await expect(page.getByRole('dialog', { name: 'Planning tools' })).toHaveCount(0)
 })
 
+test('the cloud account route stays addressable for an email-link return', async ({ page }) => {
+  await openLocalWorkspace(page, '/tools/cloud')
+
+  await expect(page.getByRole('heading', { name: 'Keep new planning work in sync.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Cloud workspace active' })).toHaveCount(0)
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
