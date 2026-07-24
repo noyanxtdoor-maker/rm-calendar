@@ -11,7 +11,7 @@ export function FocusGroupDetailScreen() {
   if (!group) return <section className="animate-enter rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5"><h2 className="text-xl font-semibold text-white">Focus group not found</h2><Link className="mt-4 inline-block text-sm font-semibold text-[var(--rm-teal)]" to="/people">Back to people</Link></section>
 
   const members = snapshot.contactOrganizations
-    .filter((link) => link.organizationId === group.id)
+    .filter((link) => link.organizationId === group.id && !link.deletedAt)
     .flatMap((link) => snapshot.contacts.filter((contact) => contact.id === link.contactId))
   const activeActivities = snapshot.activities.filter((activity) => activity.state === 'scheduled')
 
@@ -32,7 +32,7 @@ export function FocusGroupDetailScreen() {
           return <Link className="flex min-h-16 items-center gap-3 py-2" key={person.id} to={'/people/' + person.id}>
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">{person.displayName.slice(0, 1)}</span>
             <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{person.displayName}</span><span className="mt-1 block truncate text-xs text-slate-400">{task?.title ?? visit?.title ?? 'No next step yet'}</span></span>
-            <span aria-hidden="true" className="text-lg text-slate-500">›</span>
+            <span aria-hidden="true" className="text-lg text-slate-500">&rsaquo;</span>
           </Link>
         }) : <p className="py-4 text-sm text-slate-400">This group has no people yet. Edit it to add someone.</p>}
       </div>

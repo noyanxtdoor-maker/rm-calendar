@@ -17,7 +17,9 @@ export function FocusGroupEditScreen() {
   if (!group) return <section className="animate-enter rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5"><h2 className="text-xl font-semibold text-white">Focus group not found</h2></section>
   const focusGroup = group
 
-  const currentIds = selectedIds ?? snapshot.contactOrganizations.filter((link) => link.organizationId === focusGroup.id).map((link) => link.contactId)
+  const currentIds = selectedIds ?? snapshot.contactOrganizations
+    .filter((link) => link.organizationId === focusGroup.id && !link.deletedAt)
+    .map((link) => link.contactId)
   function toggle(contactId: string) { setSelectedIds(currentIds.includes(contactId) ? currentIds.filter((id) => id !== contactId) : [...currentIds, contactId]) }
   async function save() {
     setBusy(true); setMessage(undefined)

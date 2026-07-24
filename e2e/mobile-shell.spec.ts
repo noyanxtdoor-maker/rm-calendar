@@ -114,6 +114,7 @@ test('a user can open and safely update a focus group at phone width', async ({ 
 
   await expect(page.getByRole('heading', { name: 'Next week' })).toBeVisible()
   await expect(page.getByText('Jordan Lee', { exact: true })).toBeVisible()
+  await expect(page.getByText('Avery Brooks', { exact: true })).toHaveCount(0)
   const layout = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth
