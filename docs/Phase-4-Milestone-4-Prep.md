@@ -50,8 +50,14 @@ hosted project has been linked or contacted.
   - authenticated profiles and exactly-one-owner private workspaces;
   - contacts, organizations, places, activities, tasks, notes, reminders, histories, follow-ups, change logs, and mutation receipts;
   - same-workspace relationship triggers, RLS read policies, and no direct browser write grants;
-  - `bootstrap_private_workspace(name, timezone)`, bounded owner-scoped `pull_changes`, and a restricted `apply_sync_batch` RPC for simple creates.
+  - `bootstrap_private_workspace(name, timezone)`, bounded owner-scoped `pull_changes`, and a restricted `apply_sync_batch` RPC for simple records plus Activity/Task/Note creates.
 - Added a local pgTAP owner-isolation suite with two fictional Auth users.
+- Extended the local RPC boundary with database-tested lifecycle creation:
+  - Activity and Quick Capture creation insert their canonical record, immutable creation history, optional primary-person link, change-log entry, and receipt;
+  - Task creation inserts immutable Task history, a change-log entry, and receipt;
+  - Note creation validates its single local parent, then writes its canonical record, change-log entry, and receipt;
+  - retrying the same operation ID returns the original acknowledgement without duplicating a record.
+- Intentionally **not** added remote support for Activity updates/completion/reopen, Task completion, or compound Follow-ups. Their revision semantics and multi-record local acknowledgement still need an explicit next slice.
 
 ## 3. Verification evidence
 
@@ -71,7 +77,7 @@ Commands run successfully:
 npm run verify
   typecheck: pass
   lint: pass
-  Vitest: 28 passed
+  Vitest: 30 passed
   production Vite build: pass
   PWA service worker and manifest: emitted
 
@@ -86,7 +92,7 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
   clean local migration replay: pass
   schema lint: pass
-  pgTAP owner-isolation and simple-batch checks: 24 passed
+  pgTAP owner-isolation, simple-batch, and lifecycle-create checks: 35 passed
 ~~~
 
 ## 4. What this does not do
@@ -112,7 +118,7 @@ The founder must explicitly identify or authorize all of the following before ex
 
 After approval, the next implementation sequence is:
 
-1. extend and locally test `apply_sync_batch` for Activity/Task lifecycle, Notes, and atomic Follow-ups against [Sync Contract](Sync-Contract.md);
+1. extend and locally test `apply_sync_batch` for revision-checked Activity/Task transitions and atomic Follow-ups against [Sync Contract](Sync-Contract.md);
 2. add the remote RPC adapter and authenticated browser bootstrap;
 3. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;

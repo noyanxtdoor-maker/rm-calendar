@@ -42,6 +42,20 @@ The operation ID is an idempotency key. Retrying the same ID must return the ori
 
 The base revision is the observed server revision before the mutation. An operation that depends on an acknowledged earlier mutation is updated locally to that newer server revision before it is sent.
 
+### Current locally proven server slice
+
+The local Supabase test database currently accepts these remote-safe creation
+operations: `create_contact`, `create_household`, `create_place`,
+`create_activity`, `quick_capture_activity`, `create_task`, and `create_note`.
+Activity creates preserve an optional primary-person link and append immutable
+history; Task creates append immutable history. Each successful operation also
+has a change-log row and an idempotency receipt.
+
+The remaining operation kinds are intentionally rejected for now. In
+particular, a remote `create_follow_up` must not be enabled until the client can
+acknowledge the source, target, and link atomically without leaving either local
+target falsely pending.
+
 ## 3. Compound follow-up operation
 
 Create-follow-up is one logical remote operation, not a generic insert of unrelated rows.
