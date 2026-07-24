@@ -7,6 +7,7 @@ import pullChangesMigration from '../../../supabase/migrations/20260724094000_pu
 import applySyncSimpleRecordsMigration from '../../../supabase/migrations/20260724095000_apply_sync_simple_records.sql?raw'
 import applySyncLifecycleTransitionsMigration from '../../../supabase/migrations/20260724103000_apply_sync_lifecycle_transitions.sql?raw'
 import applySyncFollowUpMigration from '../../../supabase/migrations/20260724110000_apply_sync_follow_up.sql?raw'
+import pullRelatedContextMigration from '../../../supabase/migrations/20260724120000_pull_related_context.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -31,6 +32,7 @@ describe('Supabase identity migration guardrails', () => {
       activitiesTasksMigration,
       followUpsSyncMigration,
       pullChangesMigration,
+      pullRelatedContextMigration,
       applySyncSimpleRecordsMigration,
       applySyncLifecycleTransitionsMigration,
       applySyncFollowUpMigration
@@ -59,7 +61,7 @@ describe('Supabase identity migration guardrails', () => {
   })
 
   it('keeps pull access owner-scoped, cursor-bounded, and inaccessible to public callers', () => {
-    const sql = pullChangesMigration.toLocaleLowerCase()
+    const sql = [pullChangesMigration, pullRelatedContextMigration].join('\n').toLocaleLowerCase()
 
     expect(sql).toContain('create or replace function public.pull_changes')
     expect(sql).toContain('if not public.is_active_workspace_owner(p_workspace_id)')
@@ -67,6 +69,15 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).toContain("'nextcursor'")
     expect(sql).toContain('revoke all on function public.pull_changes(uuid, bigint, integer) from public')
     expect(sql).toContain('grant execute on function public.pull_changes(uuid, bigint, integer) to authenticated')
+  })
+
+  it('pulls the minimum Activity and Task context needed for a second device without opening direct table access', () => {
+    const sql = pullRelatedContextMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.sync_pull_related_context')
+    expect(sql).toContain("'primarycontact'")
+    expect(sql).toContain("'history'")
+    expect(sql).toContain('revoke all on function public.sync_pull_related_context(uuid, text, uuid) from public')
   })
 
   it('limits batch mutation to the reviewed RPC and keeps receipt idempotency in the database', () => {

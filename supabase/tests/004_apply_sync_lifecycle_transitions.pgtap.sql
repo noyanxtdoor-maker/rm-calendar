@@ -113,7 +113,7 @@ select is(
 reset role;
 select is((select title from public.activities where id = '25000000-0000-0000-0000-000000000025'), 'Revised plan', 'completion cannot smuggle a title edit');
 select is((select outcome_text from public.activities where id = '25000000-0000-0000-0000-000000000025'), 'A private result', 'completion records the submitted outcome');
-select is((select event_type from public.activity_history where activity_id = '25000000-0000-0000-0000-000000000025' order by event_at desc, created_at desc limit 1), 'completed', 'completion has immutable history');
+select is((select count(*) from public.activity_history where activity_id = '25000000-0000-0000-0000-000000000025' and event_type = 'completed'), 1::bigint, 'completion has one immutable history entry');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '21000000-0000-0000-0000-000000000021', true);

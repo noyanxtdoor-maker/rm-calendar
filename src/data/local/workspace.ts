@@ -13,6 +13,7 @@ import { atLocalTime, localIsoDate, localTimeZone } from '../../lib/time'
 import { rmCalendarDb } from './RmCalendarDatabase'
 
 export const DEMO_WORKSPACE_ID = 'rm-calendar-private-demo'
+export const ACTIVE_WORKSPACE_KEY = 'active-workspace-id'
 export const WORKSPACE_LIFECYCLE_KEY = 'workspace-lifecycle'
 export const PRIVACY_NOTICE_KEY = 'privacy-notice'
 export const PRIVACY_NOTICE_VERSION = 1
@@ -131,6 +132,62 @@ async function workspaceLifecycle() {
   return setting?.valueJson.state as WorkspaceLifecycle | undefined
 }
 
+export async function activeWorkspaceId() {
+  const setting = await rmCalendarDb.localSettings.get(ACTIVE_WORKSPACE_KEY)
+  const id = setting?.valueJson.workspaceId
+  return typeof id === 'string' && id.trim() ? id : DEMO_WORKSPACE_ID
+}
+
+export async function setActiveWorkspaceId(workspaceId: string) {
+  await rmCalendarDb.localSettings.put({
+    key: ACTIVE_WORKSPACE_KEY,
+    valueJson: { workspaceId },
+    updatedAt: nowIso()
+  })
+}
+
+/**
+ * Stores a newly bootstrapped server workspace locally without copying the
+ * fictional starter data. New records receive UUIDs and can be synced; the
+ * original demo remains intact and local-only for safe exploration.
+ */
+export async function createRemoteWorkspace(input: {
+  id: string
+  name: string
+  timezone: string
+  ownerUserId: string
+}) {
+  const timestamp = nowIso()
+  const workspace: WorkspaceRecord = {
+    id: input.id,
+    name: input.name,
+    timezone: input.timezone,
+    ownerUserId: input.ownerUserId,
+    terminologyJson: {
+      activity: 'Visit',
+      contact: 'Person',
+      organization: 'Household'
+    },
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    clientUpdatedAt: timestamp,
+    revision: 1,
+    syncState: 'synced'
+  }
+
+  await rmCalendarDb.transaction('rw', ['workspaces', 'syncMetadata', 'localSettings'], async () => {
+    const existing = await rmCalendarDb.workspaces.get(workspace.id)
+    await rmCalendarDb.workspaces.put(existing ? { ...existing, ...workspace } : workspace)
+    await rmCalendarDb.syncMetadata.put({
+      workspaceId: workspace.id,
+      syncInProgress: false
+    })
+    await setActiveWorkspaceId(workspace.id)
+  })
+
+  return workspace
+}
+
 export async function acknowledgeLocalPrivacyNotice() {
   await rmCalendarDb.localSettings.put({
     key: PRIVACY_NOTICE_KEY,
@@ -189,6 +246,9 @@ export async function bootstrapLocalWorkspace() {
         valueJson: { state: 'active' },
         updatedAt: timestamp
       })
+      if (!await rmCalendarDb.localSettings.get(ACTIVE_WORKSPACE_KEY)) {
+        await setActiveWorkspaceId(workspace.id)
+      }
       await rmCalendarDb.localSettings.put({
         key: 'schema-version',
         valueJson: { version: 2 },

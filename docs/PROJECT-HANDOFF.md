@@ -5,7 +5,9 @@
 **Last updated:** 2026-07-24  
 **Repository:** <https://github.com/noyanxtdoor-maker/rm-calendar>  
 **Product owner:** Founder / user  
-**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3, the local preparation portions of M4/M5, and the original calendar refinement are complete and locally verified. M4 authenticated sync, account-aware M5 work, and all external beta configuration remain gated on explicit founder authority.
+**Current status:** Phase 3 is founder-approved. Phase 4 Milestones 0-3, M5’s local privacy/recovery preparation, and M4’s implemented/hosted authenticated path are complete and locally verified. M4’s production redirect and manual two-browser proof, plus account-aware M5 work, remain before beta readiness.
+
+**M4 continuation:** The hosted Supabase project has migrations through `20260724120000_pull_related_context.sql` and clean remote lint. The browser now offers email-link sign-in, a separate UUID workspace for future records, authenticated RPC sync, and owner-scoped Activity/Task context pull. Existing fictional starter data remains local-only. Configure the deployed redirect URL, then complete the same-account two-browser and conflict checks in [Phase 4 Milestone 4](Phase-4-Milestone-4-Prep.md).
 
 ## 1. Read this first
 

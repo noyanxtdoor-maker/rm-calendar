@@ -38,7 +38,7 @@ import { outboxEntityId, syncEntityTypeForOperation, type SyncOperationKind } fr
 import { createLocalId } from '../../lib/ids'
 import { zonedDateTimeToUtcIso } from '../../lib/time'
 import { rmCalendarDb } from './RmCalendarDatabase'
-import { DEMO_WORKSPACE_ID } from './workspace'
+import { activeWorkspaceId } from './workspace'
 
 export type ActivityFormDraftPayload = {
   title: string
@@ -77,7 +77,7 @@ function cleanedOptional(value: string | undefined) {
 }
 
 async function activeWorkspace() {
-  const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+  const workspace = await rmCalendarDb.workspaces.get(await activeWorkspaceId())
   if (!workspace || workspace.deletedAt) {
     throw new Error('Create a local workspace before planning.')
   }

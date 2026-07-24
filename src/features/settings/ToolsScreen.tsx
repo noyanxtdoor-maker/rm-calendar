@@ -6,9 +6,11 @@ import { createLocalDemoContact } from '../../data/local/workspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
 import { useLocalSyncStatus, useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
+import { useLocalWorkspace } from '../workspace/useLocalWorkspace'
 
 export function ToolsScreen() {
   const snapshot = useWorkspaceSnapshot()
+  const { workspace } = useLocalWorkspace()
   const sync = useLocalSyncStatus()
   const [message, setMessage] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -76,6 +78,10 @@ export function ToolsScreen() {
         <span>Sync status</span>
         <span className="text-xs font-medium text-slate-400">{sync ? sync.queued + sync.retrying + sync.blocked + ' local changes' : 'Checking local changes'}</span>
       </Link>
+      <Link className="flex min-h-12 items-center justify-between rounded-2xl border border-[var(--rm-teal)]/25 bg-[var(--rm-teal)]/[0.06] px-4 text-sm font-semibold text-[var(--rm-teal)] transition hover:border-[var(--rm-teal)]/50" to="/tools/cloud">
+        <span>{workspace.ownerUserId === 'local-device-owner' ? 'Private cloud setup' : 'Cloud workspace'}</span>
+        <span className="text-xs font-medium text-slate-400">{workspace.ownerUserId === 'local-device-owner' ? 'Keep new work in sync' : 'Account and sync'}</span>
+      </Link>
 
       <section>
         <SectionLabel action={<span className="text-xs font-semibold text-slate-500">{openTasks.length} open</span>}>Next actions</SectionLabel>
@@ -93,7 +99,7 @@ export function ToolsScreen() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5 shadow-[var(--rm-shadow-card)]">
+      {workspace.ownerUserId === 'local-device-owner' ? <section className="rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5 shadow-[var(--rm-shadow-card)]">
         <SectionLabel>Local workspace check</SectionLabel>
         <p className="mt-2 text-sm leading-6 text-slate-400">Use a fictional person to confirm that IndexedDB survives a browser reload. This test data stays separate from real planning.</p>
         <button
@@ -104,7 +110,7 @@ export function ToolsScreen() {
         >
           Add fictional person
         </button>
-      </section>
+      </section> : null}
 
       <Link className="flex min-h-16 items-center justify-between rounded-3xl border border-red-300/20 bg-red-400/[0.04] px-5 text-left transition hover:border-red-300/40" to="/tools/data">
         <span>

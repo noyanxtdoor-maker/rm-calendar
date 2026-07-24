@@ -1,10 +1,13 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { AppIcon } from '../design-system/AppIcon'
 import { destinationTitle, navigationDestinations } from './navigation'
+import { useLocalWorkspace } from '../features/workspace/useLocalWorkspace'
 
 export function AppShell() {
   const location = useLocation()
   const title = destinationTitle(location.pathname)
+  const { workspace } = useLocalWorkspace()
+  const usingCloudWorkspace = workspace.ownerUserId !== 'local-device-owner'
 
   return (
     <div className="min-h-dvh bg-[var(--rm-ink)] text-slate-100">
@@ -15,11 +18,11 @@ export function AppShell() {
             <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">{title}</h1>
           </div>
           <div
-            aria-label="Data status: stored on this device"
+            aria-label={usingCloudWorkspace ? 'Data status: private cloud workspace' : 'Data status: stored on this device'}
             className="flex h-10 items-center gap-2 rounded-full border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/10 px-3 text-xs font-medium text-[var(--rm-teal)]"
           >
             <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--rm-teal)]" />
-            On this device
+            {usingCloudWorkspace ? 'Cloud ready' : 'On this device'}
           </div>
         </header>
 

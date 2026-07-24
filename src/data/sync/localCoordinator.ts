@@ -4,6 +4,7 @@ import { createLocalId } from '../../lib/ids'
 import { rmCalendarDb } from '../local/RmCalendarDatabase'
 import type { SyncApplyResult, SyncEntityRevision, SyncErrorCode, SyncTransport } from './contracts'
 import { buildSyncOperationEnvelope, LocalSyncPreparationError } from './operationPayload'
+import { applyRemoteChanges } from './remoteChanges'
 
 const tableNameByEntity: Record<SyncEntityType, string> = {
   contact: 'contacts',
@@ -23,6 +24,7 @@ export type SyncCycleSummary = {
   conflicted: number
   rejected: number
   blockedLocally: number
+  pulled: number
 }
 
 export type SyncCycleOptions = {
@@ -38,7 +40,8 @@ function zeroSummary(status: SyncCycleSummary['status']): SyncCycleSummary {
     retried: 0,
     conflicted: 0,
     rejected: 0,
-    blockedLocally: 0
+    blockedLocally: 0,
+    pulled: 0
   }
 }
 
@@ -321,6 +324,28 @@ export async function runLocalSyncCycle(
 
   const summary = zeroSummary('completed')
   try {
+    const pullUntilCurrent = async () => {
+      let hasMore = true
+      let pages = 0
+      while (hasMore && pages < 10) {
+        const metadata = await rmCalendarDb.syncMetadata.get(workspaceId)
+        const response = await transport.pullChanges({ workspaceId, cursor: metadata?.pullCursor, limit: 100 })
+        const applied = await applyRemoteChanges(workspaceId, response.changes, response.nextCursor)
+        summary.pulled += applied.applied
+        summary.conflicted += applied.conflicted
+        hasMore = response.hasMore
+        pages += 1
+      }
+      if (hasMore) throw new Error('Remote change pagination limit reached.')
+    }
+
+    try {
+      await pullUntilCurrent()
+    } catch {
+      await finishSyncRun(workspaceId, now, 'SYNC_UNAVAILABLE')
+      return summary
+    }
+
     const outstanding = await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspaceId).toArray()
     const candidates = selectDependencyReadyOperations(outstanding, now, limit)
     const prepared: Array<{ operation: OutboxOperationRecord; envelope: Awaited<ReturnType<typeof buildSyncOperationEnvelope>> }> = []
@@ -416,6 +441,11 @@ export async function runLocalSyncCycle(
     )
 
     await finishSyncRun(workspaceId, now)
+    try {
+      await pullUntilCurrent()
+    } catch {
+      await finishSyncRun(workspaceId, now, 'SYNC_UNAVAILABLE')
+    }
     return summary
   } catch (error) {
     await finishSyncRun(workspaceId, now, 'PROTOCOL_ERROR')

@@ -1,12 +1,12 @@
 # RM Calendar - Phase 4, Milestone 4: Local Sync Contract Preparation
 
-**Status:** Local preparation and Supabase foundation verified; authenticated remote sync not started  
+**Status:** Authenticated browser implementation and hosted database migration deployed; production redirect/manual two-device proof still required  
 **Completed:** 2026-07-24  
 **Depends on:** [Phase 4 Milestone 3](Phase-4-Milestone-3.md), [Sync Contract](Sync-Contract.md), [Data and Sync Architecture](Data-Sync-Architecture.md), and [Database Schema Plan](Database-Schema-Plan.md)
 
 ## 1. Outcome
 
-This is a deliberately bounded preparation slice for M4. It creates and verifies the local rules that an authenticated remote adapter must obey, without creating any external project, account flow, or network connection.
+This record began as the bounded local preparation slice for M4. The approved external continuation now adds a browser-safe Supabase client, provider-managed email-link session flow, an owner-only UUID cloud-workspace bootstrap, authenticated RPC transport, and owner-scoped pull application. Existing fictional local starter data is deliberately not converted or uploaded.
 
 The product now has a real local contract for:
 
@@ -21,7 +21,7 @@ durable outbox
 
 It also has a clean-local-Supabase migration foundation for private owner
 workspaces, current domain tables, RLS, and owner-scoped change pulls. No
-hosted project has been linked or contacted.
+hosted project has been linked and received the reviewed migrations. The application still needs a deployed redirect URL and manual authenticated browser proof before it can be called beta-ready.
 
 ## 2. Delivered implementation
 
@@ -107,7 +107,17 @@ supabase test db --local supabase/tests
   pgTAP owner-isolation, simple-batch, lifecycle-create, revision-transition, and compound-follow-up checks: 67 passed
 ~~~
 
-## 4. What this does not do
+## 4. Authenticated continuation delivered
+
+- The approved dedicated RM Calendar Supabase project is linked locally; all migrations through `20260724120000_pull_related_context.sql` are applied and remote schema lint passes.
+- The web app uses `@supabase/supabase-js` with provider-managed session persistence and refresh. It never implements its own token store and never accepts a service-role key in browser configuration.
+- `/tools/cloud` sends an email sign-in link, bootstraps exactly one private UUID workspace for the authenticated owner, and switches future local work to that clean workspace. The existing `rm-calendar-private-demo` workspace remains untouched and local-only.
+- `/tools/sync-status` pulls before and after a push, applies canonical remote records in one IndexedDB transaction, carries the primary Activity Contact and Activity/Task history required to render a second device, advances the cursor only after that transaction, and preserves a visible conflict instead of overwriting pending local work.
+- `20260724120000_pull_related_context.sql` enriches the owner-authorized `pull_changes` RPC with only the related Activity/Task context needed by the local UI. It grants no direct browser writes or new direct table access.
+
+## 5. Historical local-preparation boundary (superseded)
+
+The following text records the original M4 preparation gate. It is retained for traceability and is superseded by the hosted implementation above.
 
 This is **not** completed M4 authenticated sync. It does not:
 
@@ -119,7 +129,7 @@ This is **not** completed M4 authenticated sync. It does not:
 
 The local screen intentionally says “Cloud sync is not set up.”
 
-## 5. Required authority before M4 can finish
+## 6. Historical authority gate (satisfied)
 
 The founder must explicitly identify or authorize all of the following before external M4 work begins:
 
@@ -135,3 +145,11 @@ After approval, the next implementation sequence is:
 3. configure the approved email-OTP sender, redirect policy, and production domain;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;
 5. finish the remaining account-aware and deployment portions of beta readiness. The safe local privacy/recovery preparation is already documented in [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md).
+
+## 7. Remaining M4 exit proof
+
+1. Add the production Vercel URL (and a local development URL if used) to Supabase Auth’s redirect allow-list; do not overwrite hosted Auth configuration with the repository’s local `config.toml`.
+2. Use the approved temporary sender to sign in on two browser profiles with the same test account.
+3. On one profile, create a fictional Contact/Activity, run Sync now, then verify the other profile pulls the record, primary Contact, and history exactly once.
+4. Make a conflicting edit on both profiles and verify Sync Status retains a visible needs-attention record rather than silently overwriting either version.
+5. Before inviting anyone outside the founding team, configure custom SMTP/sender-domain controls and complete M5 account-aware sign-out/delete work.

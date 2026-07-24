@@ -82,6 +82,7 @@ export type RemoteChange = {
   revision: number
   changedAt: string
   record: SyncJson
+  context?: SyncJson
 }
 
 export type PullChangesResponse = {

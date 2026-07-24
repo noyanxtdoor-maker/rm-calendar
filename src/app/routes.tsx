@@ -18,12 +18,15 @@ import { TodayScreen } from '../features/today/TodayScreen'
 import { WeeklyReviewScreen } from '../features/review/WeeklyReviewScreen'
 import { SyncStatusScreen } from '../features/sync/SyncStatusScreen'
 import { LocalWorkspaceProvider } from '../features/workspace/LocalWorkspaceProvider'
+import { SupabaseAuthProvider } from '../features/auth/SupabaseAuthProvider'
+import { CloudAccountScreen } from '../features/auth/CloudAccountScreen'
 import { AppShell } from './AppShell'
 
 export function AppRoutes() {
   return (
-    <LocalWorkspaceProvider>
-      <Routes>
+    <SupabaseAuthProvider>
+      <LocalWorkspaceProvider>
+        <Routes>
         <Route element={<AppShell />}>
           <Route index element={<TodayScreen />} />
           <Route path="calendar" element={<CalendarScreen />} />
@@ -43,10 +46,12 @@ export function AppRoutes() {
           <Route path="tools/tasks/new" element={<TaskFormScreen />} />
           <Route path="tools/weekly-review" element={<WeeklyReviewScreen />} />
           <Route path="tools/sync-status" element={<SyncStatusScreen />} />
+          <Route path="tools/cloud" element={<CloudAccountScreen />} />
           <Route path="capture" element={<QuickCaptureScreen />} />
         </Route>
         <Route path="*" element={<Navigate replace to="/" />} />
-      </Routes>
-    </LocalWorkspaceProvider>
+        </Routes>
+      </LocalWorkspaceProvider>
+    </SupabaseAuthProvider>
   )
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { rmCalendarDb } from '../../data/local/RmCalendarDatabase'
-import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID, PRIVACY_NOTICE_KEY, PRIVACY_NOTICE_VERSION, restoreFictionalWorkspace, WORKSPACE_LIFECYCLE_KEY } from '../../data/local/workspace'
+import { activeWorkspaceId, bootstrapLocalWorkspace, PRIVACY_NOTICE_KEY, PRIVACY_NOTICE_VERSION, restoreFictionalWorkspace, WORKSPACE_LIFECYCLE_KEY } from '../../data/local/workspace'
 import { LocalWorkspaceContext, type LocalWorkspaceContextValue } from './LocalWorkspaceContext'
 import { PrivacyOnboarding } from './PrivacyOnboarding'
 
@@ -45,7 +45,8 @@ function BootstrapScreen({
 export function LocalWorkspaceProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<BootstrapStatus>('opening')
   const [error, setError] = useState<string>()
-  const workspace = useLiveQuery(() => rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID), [])
+  const activeId = useLiveQuery(() => activeWorkspaceId(), [])
+  const workspace = useLiveQuery(() => activeId ? rmCalendarDb.workspaces.get(activeId) : undefined, [activeId])
   const privacyNotice = useLiveQuery(() => rmCalendarDb.localSettings.get(PRIVACY_NOTICE_KEY), [])
   const lifecycle = useLiveQuery(() => rmCalendarDb.localSettings.get(WORKSPACE_LIFECYCLE_KEY), [])
 

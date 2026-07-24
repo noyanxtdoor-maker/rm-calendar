@@ -19,6 +19,7 @@
     "verify": "npm run typecheck && npm run lint && npm run test:unit && npm run build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
     "dexie": "^4.4.4",
     "dexie-react-hooks": "^4.4.0",
     "react": "19.2.8",
