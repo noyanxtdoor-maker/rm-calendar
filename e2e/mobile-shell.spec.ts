@@ -146,6 +146,26 @@ test('a user can plan a visit and a task directly from a focus group', async ({ 
   await expect(page.getByText('Avery group task', { exact: true })).toBeVisible()
 })
 
+test('a focus group puts people without a next step first and starts the next visit', async ({ page }) => {
+  await openLocalWorkspace(page, '/people')
+
+  await page.getByRole('link', { name: 'Create focus group' }).click()
+  await page.getByLabel('Group name').fill('Weekly pass')
+  await page.getByLabel('Avery Brooks').check()
+  await page.getByLabel('Jordan Lee').check()
+  await page.getByRole('button', { name: 'Save focus group' }).click()
+  await page.getByRole('link', { name: 'Weekly pass' }).click()
+
+  await expect(page.getByText('No one has a next step yet.')).toBeVisible()
+  await page.getByRole('link', { name: 'Plan next visit for Avery Brooks' }).click()
+  await page.getByLabel('Visit title').fill('Avery weekly pass')
+  await page.getByRole('button', { name: 'Save plan' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Weekly pass' })).toBeVisible()
+  await expect(page.getByText('1 of 2 people have a next step.')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Plan next visit for Jordan Lee' })).toBeVisible()
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

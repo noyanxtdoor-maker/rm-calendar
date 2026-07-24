@@ -15,19 +15,33 @@ export function FocusGroupDetailScreen() {
     .flatMap((link) => snapshot.contacts.filter((contact) => contact.id === link.contactId))
   const activeActivities = snapshot.activities.filter((activity) => activity.state === 'scheduled')
   const returnPath = '/people/groups/' + group.id
+  const peopleWithNextStep = new Set([
+    ...snapshot.activityContacts
+      .filter((link) => activeActivities.some((activity) => activity.id === link.activityId))
+      .map((link) => link.contactId),
+    ...snapshot.tasks
+      .filter((task) => task.state === 'open' && task.contactId)
+      .map((task) => task.contactId as string)
+  ])
+  const peopleNeedingNextStep = members.filter((person) => !peopleWithNextStep.has(person.id))
+  const peopleInMotion = members.filter((person) => peopleWithNextStep.has(person.id))
+  const orderedMembers = [...peopleNeedingNextStep, ...peopleInMotion]
+  const nextPerson = peopleNeedingNextStep[0]
 
   return <section aria-labelledby="focus-group-detail-title" className="animate-enter space-y-5">
     <div className="rounded-3xl border border-[var(--rm-violet)]/20 bg-[linear-gradient(135deg,rgba(170,154,248,0.16),rgba(16,29,48,0.95)_65%)] p-5 shadow-[var(--rm-shadow-card)]">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--rm-violet)]">Private planning group</p>
       <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white" id="focus-group-detail-title">{group.name}</h2>
       <p className="mt-2 text-sm leading-6 text-slate-300">{members.length} {members.length === 1 ? 'person' : 'people'} in this focus group. This is private planning context, not an official record.</p>
-      <Link className="mt-5 flex min-h-12 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)]" to={'/people/groups/' + group.id + '/edit'}>Edit focus group</Link>
+      <p className="mt-2 text-xs font-semibold text-[var(--rm-teal)]">{peopleInMotion.length ? `${peopleInMotion.length} of ${members.length} people have a next step.` : 'No one has a next step yet.'}</p>
+      {nextPerson ? <Link aria-label={'Plan next visit for ' + nextPerson.displayName} className="mt-4 flex min-h-12 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)]" to={'/calendar/new?' + new URLSearchParams({ contactId: nextPerson.id, returnTo: returnPath }).toString()}>Plan next visit</Link> : null}
+      <Link className="mt-2 flex min-h-11 items-center justify-center rounded-2xl border border-white/[0.1] px-4 text-sm font-semibold text-slate-200" to={'/people/groups/' + group.id + '/edit'}>Edit focus group</Link>
     </div>
 
     <section>
       <h3 className="text-sm font-semibold text-white">People and next steps</h3>
       <div className="mt-3 divide-y divide-white/[0.08] border-y border-white/[0.1]">
-        {members.length ? members.map((person) => {
+        {orderedMembers.length ? orderedMembers.map((person) => {
           const task = snapshot.tasks.find((candidate) => candidate.contactId === person.id && candidate.state === 'open')
           const visit = activeActivities.find((activity) => snapshot.activityContacts.some((link) => link.activityId === activity.id && link.contactId === person.id))
           const query = new URLSearchParams({ contactId: person.id, returnTo: returnPath }).toString()
