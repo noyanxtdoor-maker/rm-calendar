@@ -119,6 +119,10 @@ function readDraft(payload: Record<string, unknown>, fallback: ActivityFormDraft
   }
 }
 
+function safeReturnPath(value: string | null) {
+  return value && value.startsWith('/') && !value.startsWith('//') ? value : undefined
+}
+
 export function ActivityFormScreen() {
   const snapshot = useWorkspaceSnapshot()
   const navigate = useNavigate()
@@ -135,6 +139,7 @@ export function ActivityFormScreen() {
   const existing = snapshot?.activities.find((activity) => activity.id === activityId)
   const queryDate = searchParams.get('date')
   const queryContactId = searchParams.get('contactId') ?? ''
+  const returnPath = safeReturnPath(searchParams.get('returnTo'))
   const defaultDate = snapshot ? (queryDate ?? localIsoDate(new Date(), snapshot.workspace.timezone)) : ''
   const resolvedContactId = primaryContactId(existing, snapshot?.activityContacts ?? []) || queryContactId
   const formKey = activityId ?? 'new-' + defaultDate + '-' + queryContactId
@@ -205,7 +210,7 @@ export function ActivityFormScreen() {
         ? await updateActivity({ ...input, activityId })
         : await createActivity(input)
       await discardActivityDraft(draftId)
-      navigate('/calendar/' + saved.id)
+      navigate(returnPath ?? '/calendar/' + saved.id)
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : 'The activity could not be saved.')
       setShouldPersistDraft(true)
@@ -217,7 +222,7 @@ export function ActivityFormScreen() {
   async function discardDraft() {
     setShouldPersistDraft(false)
     await discardActivityDraft(draftId)
-    navigate('/calendar')
+    navigate(returnPath ?? '/calendar')
   }
 
   return (

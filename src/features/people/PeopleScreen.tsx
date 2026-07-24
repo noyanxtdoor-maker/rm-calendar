@@ -97,7 +97,7 @@ export function PeopleScreen() {
           {snapshot.organizations.filter((organization) => organization.kind === 'group').length ? snapshot.organizations
             .filter((organization) => organization.kind === 'group')
             .map((group) => {
-              const memberIds = snapshot.contactOrganizations.filter((link) => link.organizationId === group.id).map((link) => link.contactId)
+              const memberIds = snapshot.contactOrganizations.filter((link) => link.organizationId === group.id && !link.deletedAt).map((link) => link.contactId)
               const plannedMemberCount = memberIds.filter((contactId) => peopleWithPlans.has(contactId)).length
               return (
                 <Link className="block rounded-2xl border border-[var(--rm-violet)]/20 bg-[var(--rm-violet)]/[0.05] p-4 transition hover:border-[var(--rm-violet)]/50" key={group.id} to={'/people/groups/' + group.id}>

@@ -34,8 +34,9 @@ export function PersonDetailScreen() {
     )
   }
 
-  const householdLink = snapshot.contactOrganizations.find((link) => link.contactId === person.id)
-  const household = householdLink ? snapshot.organizations.find((organization) => organization.id === householdLink.organizationId) : undefined
+  const household = snapshot.organizations.find((organization) => organization.kind === 'household' && snapshot.contactOrganizations.some(
+    (link) => link.contactId === person.id && link.organizationId === organization.id && !link.deletedAt
+  ))
   const activityIds = new Set(snapshot.activityContacts.filter((link) => link.contactId === person.id).map((link) => link.activityId))
   const activities = snapshot.activities
     .filter((activity) => activityIds.has(activity.id))

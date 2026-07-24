@@ -122,6 +122,30 @@ test('a user can open and safely update a focus group at phone width', async ({ 
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
 })
 
+test('a user can plan a visit and a task directly from a focus group', async ({ page }) => {
+  await openLocalWorkspace(page, '/people')
+
+  await page.getByRole('link', { name: 'Create focus group' }).click()
+  await page.getByLabel('Group name').fill('This week')
+  await page.getByLabel('Avery Brooks').check()
+  await page.getByRole('button', { name: 'Save focus group' }).click()
+  await page.getByRole('link', { name: 'This week' }).click()
+
+  await page.getByRole('link', { name: 'Plan a visit for Avery Brooks' }).click()
+  await expect(page.getByLabel('Existing person (optional)')).toHaveValue(/.+/)
+  await page.getByLabel('Visit title').fill('Avery group visit')
+  await page.getByRole('button', { name: 'Save plan' }).click()
+  await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible()
+  await expect(page.getByText('Avery group visit', { exact: true })).toBeVisible()
+
+  await page.getByRole('link', { name: 'Add a task for Avery Brooks' }).click()
+  await expect(page.getByLabel('Person (optional)')).toHaveValue(/.+/)
+  await page.getByLabel('Task').fill('Avery group task')
+  await page.getByRole('button', { name: 'Save task' }).click()
+  await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible()
+  await expect(page.getByText('Avery group task', { exact: true })).toBeVisible()
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

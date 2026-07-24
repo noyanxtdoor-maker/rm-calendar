@@ -14,6 +14,7 @@ export function FocusGroupDetailScreen() {
     .filter((link) => link.organizationId === group.id && !link.deletedAt)
     .flatMap((link) => snapshot.contacts.filter((contact) => contact.id === link.contactId))
   const activeActivities = snapshot.activities.filter((activity) => activity.state === 'scheduled')
+  const returnPath = '/people/groups/' + group.id
 
   return <section aria-labelledby="focus-group-detail-title" className="animate-enter space-y-5">
     <div className="rounded-3xl border border-[var(--rm-violet)]/20 bg-[linear-gradient(135deg,rgba(170,154,248,0.16),rgba(16,29,48,0.95)_65%)] p-5 shadow-[var(--rm-shadow-card)]">
@@ -29,11 +30,18 @@ export function FocusGroupDetailScreen() {
         {members.length ? members.map((person) => {
           const task = snapshot.tasks.find((candidate) => candidate.contactId === person.id && candidate.state === 'open')
           const visit = activeActivities.find((activity) => snapshot.activityContacts.some((link) => link.activityId === activity.id && link.contactId === person.id))
-          return <Link className="flex min-h-16 items-center gap-3 py-2" key={person.id} to={'/people/' + person.id}>
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">{person.displayName.slice(0, 1)}</span>
-            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{person.displayName}</span><span className="mt-1 block truncate text-xs text-slate-400">{task?.title ?? visit?.title ?? 'No next step yet'}</span></span>
-            <span aria-hidden="true" className="text-lg text-slate-500">&rsaquo;</span>
-          </Link>
+          const query = new URLSearchParams({ contactId: person.id, returnTo: returnPath }).toString()
+          return <article className="py-3" key={person.id}>
+            <Link className="flex min-h-12 items-center gap-3" to={'/people/' + person.id}>
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">{person.displayName.slice(0, 1)}</span>
+              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-white">{person.displayName}</span><span className="mt-1 block truncate text-xs text-slate-400">{task?.title ?? visit?.title ?? 'No next step yet'}</span></span>
+              <span aria-hidden="true" className="text-lg text-slate-500">&rsaquo;</span>
+            </Link>
+            <div className="mt-2 grid grid-cols-2 gap-2 pl-14">
+              <Link aria-label={'Plan a visit for ' + person.displayName} className="flex min-h-10 items-center justify-center rounded-xl bg-[var(--rm-teal)] px-3 text-xs font-semibold text-[var(--rm-ink)]" to={'/calendar/new?' + query}>Plan visit</Link>
+              <Link aria-label={'Add a task for ' + person.displayName} className="flex min-h-10 items-center justify-center rounded-xl border border-white/[0.1] px-3 text-xs font-semibold text-slate-200" to={'/tools/tasks/new?' + query}>Add task</Link>
+            </div>
+          </article>
         }) : <p className="py-4 text-sm text-slate-400">This group has no people yet. Edit it to add someone.</p>}
       </div>
     </section>
