@@ -96,6 +96,31 @@ test('a user can create a private focus group with people at phone width', async
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
 })
 
+test('a user can open and safely update a focus group at phone width', async ({ page }) => {
+  await openLocalWorkspace(page, '/people')
+
+  await page.getByRole('link', { name: 'Create focus group' }).click()
+  await page.getByLabel('Group name').fill('This week')
+  await page.getByLabel('Avery Brooks').check()
+  await page.getByRole('button', { name: 'Save focus group' }).click()
+
+  await page.getByRole('link', { name: 'This week' }).click()
+  await expect(page.getByRole('heading', { name: 'This week' })).toBeVisible()
+  await page.getByRole('link', { name: 'Edit focus group' }).click()
+  await page.getByLabel('Group name').fill('Next week')
+  await page.getByLabel('Avery Brooks').uncheck()
+  await page.getByLabel('Jordan Lee').check()
+  await page.getByRole('button', { name: 'Save changes' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Next week' })).toBeVisible()
+  await expect(page.getByText('Jordan Lee', { exact: true })).toBeVisible()
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

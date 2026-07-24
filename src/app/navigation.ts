@@ -42,6 +42,12 @@ export function destinationTitle(pathname: string) {
   if (pathname.startsWith('/people/groups/new')) {
     return 'Focus group'
   }
+  if (pathname.startsWith('/people/groups/') && pathname.endsWith('/edit')) {
+    return 'Edit focus group'
+  }
+  if (pathname.startsWith('/people/groups/')) {
+    return 'Focus group'
+  }
   if (pathname.startsWith('/people/new')) {
     return 'Add person'
   }

@@ -100,13 +100,13 @@ export function PeopleScreen() {
               const memberIds = snapshot.contactOrganizations.filter((link) => link.organizationId === group.id).map((link) => link.contactId)
               const plannedMemberCount = memberIds.filter((contactId) => peopleWithPlans.has(contactId)).length
               return (
-                <article className="rounded-2xl border border-[var(--rm-violet)]/20 bg-[var(--rm-violet)]/[0.05] p-4" key={group.id}>
+                <Link className="block rounded-2xl border border-[var(--rm-violet)]/20 bg-[var(--rm-violet)]/[0.05] p-4 transition hover:border-[var(--rm-violet)]/50" key={group.id} to={'/people/groups/' + group.id}>
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="truncate text-sm font-semibold text-white">{group.name}</h3>
                     <span className="rounded-full bg-[var(--rm-violet)]/15 px-2 py-1 text-[0.62rem] font-semibold text-[var(--rm-violet)]">{memberIds.length} {memberIds.length === 1 ? 'person' : 'people'}</span>
                   </div>
                   <p className="mt-2 text-xs text-slate-400">{plannedMemberCount ? `${plannedMemberCount} with a planned next step` : 'No one in this group has a planned next step yet.'}</p>
-                </article>
+                </Link>
               )
             }) : <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Create a private focus group when it helps you plan people together.</p>}
         </div>

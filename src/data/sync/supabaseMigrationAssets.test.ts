@@ -9,6 +9,7 @@ import applySyncLifecycleTransitionsMigration from '../../../supabase/migrations
 import applySyncFollowUpMigration from '../../../supabase/migrations/20260724110000_apply_sync_follow_up.sql?raw'
 import pullRelatedContextMigration from '../../../supabase/migrations/20260724120000_pull_related_context.sql?raw'
 import focusGroupsMigration from '../../../supabase/migrations/20260724130000_focus_groups.sql?raw'
+import focusGroupUpdatesMigration from '../../../supabase/migrations/20260724140000_focus_group_updates.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -35,6 +36,7 @@ describe('Supabase identity migration guardrails', () => {
       pullChangesMigration,
       pullRelatedContextMigration,
       focusGroupsMigration,
+      focusGroupUpdatesMigration,
       applySyncSimpleRecordsMigration,
       applySyncLifecycleTransitionsMigration,
       applySyncFollowUpMigration
@@ -108,7 +110,7 @@ describe('Supabase identity migration guardrails', () => {
   })
 
   it('keeps focus-group membership atomic, owner-scoped, and unavailable for direct browser writes', () => {
-    const sql = focusGroupsMigration.toLocaleLowerCase()
+    const sql = [focusGroupsMigration, focusGroupUpdatesMigration].join('\n').toLocaleLowerCase()
 
     expect(sql).toContain('create or replace function public.sync_apply_focus_group_operation')
     expect(sql).toContain("p_operation ->> 'kind' <> 'create_focus_group'")
@@ -117,5 +119,17 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).toContain("'create_focus_group'")
     expect(sql).toContain('revoke all on function public.sync_apply_focus_group_operation')
     expect(sql).not.toContain('grant insert on table public.contact_organizations to authenticated')
+  })
+
+  it('keeps focus-group updates revision-checked and sends removed members as tombstones', () => {
+    const sql = focusGroupUpdatesMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.sync_apply_update_focus_group_operation')
+    expect(sql).toContain("p_operation ->> 'kind' <> 'update_focus_group'")
+    expect(sql).toContain('v_group.revision <> v_base_revision')
+    expect(sql).toContain('deleted_at = v_link_deleted_at')
+    expect(sql).toContain("'update_focus_group'")
+    expect(sql).toContain('revoke all on function public.sync_apply_update_focus_group_operation')
+    expect(sql).not.toContain('grant update on table public.contact_organizations to authenticated')
   })
 })

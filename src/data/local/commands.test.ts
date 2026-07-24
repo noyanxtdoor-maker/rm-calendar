@@ -14,7 +14,8 @@ import {
   quickCaptureActivity,
   reopenActivity,
   saveActivityDraft,
-  updateActivity
+  updateActivity,
+  updateFocusGroup
 } from './commands'
 import { deleteRmCalendarDatabase, rmCalendarDb } from './RmCalendarDatabase'
 import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID } from './workspace'
@@ -73,6 +74,22 @@ describe('Milestone 2 local planning commands', () => {
       expect.any(String),
       expect.any(String)
     ]))
+  })
+
+  it('updates a focus group locally without adding a stale second operation before its first sync', async () => {
+    const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+    if (!workspace) throw new Error('Expected the fictional local workspace.')
+    const first = await createContact({ displayName: 'Focus update one' })
+    const second = await createContact({ displayName: 'Focus update two' })
+    const group = await createFocusGroup({ name: 'First focus', contactIds: [first.id] })
+
+    await updateFocusGroup({ groupId: group.id, name: 'Updated focus', contactIds: [second.id] })
+
+    expect((await rmCalendarDb.organizations.get(group.id))?.name).toBe('Updated focus')
+    const links = await rmCalendarDb.contactOrganizations.where('[workspaceId+organizationId]').equals([workspace.id, group.id]).toArray()
+    expect(links.find((link) => link.contactId === first.id)?.deletedAt).toBeTruthy()
+    expect(links.find((link) => link.contactId === second.id)?.deletedAt).toBeUndefined()
+    expect((await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspace.id).toArray()).filter((operation) => operation.kind === 'update_focus_group')).toHaveLength(0)
   })
 
   it('keeps one activity identifier, writes planning history, and warns without blocking on an overlap', async () => {

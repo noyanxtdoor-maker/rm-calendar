@@ -39,6 +39,12 @@ export const createFocusGroupInputSchema = z.object({
 
 export type CreateFocusGroupInput = z.infer<typeof createFocusGroupInputSchema>
 
+export const updateFocusGroupInputSchema = createFocusGroupInputSchema.extend({
+  groupId: z.string().trim().min(1)
+})
+
+export type UpdateFocusGroupInput = z.infer<typeof updateFocusGroupInputSchema>
+
 export const createPlaceInputSchema = z.object({
   name: z.string().trim().min(1, 'A place needs a name.').max(100, 'Keep the name under 100 characters.'),
   addressText: optionalShortText,

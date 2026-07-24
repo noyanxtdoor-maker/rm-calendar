@@ -7,6 +7,8 @@ import { FollowUpFormScreen } from '../features/activities/FollowUpFormScreen'
 import { QuickCaptureScreen } from '../features/activities/QuickCaptureScreen'
 import { HouseholdFormScreen } from '../features/people/HouseholdFormScreen'
 import { FocusGroupFormScreen } from '../features/people/FocusGroupFormScreen'
+import { FocusGroupDetailScreen } from '../features/people/FocusGroupDetailScreen'
+import { FocusGroupEditScreen } from '../features/people/FocusGroupEditScreen'
 import { PersonDetailScreen } from '../features/people/PersonDetailScreen'
 import { PersonFormScreen } from '../features/people/PersonFormScreen'
 import { PeopleScreen } from '../features/people/PeopleScreen'
@@ -40,6 +42,8 @@ export function AppRoutes() {
           <Route path="people/new" element={<PersonFormScreen />} />
           <Route path="people/household/new" element={<HouseholdFormScreen />} />
           <Route path="people/groups/new" element={<FocusGroupFormScreen />} />
+          <Route path="people/groups/:groupId" element={<FocusGroupDetailScreen />} />
+          <Route path="people/groups/:groupId/edit" element={<FocusGroupEditScreen />} />
           <Route path="people/:contactId" element={<PersonDetailScreen />} />
           <Route path="map" element={<PlacesScreen />} />
           <Route path="map/new" element={<PlaceFormScreen />} />

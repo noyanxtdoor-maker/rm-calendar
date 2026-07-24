@@ -17,7 +17,8 @@ import {
   type QuickCaptureActivityInput,
   type UpdateActivityInput,
   quickCaptureActivityInputSchema,
-  updateActivityInputSchema
+  updateActivityInputSchema,
+  updateFocusGroupInputSchema
 } from '../../domain/schemas'
 import type {
   ActivityContactRecord,
@@ -354,6 +355,70 @@ export async function createFocusGroup(input: { name: string; contactIds: string
   })
 
   return group
+}
+
+/** Renames a private group and replaces its member set in one local transaction. */
+export async function updateFocusGroup(input: { groupId: string; name: string; contactIds: string[] }) {
+  const data = updateFocusGroupInputSchema.parse(input)
+  const workspace = await activeWorkspace()
+  const timestamp = nowIso()
+
+  await rmCalendarDb.transaction('rw', ['contacts', 'organizations', 'contactOrganizations', 'outboxOperations'], async () => {
+    const group = await rmCalendarDb.organizations.get(data.groupId)
+    if (!group || group.workspaceId !== workspace.id || group.deletedAt || group.kind !== 'group') {
+      throw new Error('The selected focus group is not available in this workspace.')
+    }
+    const selectedContacts = await Promise.all(data.contactIds.map((contactId) => rmCalendarDb.contacts.get(contactId)))
+    if (selectedContacts.some((contact) => !contact || contact.workspaceId !== workspace.id || contact.deletedAt)) {
+      throw new Error('One or more selected people are not available in this workspace.')
+    }
+
+    const baseRevision = group.pendingBaseRevision ?? group.revision
+    const pendingGroupOperation = await latestPendingOperationForEntity(workspace.id, group.id)
+    await rmCalendarDb.organizations.put({
+      ...group,
+      name: data.name,
+      nameNormalized: normalizeDisplayName(data.name),
+      updatedAt: timestamp,
+      clientUpdatedAt: timestamp,
+      syncState: 'pending',
+      pendingBaseRevision: baseRevision
+    })
+
+    const existingLinks = await rmCalendarDb.contactOrganizations.where('[workspaceId+organizationId]').equals([workspace.id, group.id]).toArray()
+    const selectedIds = new Set(data.contactIds)
+    for (const link of existingLinks) {
+      const shouldBeActive = selectedIds.has(link.contactId)
+      if (Boolean(link.deletedAt) !== !shouldBeActive) {
+        await rmCalendarDb.contactOrganizations.put({
+          ...link,
+          deletedAt: shouldBeActive ? undefined : timestamp,
+          updatedAt: timestamp,
+          clientUpdatedAt: timestamp,
+          syncState: 'pending',
+          pendingBaseRevision: link.pendingBaseRevision ?? link.revision
+        })
+      }
+    }
+    const existingContactIds = new Set(existingLinks.map((link) => link.contactId))
+    const newLinks: ContactOrganizationRecord[] = data.contactIds
+      .filter((contactId) => !existingContactIds.has(contactId))
+      .map((contactId) => ({
+        ...localEnvelope(createLocalId(), workspace.id, timestamp),
+        contactId,
+        organizationId: group.id,
+        relationshipLabel: 'focus group member'
+      }))
+    if (newLinks.length) await rmCalendarDb.contactOrganizations.bulkAdd(newLinks)
+
+    // An existing create/update operation reads the current local group when it
+    // syncs. Reusing it prevents a just-created group from receiving a stale
+    // second update with a pre-create revision.
+    if (!pendingGroupOperation) {
+      const contactOperations = await Promise.all(data.contactIds.map((contactId) => latestPendingOperationForEntity(workspace.id, contactId)))
+      await enqueueOperation(workspace.id, 'update_focus_group', group.id, dependencyIds(...contactOperations), baseRevision)
+    }
+  })
 }
 
 export async function createPlace(input: { name: string; addressText?: string; entranceNotes?: string }) {
