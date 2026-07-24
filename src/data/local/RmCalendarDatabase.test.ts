@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { acknowledgeLocalPrivacyNotice, clearAllLocalData, createLocalDemoContact, bootstrapLocalWorkspace, DEMO_WORKSPACE_ID, PRIVACY_NOTICE_KEY, WORKSPACE_LIFECYCLE_KEY } from './workspace'
+import { acknowledgeLocalPrivacyNotice, activeWorkspaceId, clearAllLocalData, createLocalDemoContact, bootstrapLocalWorkspace, createRemoteWorkspace, DEMO_WORKSPACE_ID, PRIVACY_NOTICE_KEY, removeLocalCloudWorkspace, WORKSPACE_LIFECYCLE_KEY } from './workspace'
 import { deleteRmCalendarDatabase, rmCalendarDb, RmCalendarDatabase } from './RmCalendarDatabase'
 
 describe('Milestone 1 local workspace', () => {
@@ -66,5 +66,21 @@ describe('Milestone 1 local workspace', () => {
     expect(await rmCalendarDb.localSettings.get(PRIVACY_NOTICE_KEY)).toBeUndefined()
     expect((await rmCalendarDb.localSettings.get(WORKSPACE_LIFECYCLE_KEY))?.valueJson.state).toBe('cleared')
     await expect(bootstrapLocalWorkspace()).resolves.toBeUndefined()
+  })
+
+  it('removes a signed-out cloud workspace without deleting the separate fictional starter workspace', async () => {
+    await bootstrapLocalWorkspace()
+    await createRemoteWorkspace({
+      id: '6c7d1196-4246-4d7b-9a75-7f88618f3997',
+      name: 'Cloud planning space',
+      timezone: 'UTC',
+      ownerUserId: '6c7d1196-4246-4d7b-9a75-7f88618f3998'
+    })
+
+    await removeLocalCloudWorkspace('6c7d1196-4246-4d7b-9a75-7f88618f3997')
+
+    expect(await rmCalendarDb.workspaces.get('6c7d1196-4246-4d7b-9a75-7f88618f3997')).toBeUndefined()
+    expect((await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID))?.name).toBe('Personal planning space')
+    await expect(activeWorkspaceId()).resolves.toBe(DEMO_WORKSPACE_ID)
   })
 })

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { createRemoteWorkspace } from '../../data/local/workspace'
+import { createRemoteWorkspace, removeLocalCloudWorkspace } from '../../data/local/workspace'
 import { configuredSupabaseClient } from '../../data/sync/supabaseClient'
-import { useLocalWorkspace } from '../workspace/useLocalWorkspace'
+import { useLocalSyncStatus, useLocalWorkspace } from '../workspace/useLocalWorkspace'
 import { useSupabaseAuth } from './useSupabaseAuth'
 
 function browserTimeZone() {
@@ -16,10 +16,12 @@ function isUuid(value: unknown): value is string {
 export function CloudAccountScreen() {
   const auth = useSupabaseAuth()
   const { workspace } = useLocalWorkspace()
+  const sync = useLocalSyncStatus()
   const { client } = configuredSupabaseClient()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<string>()
   const [busy, setBusy] = useState(false)
+  const [signOutAcknowledged, setSignOutAcknowledged] = useState(false)
 
   async function sendSignInLink() {
     if (!client) return
@@ -76,7 +78,28 @@ export function CloudAccountScreen() {
     }
   }
 
+  async function signOutOnThisDevice() {
+    if (!client || (usingCloudWorkspace && !signOutAcknowledged)) return
+    setBusy(true)
+    setMessage(undefined)
+    try {
+      const { error } = await client.auth.signOut({ scope: 'local' })
+      if (error) throw error
+      if (usingCloudWorkspace) {
+        await removeLocalCloudWorkspace(workspace.id)
+        setMessage('You are signed out. The cloud workspace was removed from this device; the fictional starter workspace remains separate.')
+      } else {
+        setMessage('You are signed out on this device. Your separate local starter workspace was not changed.')
+      }
+    } catch {
+      setMessage('Sign-out could not finish. No local planning data was removed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const usingCloudWorkspace = workspace.ownerUserId !== 'local-device-owner'
+  const unsyncedChanges = (sync?.queued ?? 0) + (sync?.retrying ?? 0) + (sync?.blocked ?? 0)
 
   return (
     <section aria-labelledby="cloud-account-title" className="animate-enter space-y-5">
@@ -116,6 +139,23 @@ export function CloudAccountScreen() {
           <button className="mt-4 min-h-12 w-full rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)] disabled:cursor-wait disabled:opacity-60" disabled={busy} onClick={() => void preparePrivateWorkspace()} type="button">Create private cloud workspace</button>
         </section>
       )}
+
+      {auth.status === 'signed_in' ? <section className="rounded-3xl border border-white/[0.08] bg-[var(--rm-surface)] p-5">
+        <h3 className="text-sm font-semibold text-white">Sign out on this device</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-400">{usingCloudWorkspace ? 'Signing out removes this browser’s cloud-workspace copy only after the local session is cleared. It does not delete the remote workspace or your account.' : 'Your separate local starter workspace stays on this device.'}</p>
+        {usingCloudWorkspace && unsyncedChanges ? <div className="mt-4 rounded-2xl border border-[var(--rm-gold)]/20 bg-[var(--rm-gold)]/[0.07] p-4">
+          <p className="text-sm font-semibold text-[var(--rm-gold)]">{unsyncedChanges} local change{unsyncedChanges === 1 ? '' : 's'} still need attention.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-300">Sync first if you want to keep them in the cloud. Otherwise, remove this device’s cloud copy explicitly.</p>
+          <Link className="mt-3 inline-flex min-h-10 items-center text-xs font-semibold text-[var(--rm-teal)]" to="/tools/sync-status">Review sync status</Link>
+        </div> : null}
+        {usingCloudWorkspace ? <label className="mt-4 flex items-start gap-3 rounded-2xl border border-white/[0.08] p-3 text-sm leading-5 text-slate-300">
+          <input checked={signOutAcknowledged} className="mt-0.5 h-4 w-4 accent-[var(--rm-teal)]" onChange={(event) => setSignOutAcknowledged(event.target.checked)} type="checkbox" />
+          <span>I understand that this removes the cloud workspace data stored in this browser after I sign out.</span>
+        </label> : null}
+        <button className="mt-4 min-h-12 w-full rounded-2xl border border-white/[0.14] px-4 text-sm font-semibold text-slate-100 transition hover:border-[var(--rm-teal)]/45 hover:text-[var(--rm-teal)] disabled:cursor-not-allowed disabled:opacity-50" disabled={busy || (usingCloudWorkspace && !signOutAcknowledged)} onClick={() => void signOutOnThisDevice()} type="button">
+          {busy ? 'Signing out…' : usingCloudWorkspace ? 'Sign out and remove this device copy' : 'Sign out on this device'}
+        </button>
+      </section> : null}
 
       <p className="text-xs leading-5 text-slate-500">RM Calendar is independent and is not affiliated with The Church of Jesus Christ of Latter-day Saints. Do not enter official Church records or confidential information.</p>
     </section>

@@ -306,6 +306,8 @@ const clearableTableNames = [
   'conflicts'
 ] as const
 
+const workspaceScopedTableNames = clearableTableNames.filter((tableName) => tableName !== 'workspaces' && tableName !== 'syncMetadata')
+
 export async function clearAllLocalData() {
   const timestamp = nowIso()
   await rmCalendarDb.transaction('rw', [...clearableTableNames, 'localSettings'], async () => {
@@ -316,6 +318,23 @@ export async function clearAllLocalData() {
       valueJson: { state: 'cleared' },
       updatedAt: timestamp
     })
+  })
+}
+
+/**
+ * Removes only one cloud workspace from this browser after a completed sign-out.
+ * The unrelated fictional starter workspace is retained and is never uploaded.
+ */
+export async function removeLocalCloudWorkspace(workspaceId: string) {
+  if (workspaceId === DEMO_WORKSPACE_ID) {
+    throw new Error('The local starter workspace is not a cloud workspace.')
+  }
+
+  await rmCalendarDb.transaction('rw', [...clearableTableNames, 'localSettings'], async () => {
+    await Promise.all(workspaceScopedTableNames.map((tableName) => rmCalendarDb.table(tableName).where('workspaceId').equals(workspaceId).delete()))
+    await rmCalendarDb.syncMetadata.delete(workspaceId)
+    await rmCalendarDb.workspaces.delete(workspaceId)
+    await setActiveWorkspaceId(DEMO_WORKSPACE_ID)
   })
 }
 
