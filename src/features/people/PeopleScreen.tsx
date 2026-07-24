@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import type { ContactRecord } from '../../domain/models'
 import { useWorkspaceSnapshot } from '../workspace/useLocalWorkspace'
 import { LoadingPanel } from '../shared/LoadingPanel'
 import { SectionLabel } from '../shared/SectionLabel'
@@ -27,6 +28,28 @@ export function PeopleScreen() {
 
   const normalizedQuery = query.trim().toLocaleLowerCase()
   const visiblePeople = snapshot.contacts.filter((person) => person.displayName.toLocaleLowerCase().includes(normalizedQuery))
+  const tasks = snapshot.tasks
+  const peopleInMotion = visiblePeople.filter((person) => peopleWithPlans.has(person.id))
+  const peopleNeedingNextStep = visiblePeople.filter((person) => !peopleWithPlans.has(person.id))
+
+  function personCard(person: ContactRecord) {
+    const planned = peopleWithPlans.has(person.id)
+    const task = tasks.find((candidate) => candidate.contactId === person.id && candidate.state === 'open')
+    return (
+      <Link className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30" key={person.id} to={'/people/' + person.id}>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">
+          {person.displayName.slice(0, 1)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-white">{person.displayName}</h3>
+          <p className="mt-0.5 truncate text-xs text-slate-400">{task?.title ?? (planned ? 'A visit is planned' : 'No next step yet')}</p>
+        </div>
+        <span className={planned ? 'rounded-full bg-[var(--rm-teal)]/12 px-2 py-1 text-[0.62rem] font-semibold text-[var(--rm-teal)]' : 'rounded-full bg-white/[0.06] px-2 py-1 text-[0.62rem] font-semibold text-slate-500'}>
+          {planned ? 'In motion' : 'Needs plan'}
+        </span>
+      </Link>
+    )
+  }
 
   return (
     <section aria-labelledby="people-list-title" className="animate-enter">
@@ -52,26 +75,16 @@ export function PeopleScreen() {
       </div>
 
       <section className="mt-5">
-        <SectionLabel action={<span className="text-xs font-semibold text-[var(--rm-teal)]">{peopleWithPlans.size} with a plan</span>}>People with a plan</SectionLabel>
-        <div className="mt-3 space-y-2">
-          {visiblePeople.map((person) => {
-            const planned = peopleWithPlans.has(person.id)
-            const task = snapshot.tasks.find((candidate) => candidate.contactId === person.id && candidate.state === 'open')
-            return (
-              <Link className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[var(--rm-surface)] p-3 transition hover:border-[var(--rm-teal)]/30" key={person.id} to={'/people/' + person.id}>
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--rm-violet)]/15 text-sm font-semibold text-[var(--rm-violet)]">
-                  {person.displayName.slice(0, 1)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-semibold text-white">{person.displayName}</h3>
-                  <p className="mt-0.5 truncate text-xs text-slate-400">{task?.title ?? (planned ? 'A visit is planned' : 'No next step yet')}</p>
-                </div>
-                <span className={planned ? 'rounded-full bg-[var(--rm-teal)]/12 px-2 py-1 text-[0.62rem] font-semibold text-[var(--rm-teal)]' : 'rounded-full bg-white/[0.06] px-2 py-1 text-[0.62rem] font-semibold text-slate-500'}>
-                  {planned ? 'Planned' : 'Open'}
-                </span>
-              </Link>
-            )
-          })}
+        <SectionLabel action={<span className="text-xs font-semibold text-[var(--rm-teal)]">{peopleInMotion.length} in motion</span>}>Planning pulse</SectionLabel>
+        <div className="mt-3 space-y-5">
+          {peopleInMotion.length ? <div>
+            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-400">In motion</p>
+            <div className="space-y-2">{peopleInMotion.map(personCard)}</div>
+          </div> : null}
+          {peopleNeedingNextStep.length ? <div>
+            <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-400">Needs a next step</p>
+            <div className="space-y-2">{peopleNeedingNextStep.map(personCard)}</div>
+          </div> : null}
           {!visiblePeople.length ? <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">No people match this search.</p> : null}
         </div>
       </section>
