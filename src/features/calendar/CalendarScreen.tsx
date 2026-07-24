@@ -36,6 +36,29 @@ function weekRangeLabel(dates: string[], timeZone: string) {
     + ' – ' + displayDate(dates[dates.length - 1], timeZone, { weekday: undefined, month: 'short', day: 'numeric' })
 }
 
+function timeOfDayMinutes(iso: string, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(new Date(iso))
+  const hour = Number(parts.find((part) => part.type === 'hour')?.value ?? 0)
+  const minute = Number(parts.find((part) => part.type === 'minute')?.value ?? 0)
+  return hour * 60 + minute
+}
+
+function hourLabel(hour: number) {
+  const displayHour = hour % 12 || 12
+  return `${displayHour} ${hour < 12 ? 'AM' : 'PM'}`
+}
+
+function activityAccent(activity: ActivityRecord) {
+  if (activity.activityType === 'visit') return 'border-[var(--rm-teal)] bg-[var(--rm-teal)]/[0.12]'
+  if (activity.activityType === 'planning') return 'border-[var(--rm-violet)] bg-[var(--rm-violet)]/[0.12]'
+  return 'border-[var(--rm-gold)] bg-[var(--rm-gold)]/[0.1]'
+}
+
 export function CalendarScreen() {
   const snapshot = useWorkspaceSnapshot()
   const today = snapshot ? localIsoDate(new Date(), snapshot.workspace.timezone) : ''
@@ -64,6 +87,8 @@ export function CalendarScreen() {
     return <LoadingPanel />
   }
 
+  const timeZone = snapshot.workspace.timezone
+  const activityLinks = snapshot.activityContacts
   const scheduledActivities = snapshot.activities
     .filter((activity) => activity.state === 'scheduled')
     .sort((left, right) => (left.scheduledStartAt ?? '').localeCompare(right.scheduledStartAt ?? ''))
@@ -80,6 +105,21 @@ export function CalendarScreen() {
   }
   const contactsById = new Map(snapshot.contacts.map((contact) => [contact.id, contact]))
   const placesById = new Map(snapshot.places.map((place) => [place.id, place]))
+  const allDayActivities = activities.filter((activity) => !activity.scheduledStartAt)
+  const timedActivities = activities.filter((activity): activity is ActivityRecord & { scheduledStartAt: string } => Boolean(activity.scheduledStartAt))
+  const timelineStartHour = 6
+  const timelineEndHour = 22
+  const timelineHourHeight = 72
+  const timelineHeight = (timelineEndHour - timelineStartHour) * timelineHourHeight
+  const showLegacyCards = false
+
+  function timelineStyle(activity: ActivityRecord & { scheduledStartAt: string }) {
+    const start = timeOfDayMinutes(activity.scheduledStartAt, timeZone)
+    const end = activity.scheduledEndAt ? timeOfDayMinutes(activity.scheduledEndAt, timeZone) : start + 45
+    const top = Math.max(0, start - timelineStartHour * 60) / 60 * timelineHourHeight
+    const height = Math.max(52, (Math.max(end, start + 30) - start) / 60 * timelineHourHeight)
+    return { top, height }
+  }
 
   function selectView(next: CalendarView, focus = false) {
     setView(next)
@@ -125,8 +165,8 @@ export function CalendarScreen() {
             {view === 'day' ? displayDay(resolvedSelectedDate, snapshot.workspace.timezone) : weekRangeLabel(weekDates, snapshot.workspace.timezone)}
           </h2>
         </div>
-        <Link className="rounded-full border border-[var(--rm-teal)]/20 bg-[var(--rm-teal)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--rm-teal)]" to={'/calendar/new?date=' + resolvedSelectedDate}>
-          Plan visit
+        <Link className="border-b-2 border-[var(--rm-teal)] px-1 py-2 text-xs font-semibold text-[var(--rm-teal)]" to={'/calendar/new?date=' + resolvedSelectedDate}>
+          Plan day
         </Link>
       </div>
 
@@ -183,7 +223,7 @@ export function CalendarScreen() {
 
       {view === 'day' ? (
         <div aria-labelledby="calendar-view-day" id={activePanelId} role="tabpanel" tabIndex={0}>
-          <div aria-label="Date ribbon" className="mt-5 grid grid-cols-7 gap-1.5">
+          <div aria-label="Date ribbon" className="mt-5 grid grid-cols-7 gap-px border-y border-white/[0.12] bg-white/[0.1]">
             {dateRibbon.map((date) => {
               const parsed = new Date(date + 'T12:00:00')
               const isSelected = date === resolvedSelectedDate
@@ -193,10 +233,10 @@ export function CalendarScreen() {
                   aria-label={'Show ' + displayDay(date, snapshot.workspace.timezone)}
                   aria-pressed={isSelected}
                   className={[
-                    'min-h-16 rounded-2xl border px-1 text-center transition',
+                    'min-h-[3.75rem] border-0 px-1 text-center transition',
                     isSelected
-                      ? 'border-[var(--rm-teal)] bg-[var(--rm-teal)] text-[var(--rm-ink)]'
-                      : 'border-white/[0.08] bg-[var(--rm-surface)] text-slate-300 hover:border-white/[0.22]'
+                      ? 'bg-[var(--rm-teal)] text-[var(--rm-ink)]'
+                      : 'bg-[var(--rm-surface)] text-slate-300 hover:bg-white/[0.08]'
                   ].join(' ')}
                   key={date}
                   onClick={() => setSelectedDate(date)}
@@ -210,15 +250,56 @@ export function CalendarScreen() {
             })}
           </div>
 
-          <div className="mt-5 flex items-center justify-between rounded-2xl border border-white/[0.08] bg-[var(--rm-surface-raised)] px-4 py-3">
-            <span className="text-xs text-slate-300">Activities and planned visits</span>
-            <span className="text-xs font-semibold text-[var(--rm-teal)]">{activities.length} on this day</span>
+          <div className="mt-5 flex items-center justify-between border-b border-white/[0.12] pb-3">
+            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Daily rhythm</span>
+            <span className="text-xs font-semibold text-[var(--rm-teal)]">{activities.length} planned</span>
           </div>
 
-          <div className="mt-4 space-y-3">
+          <div className="mt-4">
+            {allDayActivities.length ? <div className="mb-3 divide-y divide-white/[0.08] border-y border-white/[0.12]">
+              {allDayActivities.map((activity) => {
+                const link = activityLinks.find((candidate) => candidate.activityId === activity.id && candidate.isPrimary)
+                const contact = link ? contactsById.get(link.contactId) : undefined
+                return <Link className="grid min-h-14 grid-cols-[4rem_1fr] items-center gap-3 py-2" key={activity.id} to={'/calendar/' + activity.id}>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--rm-gold)]">All day</span>
+                  <span className="border-l-2 border-[var(--rm-violet)] pl-3 text-sm font-semibold text-white">{activity.title}{contact ? <span className="ml-2 text-xs font-normal text-slate-400">{contact.displayName}</span> : null}</span>
+                </Link>
+              })}
+            </div> : null}
+
+            {timedActivities.length ? <div aria-label="Timeline" className="relative overflow-hidden border-b border-white/[0.12]" style={{ height: timelineHeight }}>
+              {Array.from({ length: timelineEndHour - timelineStartHour }, (_, index) => timelineStartHour + index).map((hour) => (
+                <div className="absolute inset-x-0 grid grid-cols-[3.5rem_1fr]" key={hour} style={{ top: (hour - timelineStartHour) * timelineHourHeight }}>
+                  <span className="-translate-y-2 text-[0.62rem] font-medium uppercase text-slate-500">{hourLabel(hour)}</span>
+                  <span className="border-t border-white/[0.08]" />
+                </div>
+              ))}
+              {timedActivities.map((activity) => {
+                const { top, height } = timelineStyle(activity)
+                const link = activityLinks.find((candidate) => candidate.activityId === activity.id && candidate.isPrimary)
+                const contact = link ? contactsById.get(link.contactId) : undefined
+                const place = activity.primaryPlaceId ? placesById.get(activity.primaryPlaceId) : undefined
+                return <Link
+                  className={`absolute left-14 right-1 overflow-hidden border-l-4 p-3 shadow-[var(--rm-shadow-card)] transition hover:brightness-110 ${activityAccent(activity)}`}
+                  key={activity.id}
+                  style={{ top, minHeight: height }}
+                  to={'/calendar/' + activity.id}
+                >
+                  <span className="block text-xs font-semibold text-white">{activity.title}</span>
+                  <span className="mt-1 block text-[0.68rem] text-slate-300">{displayTime(activity.scheduledStartAt, snapshot.workspace.timezone)}{activity.scheduledEndAt ? ` – ${displayTime(activity.scheduledEndAt, snapshot.workspace.timezone)}` : ''}</span>
+                  {(contact || place) ? <span className="mt-1 block truncate text-[0.68rem] text-slate-300">{[contact?.displayName, place?.name].filter(Boolean).join(' · ')}</span> : null}
+                </Link>
+              })}
+            </div> : <div className="border-y border-dashed border-white/[0.14] py-8 text-center">
+              <p className="text-sm font-semibold text-white">An open day.</p>
+              <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-400">Make the next visit visible in the daily rhythm.</p>
+            </div>}
+          </div>
+
+          {showLegacyCards && <div aria-hidden="true" className="hidden">
             {activities.length ? (
               activities.map((activity) => {
-                const link = snapshot.activityContacts.find((candidate) => candidate.activityId === activity.id && candidate.isPrimary)
+                const link = activityLinks.find((candidate) => candidate.activityId === activity.id && candidate.isPrimary)
                 const contact = link ? contactsById.get(link.contactId) : undefined
                 const place = activity.primaryPlaceId ? placesById.get(activity.primaryPlaceId) : undefined
                 return (
@@ -226,7 +307,7 @@ export function CalendarScreen() {
                     <span aria-hidden="true" className={activity.activityType === 'visit' ? 'absolute inset-y-0 left-0 w-1 bg-[var(--rm-teal)]' : 'absolute inset-y-0 left-0 w-1 bg-[var(--rm-violet)]'} />
                     <div className="ml-2 flex gap-4">
                       <time className="w-16 shrink-0 text-xs font-semibold text-[var(--rm-gold)]">
-                        {activity.scheduledStartAt ? displayTime(activity.scheduledStartAt, snapshot.workspace.timezone) : 'All day'}
+                        {activity.scheduledStartAt ? displayTime(activity.scheduledStartAt, timeZone) : 'All day'}
                       </time>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-base font-semibold text-white">{activity.title}</h3>
@@ -244,7 +325,7 @@ export function CalendarScreen() {
                 <Link className="mt-4 inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-4 text-sm font-semibold text-[var(--rm-ink)]" to={'/calendar/new?date=' + resolvedSelectedDate}>Plan a visit</Link>
               </div>
             )}
-          </div>
+          </div>}
         </div>
       ) : (
         <div aria-labelledby="calendar-view-week" id={activePanelId} role="tabpanel" tabIndex={0}>
@@ -291,6 +372,13 @@ export function CalendarScreen() {
           </div>
         </div>
       )}
+      <Link
+        aria-label="Plan a new visit"
+        className="fixed bottom-24 right-5 z-20 grid h-14 w-14 place-items-center rounded-2xl bg-[var(--rm-teal)] text-3xl font-light text-[var(--rm-ink)] shadow-[0_14px_30px_rgba(90,215,204,0.24)] transition hover:bg-[#83e6de] focus:outline-none focus:ring-2 focus:ring-white"
+        to={'/calendar/new?date=' + resolvedSelectedDate}
+      >
+        <span aria-hidden="true">+</span>
+      </Link>
     </section>
   )
 }

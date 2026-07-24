@@ -53,6 +53,25 @@ test('the Milestone 1 local workspace stays usable at phone width and reopens of
   await page.context().setOffline(false)
 })
 
+test('planning tools provides a compact secondary workflow without replacing primary navigation', async ({ page }) => {
+  await openLocalWorkspace(page)
+
+  await page.getByRole('button', { name: 'Open planning tools' }).click()
+  const drawer = page.getByRole('dialog', { name: 'Planning tools' })
+  await expect(drawer).toBeVisible()
+  await expect(drawer.getByRole('link', { name: /Quick capture/ })).toBeVisible()
+  await expect(drawer.getByRole('link', { name: /Weekly review/ })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Primary navigation' })).toBeVisible()
+
+  await drawer.getByRole('link', { name: /Quick capture/ }).click()
+  await expect(page.getByRole('heading', { name: 'Quick capture', exact: true })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Planning tools' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Open planning tools' }).click()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Planning tools' })).toHaveCount(0)
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

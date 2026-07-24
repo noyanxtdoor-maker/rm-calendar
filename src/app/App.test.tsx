@@ -26,7 +26,7 @@ describe('Milestone 1 route shell', () => {
 
     expect(await screen.findByRole('heading', { name: 'Calendar' })).toBeInTheDocument()
     expect(await screen.findByRole('tab', { name: 'Day plan' })).toHaveAttribute('aria-selected', 'true')
-    expect(await screen.findByText('Avery visit')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Avery visit/i })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument()
 
     for (const label of ['Home', 'Calendar', 'People', 'Map', 'Tools']) {
