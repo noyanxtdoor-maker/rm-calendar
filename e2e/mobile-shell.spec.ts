@@ -79,6 +79,23 @@ test('the cloud account route stays addressable for an email-link return', async
   await expect(page.getByRole('heading', { name: 'Cloud workspace active' })).toHaveCount(0)
 })
 
+test('a user can create a private focus group with people at phone width', async ({ page }) => {
+  await openLocalWorkspace(page, '/people')
+
+  await page.getByRole('link', { name: 'Create focus group' }).click()
+  await page.getByLabel('Group name').fill('This week')
+  await page.getByLabel('Avery Brooks').check()
+  await page.getByRole('button', { name: 'Save focus group' }).click()
+
+  await expect(page.getByText('This week', { exact: true })).toBeVisible()
+  await expect(page.getByText('1 person', { exact: true })).toBeVisible()
+  const layout = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth
+  }))
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth)
+})
+
 test('a user can create a person, plan a linked visit, and retain it offline after reload', async ({ page }, testInfo) => {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))

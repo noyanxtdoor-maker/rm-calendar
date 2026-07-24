@@ -8,6 +8,7 @@ import applySyncSimpleRecordsMigration from '../../../supabase/migrations/202607
 import applySyncLifecycleTransitionsMigration from '../../../supabase/migrations/20260724103000_apply_sync_lifecycle_transitions.sql?raw'
 import applySyncFollowUpMigration from '../../../supabase/migrations/20260724110000_apply_sync_follow_up.sql?raw'
 import pullRelatedContextMigration from '../../../supabase/migrations/20260724120000_pull_related_context.sql?raw'
+import focusGroupsMigration from '../../../supabase/migrations/20260724130000_focus_groups.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -33,6 +34,7 @@ describe('Supabase identity migration guardrails', () => {
       followUpsSyncMigration,
       pullChangesMigration,
       pullRelatedContextMigration,
+      focusGroupsMigration,
       applySyncSimpleRecordsMigration,
       applySyncLifecycleTransitionsMigration,
       applySyncFollowUpMigration
@@ -103,5 +105,17 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).toContain('insert into public.follow_ups')
     expect(sql).toContain('insert into public.mutation_receipts')
     expect(sql).not.toContain('grant execute on function public.sync_apply_follow_up_operation')
+  })
+
+  it('keeps focus-group membership atomic, owner-scoped, and unavailable for direct browser writes', () => {
+    const sql = focusGroupsMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.sync_apply_focus_group_operation')
+    expect(sql).toContain("p_operation ->> 'kind' <> 'create_focus_group'")
+    expect(sql).toContain('insert into public.contact_organizations')
+    expect(sql).toContain("'memberlinks'")
+    expect(sql).toContain("'create_focus_group'")
+    expect(sql).toContain('revoke all on function public.sync_apply_focus_group_operation')
+    expect(sql).not.toContain('grant insert on table public.contact_organizations to authenticated')
   })
 })

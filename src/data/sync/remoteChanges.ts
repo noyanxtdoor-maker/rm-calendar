@@ -37,6 +37,7 @@ const localKeyByRemoteKey: Record<string, string | undefined> = {
   completed_at: 'completedAt',
   contact_id: 'contactId',
   organization_id: 'organizationId',
+  relationship_label: 'relationshipLabel',
   place_id: 'placeId',
   activity_id: 'activityId',
   parent_task_id: 'parentTaskId',
@@ -103,6 +104,11 @@ function relatedRecords(change: RemoteChange, workspaceId: string) {
       if (entry && typeof entry === 'object') values.push({ tableName: 'taskHistory', record: localRecordFromRemote(entry as Record<string, unknown>, workspaceId) })
     }
   }
+  if (change.entityType === 'organization' && Array.isArray(contextObject.memberLinks)) {
+    for (const entry of contextObject.memberLinks) {
+      if (entry && typeof entry === 'object') values.push({ tableName: 'contactOrganizations', record: localRecordFromRemote(entry as Record<string, unknown>, workspaceId) })
+    }
+  }
   return values
 }
 
@@ -111,7 +117,7 @@ export type RemoteApplySummary = { applied: number; conflicted: number }
 /** Applies a complete pulled page in one IndexedDB transaction. */
 export async function applyRemoteChanges(workspaceId: string, changes: RemoteChange[], nextCursor?: string): Promise<RemoteApplySummary> {
   const summary: RemoteApplySummary = { applied: 0, conflicted: 0 }
-  const tableNames = ['contacts', 'organizations', 'places', 'activities', 'tasks', 'notes', 'followUps', 'activityContacts', 'activityHistory', 'taskHistory', 'conflicts', 'syncMetadata']
+  const tableNames = ['contacts', 'organizations', 'places', 'activities', 'tasks', 'notes', 'followUps', 'contactOrganizations', 'activityContacts', 'activityHistory', 'taskHistory', 'conflicts', 'syncMetadata']
   await rmCalendarDb.transaction('rw', tableNames, async () => {
     for (const change of changes) {
       if (change.entityId !== change.record.id || change.record.workspace_id !== workspaceId) {

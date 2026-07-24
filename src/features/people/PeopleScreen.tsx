@@ -61,6 +61,7 @@ export function PeopleScreen() {
         <Link className="flex min-h-12 flex-1 items-center justify-center rounded-2xl bg-[var(--rm-teal)] px-3 text-sm font-semibold text-[var(--rm-ink)]" to="/people/new">Add person</Link>
         <Link className="flex min-h-12 flex-1 items-center justify-center rounded-2xl border border-white/[0.1] px-3 text-sm font-semibold text-slate-200" to="/people/household/new">Add household</Link>
       </div>
+      <Link className="mt-2 flex min-h-11 items-center justify-center rounded-2xl border border-[var(--rm-violet)]/25 bg-[var(--rm-violet)]/[0.06] px-3 text-sm font-semibold text-[var(--rm-violet)]" to="/people/groups/new">Create focus group</Link>
 
       <div className="mt-3 rounded-2xl border border-white/[0.08] bg-[var(--rm-surface)] px-4 py-3">
         <label className="sr-only" htmlFor="people-search">Search people</label>
@@ -86,6 +87,28 @@ export function PeopleScreen() {
             <div className="space-y-2">{peopleNeedingNextStep.map(personCard)}</div>
           </div> : null}
           {!visiblePeople.length ? <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">No people match this search.</p> : null}
+        </div>
+      </section>
+
+      <section className="mt-5">
+        <SectionLabel action={<span className="text-xs font-semibold text-[var(--rm-violet)]">{snapshot.organizations.filter((organization) => organization.kind === 'group').length} saved</span>}>Focus groups</SectionLabel>
+        <p className="mt-2 text-xs leading-5 text-slate-400">Private groups make a shared planning focus visible without turning it into an official record.</p>
+        <div className="mt-3 space-y-2">
+          {snapshot.organizations.filter((organization) => organization.kind === 'group').length ? snapshot.organizations
+            .filter((organization) => organization.kind === 'group')
+            .map((group) => {
+              const memberIds = snapshot.contactOrganizations.filter((link) => link.organizationId === group.id).map((link) => link.contactId)
+              const plannedMemberCount = memberIds.filter((contactId) => peopleWithPlans.has(contactId)).length
+              return (
+                <article className="rounded-2xl border border-[var(--rm-violet)]/20 bg-[var(--rm-violet)]/[0.05] p-4" key={group.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="truncate text-sm font-semibold text-white">{group.name}</h3>
+                    <span className="rounded-full bg-[var(--rm-violet)]/15 px-2 py-1 text-[0.62rem] font-semibold text-[var(--rm-violet)]">{memberIds.length} {memberIds.length === 1 ? 'person' : 'people'}</span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400">{plannedMemberCount ? `${plannedMemberCount} with a planned next step` : 'No one in this group has a planned next step yet.'}</p>
+                </article>
+              )
+            }) : <p className="rounded-2xl border border-dashed border-white/[0.12] p-4 text-sm text-slate-400">Create a private focus group when it helps you plan people together.</p>}
         </div>
       </section>
 

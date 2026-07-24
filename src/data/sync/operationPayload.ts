@@ -1,6 +1,7 @@
 import type {
   ActivityContactRecord,
   ActivityRecord,
+  ContactOrganizationRecord,
   ContactRecord,
   FollowUpRecord,
   NoteRecord,
@@ -48,6 +49,14 @@ function toRemoteActivityContact(record: ActivityContactRecord) {
   return remoteRecord
 }
 
+function toRemoteContactOrganization(record: ContactOrganizationRecord) {
+  const remoteRecord = { ...record } as SyncJson
+  delete remoteRecord.syncState
+  delete remoteRecord.pendingBaseRevision
+  delete remoteRecord.lastLocalMutationId
+  return remoteRecord
+}
+
 async function loadEntityRecord(entityType: SyncEntityType, entityId: string) {
   switch (entityType) {
     case 'contact':
@@ -78,6 +87,14 @@ async function primaryActivityContact(workspaceId: string, activityId: string) {
 async function activityContext(workspaceId: string, activity: ActivityRecord) {
   const primaryContact = await primaryActivityContact(workspaceId, activity.id)
   return primaryContact ? { primaryContact: toRemoteActivityContact(primaryContact) } : undefined
+}
+
+async function focusGroupContext(workspaceId: string, group: OrganizationRecord) {
+  const memberLinks = await rmCalendarDb.contactOrganizations
+    .where('[workspaceId+organizationId]')
+    .equals([workspaceId, group.id])
+    .toArray()
+  return { memberLinks: memberLinks.filter((link) => !link.deletedAt).map(toRemoteContactOrganization) }
 }
 
 function numberFromPayload(payload: Record<string, unknown>, key: string) {
@@ -136,6 +153,8 @@ export async function buildSyncOperationEnvelope(operation: OutboxOperationRecor
   let context: SyncJson | undefined
   if (entityType === 'activity') {
     context = await activityContext(operation.workspaceId, entity as ActivityRecord)
+  } else if (operation.kind === 'create_focus_group') {
+    context = await focusGroupContext(operation.workspaceId, entity as OrganizationRecord)
   } else if (entityType === 'follow_up') {
     context = await followUpContext(
       operation.workspaceId,

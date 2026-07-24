@@ -13,6 +13,7 @@ export type SyncEntityType = (typeof syncEntityTypes)[number]
 export const syncOperationKinds = [
   'create_contact',
   'create_household',
+  'create_focus_group',
   'create_place',
   'create_activity',
   'update_activity',
@@ -30,6 +31,7 @@ export type SyncOperationKind = (typeof syncOperationKinds)[number]
 const entityTypeByOperation: Record<SyncOperationKind, SyncEntityType> = {
   create_contact: 'contact',
   create_household: 'organization',
+  create_focus_group: 'organization',
   create_place: 'place',
   create_activity: 'activity',
   update_activity: 'activity',

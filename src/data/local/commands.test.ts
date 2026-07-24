@@ -4,6 +4,7 @@ import {
   completeTask,
   createActivity,
   createContact,
+  createFocusGroup,
   createFollowUp,
   createHousehold,
   createNote,
@@ -54,6 +55,24 @@ describe('Milestone 2 local planning commands', () => {
     expect((await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspace.id).toArray()).map((operation) => operation.kind)).toEqual(
       expect.arrayContaining(['create_household', 'create_contact', 'create_place', 'create_activity'])
     )
+  })
+
+  it('creates a private focus group with selected people and one durable sync operation', async () => {
+    const workspace = await rmCalendarDb.workspaces.get(DEMO_WORKSPACE_ID)
+    if (!workspace) throw new Error('Expected the fictional local workspace.')
+    const first = await createContact({ displayName: 'Focus group one' })
+    const second = await createContact({ displayName: 'Focus group two' })
+
+    const group = await createFocusGroup({ name: 'This week', contactIds: [first.id, second.id] })
+    const members = await rmCalendarDb.contactOrganizations.where('[workspaceId+organizationId]').equals([workspace.id, group.id]).toArray()
+    const operation = (await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspace.id).toArray()).find((candidate) => candidate.kind === 'create_focus_group')
+
+    expect(group.kind).toBe('group')
+    expect(members.map((member) => member.contactId).sort()).toEqual([first.id, second.id].sort())
+    expect(operation?.dependsOnJson).toEqual(expect.arrayContaining([
+      expect.any(String),
+      expect.any(String)
+    ]))
   })
 
   it('keeps one activity identifier, writes planning history, and warns without blocking on an overlap', async () => {

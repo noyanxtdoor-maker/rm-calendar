@@ -1,6 +1,7 @@
 import {
   createActivityInputSchema,
   createContactInputSchema,
+  createFocusGroupInputSchema,
   createFollowUpInputSchema,
   createHouseholdInputSchema,
   createNoteInputSchema,
@@ -320,6 +321,39 @@ export async function createHousehold(input: { name: string }) {
   })
 
   return household
+}
+
+/** Creates a private user-defined planning group and its initial person links atomically. */
+export async function createFocusGroup(input: { name: string; contactIds: string[] }) {
+  const data = createFocusGroupInputSchema.parse(input)
+  const workspace = await activeWorkspace()
+  const timestamp = nowIso()
+  const group: OrganizationRecord = {
+    ...localEnvelope(createLocalId(), workspace.id, timestamp),
+    name: data.name,
+    nameNormalized: normalizeDisplayName(data.name),
+    kind: 'group'
+  }
+
+  await rmCalendarDb.transaction('rw', ['contacts', 'organizations', 'contactOrganizations', 'outboxOperations'], async () => {
+    const selectedContacts = await Promise.all(data.contactIds.map((contactId) => rmCalendarDb.contacts.get(contactId)))
+    if (selectedContacts.some((contact) => !contact || contact.workspaceId !== workspace.id || contact.deletedAt)) {
+      throw new Error('One or more selected people are not available in this workspace.')
+    }
+    const contactOperations = await Promise.all(data.contactIds.map((contactId) => latestPendingOperationForEntity(workspace.id, contactId)))
+    const links: ContactOrganizationRecord[] = data.contactIds.map((contactId) => ({
+      ...localEnvelope(createLocalId(), workspace.id, timestamp),
+      contactId,
+      organizationId: group.id,
+      relationshipLabel: 'focus group member'
+    }))
+
+    await rmCalendarDb.organizations.add(group)
+    if (links.length) await rmCalendarDb.contactOrganizations.bulkAdd(links)
+    await enqueueOperation(workspace.id, 'create_focus_group', group.id, dependencyIds(...contactOperations))
+  })
+
+  return group
 }
 
 export async function createPlace(input: { name: string; addressText?: string; entranceNotes?: string }) {

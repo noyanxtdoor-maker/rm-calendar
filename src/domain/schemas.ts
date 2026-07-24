@@ -28,6 +28,17 @@ export const createHouseholdInputSchema = z.object({
 
 export type CreateHouseholdInput = z.infer<typeof createHouseholdInputSchema>
 
+export const createFocusGroupInputSchema = z.object({
+  name: z.string().trim().min(1, 'A focus group needs a name.').max(100, 'Keep the name under 100 characters.'),
+  contactIds: z.array(z.string().trim().min(1)).max(50, 'Keep a focus group to 50 people or fewer.').default([])
+}).superRefine((input, context) => {
+  if (new Set(input.contactIds).size !== input.contactIds.length) {
+    context.addIssue({ code: 'custom', message: 'Choose each person only once.', path: ['contactIds'] })
+  }
+})
+
+export type CreateFocusGroupInput = z.infer<typeof createFocusGroupInputSchema>
+
 export const createPlaceInputSchema = z.object({
   name: z.string().trim().min(1, 'A place needs a name.').max(100, 'Keep the name under 100 characters.'),
   addressText: optionalShortText,
