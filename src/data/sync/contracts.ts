@@ -34,11 +34,18 @@ export type SyncErrorCode =
   | 'DEPENDENCY_MISSING'
   | 'LOCAL_RECORD_MISSING'
 
+export type SyncEntityRevision = {
+  entityType: SyncEntityType
+  entityId: string
+  serverRevision: number
+}
+
 export type SyncApplyResult =
   | {
       operationId: string
       disposition: 'applied' | 'already_applied'
       serverRevision: number
+      entityRevisions?: SyncEntityRevision[]
     }
   | {
       operationId: string

@@ -5,6 +5,8 @@ import activitiesTasksMigration from '../../../supabase/migrations/2026072409200
 import followUpsSyncMigration from '../../../supabase/migrations/20260724093000_followups_sync_schema.sql?raw'
 import pullChangesMigration from '../../../supabase/migrations/20260724094000_pull_changes.sql?raw'
 import applySyncSimpleRecordsMigration from '../../../supabase/migrations/20260724095000_apply_sync_simple_records.sql?raw'
+import applySyncLifecycleTransitionsMigration from '../../../supabase/migrations/20260724103000_apply_sync_lifecycle_transitions.sql?raw'
+import applySyncFollowUpMigration from '../../../supabase/migrations/20260724110000_apply_sync_follow_up.sql?raw'
 
 describe('Supabase identity migration guardrails', () => {
   it('keeps the private-owner boundary and bootstrap RPC protected in source control', () => {
@@ -29,7 +31,9 @@ describe('Supabase identity migration guardrails', () => {
       activitiesTasksMigration,
       followUpsSyncMigration,
       pullChangesMigration,
-      applySyncSimpleRecordsMigration
+      applySyncSimpleRecordsMigration,
+      applySyncLifecycleTransitionsMigration,
+      applySyncFollowUpMigration
     ]
       .join('\n')
       .toLocaleLowerCase()
@@ -66,7 +70,9 @@ describe('Supabase identity migration guardrails', () => {
   })
 
   it('limits batch mutation to the reviewed RPC and keeps receipt idempotency in the database', () => {
-    const sql = applySyncSimpleRecordsMigration.toLocaleLowerCase()
+    const sql = [applySyncSimpleRecordsMigration, applySyncLifecycleTransitionsMigration, applySyncFollowUpMigration]
+      .join('\n')
+      .toLocaleLowerCase()
 
     expect(sql).toContain('create or replace function public.apply_sync_batch')
     expect(sql).toContain("p_table not in ('contacts', 'organizations', 'places')")
@@ -74,5 +80,17 @@ describe('Supabase identity migration guardrails', () => {
     expect(sql).toContain("'already_applied'")
     expect(sql).toContain('revoke all on function public.apply_sync_batch(uuid, jsonb) from public')
     expect(sql).toContain('grant execute on function public.apply_sync_batch(uuid, jsonb) to authenticated')
+  })
+
+  it('keeps Follow-up application atomic and revision-aware in the reviewed migration source', () => {
+    const sql = applySyncFollowUpMigration.toLocaleLowerCase()
+
+    expect(sql).toContain('create or replace function public.sync_apply_follow_up_operation')
+    expect(sql).toContain("v_source.state <> 'completed'")
+    expect(sql).toContain('v_source.revision <> v_source_base_revision')
+    expect(sql).toContain("'entityrevisions'")
+    expect(sql).toContain('insert into public.follow_ups')
+    expect(sql).toContain('insert into public.mutation_receipts')
+    expect(sql).not.toContain('grant execute on function public.sync_apply_follow_up_operation')
   })
 })

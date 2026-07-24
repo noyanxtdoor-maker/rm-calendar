@@ -58,10 +58,15 @@ Completion and reopen handlers modify only the fields owned by that lifecycle
 transition, so a delayed device cannot hide a title or schedule edit inside a
 completion payload.
 
-The remaining operation kinds are intentionally rejected for now. In
-particular, a remote `create_follow_up` must not be enabled until the client can
-acknowledge the source, target, and link atomically without leaving either local
-target falsely pending.
+The local test database also proves `create_follow_up` for either a Task or an
+Activity target. Its one transaction creates the target, Follow-up link,
+immutable source/target history, change-log entries, and receipt together. A
+stale source revision creates none of them. The response includes an
+`entityRevisions` list for both created entities so the local coordinator can
+acknowledge the target or make later target work depend on its returned
+revision.
+
+No browser transport, account session, or hosted endpoint is configured yet.
 
 ## 3. Compound follow-up operation
 
@@ -75,7 +80,7 @@ Its payload includes:
 - exactly one target Task or Activity; and
 - the source revision expected by the compound command.
 
-The future server RPC must atomically create the target, Follow-up link, required history/change-log rows, and mutation receipt. If any invariant fails, it must create none of them.
+The locally tested server RPC atomically creates the target, Follow-up link, required history/change-log rows, and mutation receipt. If any invariant fails, it creates none of them. A hosted deployment of that RPC is still not configured.
 
 ## 4. Batch response
 

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { OutboxOperationRecord } from '../../domain/models'
-import { completeActivity, createActivity, createContact, createFollowUp, updateActivity } from '../local/commands'
+import { completeActivity, completeTask, createActivity, createContact, createFollowUp, updateActivity } from '../local/commands'
 import { deleteRmCalendarDatabase, rmCalendarDb } from '../local/RmCalendarDatabase'
 import { bootstrapLocalWorkspace, DEMO_WORKSPACE_ID } from '../local/workspace'
 import type { PullChangesResponse, SyncBatchRequest, SyncBatchResponse, SyncTransport } from './contracts'
@@ -231,5 +231,64 @@ describe('local sync contract coordinator', () => {
     expect(requests[2]?.operations[0]?.payload.context).toMatchObject({
       sourceBaseRevision: 71
     })
+  })
+
+  it('acknowledges a compound follow-up target and orders later target work after it', async () => {
+    const source = await createActivity({
+      title: 'Atomic follow-up source',
+      activityType: 'visit',
+      schedule: { kind: 'all-day', date: '2026-07-24' }
+    })
+    await completeActivity({ activityId: source.id })
+    const followUpResult = await createFollowUp({
+      sourceActivityId: source.id,
+      targetKind: 'task',
+      title: 'Atomic target task',
+      dueDate: '2026-07-25',
+      priority: 'normal'
+    })
+    await completeTask(followUpResult.targetId)
+
+    const beforeSync = await rmCalendarDb.outboxOperations.where('workspaceId').equals(DEMO_WORKSPACE_ID).toArray()
+    const followUpOperation = operationForKind(beforeSync, 'create_follow_up')
+    const targetCompletion = operationForKind(beforeSync, 'complete_task')
+    expect(targetCompletion.dependsOnJson).toContain(followUpOperation.operationId)
+
+    const requests: SyncBatchRequest[] = []
+    const compoundTransport: SyncTransport = {
+      async applySyncBatch(request) {
+        requests.push(request)
+        return {
+          results: request.operations.map((operation) => {
+            if (operation.kind !== 'create_follow_up') {
+              return { operationId: operation.operationId, disposition: 'applied' as const, serverRevision: 80 }
+            }
+            return {
+              operationId: operation.operationId,
+              disposition: 'applied' as const,
+              serverRevision: 90,
+              entityRevisions: [
+                { entityType: 'follow_up' as const, entityId: operation.entityId, serverRevision: 90 },
+                { entityType: 'task' as const, entityId: followUpResult.targetId, serverRevision: 90 }
+              ]
+            }
+          })
+        }
+      },
+      async pullChanges(): Promise<PullChangesResponse> {
+        return { changes: [], hasMore: false }
+      }
+    }
+
+    await runLocalSyncCycle(DEMO_WORKSPACE_ID, compoundTransport, { now: firstAttempt })
+    await runLocalSyncCycle(DEMO_WORKSPACE_ID, compoundTransport, { now: '2026-07-24T00:00:10.000Z' })
+    await runLocalSyncCycle(DEMO_WORKSPACE_ID, compoundTransport, { now: '2026-07-24T00:00:20.000Z' })
+
+    expect((await rmCalendarDb.outboxOperations.get(targetCompletion.operationId))?.baseRevision).toBe(90)
+    expect((await rmCalendarDb.tasks.get(followUpResult.targetId))?.syncState).toBe('pending')
+
+    await runLocalSyncCycle(DEMO_WORKSPACE_ID, compoundTransport, { now: '2026-07-24T00:00:30.000Z' })
+    expect(requests[3]?.operations[0]).toMatchObject({ kind: 'complete_task', baseRevision: 90 })
+    expect((await rmCalendarDb.tasks.get(followUpResult.targetId))?.syncState).toBe('synced')
   })
 })

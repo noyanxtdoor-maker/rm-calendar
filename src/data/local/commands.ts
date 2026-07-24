@@ -85,6 +85,13 @@ async function activeWorkspace() {
   return workspace
 }
 
+function operationProducesEntity(operation: OutboxOperationRecord, entityId: string) {
+  return (
+    outboxEntityId(operation.payloadJson) === entityId ||
+    (operation.kind === 'create_follow_up' && operation.payloadJson.targetEntityId === entityId)
+  )
+}
+
 async function enqueueOperation(
   workspaceId: string,
   kind: SyncOperationKind,
@@ -96,7 +103,7 @@ async function enqueueOperation(
   const prior = await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspaceId).toArray()
   const sequence = prior.reduce((highest, operation) => Math.max(highest, operation.sequence), 0) + 1
   const priorSameEntity = prior
-    .filter((operation) => outboxEntityId(operation.payloadJson) === entityId)
+    .filter((operation) => operationProducesEntity(operation, entityId))
     .sort((left, right) => right.sequence - left.sequence)[0]
   const dependsOnJson = [...new Set([...dependencies, priorSameEntity?.operationId].filter((operationId): operationId is string => Boolean(operationId)))]
   const operation: OutboxOperationRecord = {
@@ -122,7 +129,7 @@ async function enqueueOperation(
 async function latestPendingOperationForEntity(workspaceId: string, entityId: string) {
   const operations = await rmCalendarDb.outboxOperations.where('workspaceId').equals(workspaceId).toArray()
   return operations
-    .filter((operation) => outboxEntityId(operation.payloadJson) === entityId)
+    .filter((operation) => operationProducesEntity(operation, entityId))
     .sort((left, right) => right.sequence - left.sequence)[0]
 }
 
@@ -851,7 +858,9 @@ export async function createFollowUp(input: CreateFollowUpInput) {
         0,
         {
           sourceActivityId: source.id,
-          sourceBaseRevision: source.pendingBaseRevision ?? source.revision
+          sourceBaseRevision: source.pendingBaseRevision ?? source.revision,
+          targetEntityId: targetId,
+          targetEntityType: data.targetKind === 'task' ? 'task' : 'activity'
         }
       )
     }

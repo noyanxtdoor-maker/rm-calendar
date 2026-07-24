@@ -36,7 +36,7 @@ hosted project has been linked or contacted.
 - Added a canonical payload builder.
   - It strips local-only sync fields before transport.
   - Activity payloads include primary Contact context.
-  - Follow-up payloads include source, target, and source-revision context needed for a future atomic RPC.
+  - Follow-up payloads include source, target, and source-revision context for the locally proven atomic RPC.
 - Added an injected local Sync Coordinator with no provider dependency.
   - sends only dependency-ready operations;
   - safely handles applied and idempotent acknowledgements;
@@ -63,7 +63,11 @@ hosted project has been linked or contacted.
   - stale edits return a conflict instead of silently overwriting a newer canonical record;
   - complete/reopen operations cannot smuggle unrelated title, schedule, or relationship changes;
   - replaying the same transition operation remains exactly-once through its receipt.
-- Intentionally **not** added remote support for compound Follow-ups. Their multi-record local acknowledgement still needs an explicit next slice.
+- Added atomic, database-tested compound Follow-up application:
+  - exactly one Task or Activity target, the Follow-up link, target/source history, change-log entries, and receipt commit in one transaction;
+  - the completed source Activity must still match its expected revision;
+  - idempotent replays return revisions for both the Follow-up link and target;
+  - later target work waits for the compound operation and inherits its returned target revision.
 
 ## 3. Verification evidence
 
@@ -76,6 +80,8 @@ The local contract test suite proves:
 5. Revision conflicts preserve a local conflict record and set the affected record to needs attention.
 6. A follow-up carries source/target context and receives the source revision after its completion is acknowledged.
 7. Sync diagnostics do not expose private text.
+8. A Follow-up cannot create a partial remote target/link on a stale source revision.
+9. A later change to a Follow-up target waits for the atomic operation and receives its server revision first.
 
 Commands run successfully:
 
@@ -83,7 +89,7 @@ Commands run successfully:
 npm run verify
   typecheck: pass
   lint: pass
-  Vitest: 30 passed
+  Vitest: 32 passed
   production Vite build: pass
   PWA service worker and manifest: emitted
 
@@ -98,7 +104,7 @@ supabase db lint --local --fail-on error
 supabase test db --local supabase/tests
   clean local migration replay: pass
   schema lint: pass
-  pgTAP owner-isolation, simple-batch, lifecycle-create, and revision-transition checks: 51 passed
+  pgTAP owner-isolation, simple-batch, lifecycle-create, revision-transition, and compound-follow-up checks: 67 passed
 ~~~
 
 ## 4. What this does not do
@@ -124,8 +130,8 @@ The founder must explicitly identify or authorize all of the following before ex
 
 After approval, the next implementation sequence is:
 
-1. extend and locally test `apply_sync_batch` for atomic Follow-ups against [Sync Contract](Sync-Contract.md), including multi-record local acknowledgement;
-2. add the remote RPC adapter and authenticated browser bootstrap;
-3. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
+1. identify a new dedicated RM Calendar Supabase project, then apply the reviewed migration set;
+2. add a reviewed remote RPC adapter and authenticated browser bootstrap using the provider-managed session only—never custom browser token storage;
+3. configure the approved email-OTP sender, redirect policy, and production domain;
 4. test two isolated signed-in profiles, idempotent retry, and visible conflict recovery;
 5. finish the remaining account-aware and deployment portions of beta readiness. The safe local privacy/recovery preparation is already documented in [Phase 4 Milestone 5 Prep](Phase-4-Milestone-5-Prep.md).

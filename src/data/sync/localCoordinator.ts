@@ -1,8 +1,8 @@
 import type { OutboxOperationRecord, SyncConflictRecord, SyncState } from '../../domain/models'
-import { outboxEntityId, syncEntityTypeForOperation, type SyncEntityType } from '../../domain/sync'
+import { outboxEntityId, syncEntityTypeForOperation, syncEntityTypes, type SyncEntityType } from '../../domain/sync'
 import { createLocalId } from '../../lib/ids'
 import { rmCalendarDb } from '../local/RmCalendarDatabase'
-import type { SyncApplyResult, SyncErrorCode, SyncTransport } from './contracts'
+import type { SyncApplyResult, SyncEntityRevision, SyncErrorCode, SyncTransport } from './contracts'
 import { buildSyncOperationEnvelope, LocalSyncPreparationError } from './operationPayload'
 
 const tableNameByEntity: Record<SyncEntityType, string> = {
@@ -52,6 +52,31 @@ function isReadyForAttempt(operation: OutboxOperationRecord, now: string) {
     return true
   }
   return operation.status === 'failed' && (!operation.nextRetryAt || operation.nextRetryAt <= now)
+}
+
+function compoundTargetReference(operation: OutboxOperationRecord) {
+  if (operation.kind !== 'create_follow_up') {
+    return undefined
+  }
+  const entityId = operation.payloadJson.targetEntityId
+  const entityType = operation.payloadJson.targetEntityType
+  if (
+    typeof entityId !== 'string' ||
+    typeof entityType !== 'string' ||
+    !(syncEntityTypes as readonly string[]).includes(entityType) ||
+    entityType === 'follow_up'
+  ) {
+    return undefined
+  }
+  return { entityId, entityType: entityType as Exclude<SyncEntityType, 'follow_up'> }
+}
+
+function operationProducesEntity(operation: OutboxOperationRecord, entityType: SyncEntityType, entityId: string) {
+  if (syncEntityTypeForOperation(operation.kind) === entityType && outboxEntityId(operation.payloadJson) === entityId) {
+    return true
+  }
+  const compoundTarget = compoundTargetReference(operation)
+  return compoundTarget?.entityType === entityType && compoundTarget.entityId === entityId
 }
 
 function selectDependencyReadyOperations(operations: OutboxOperationRecord[], now: string, limit: number) {
@@ -110,6 +135,10 @@ async function setOperationRetry(operation: OutboxOperationRecord, now: string, 
   if (entityType && entityId) {
     await setEntitySyncState(operation.workspaceId, entityType, entityId, 'failed')
   }
+  const compoundTarget = compoundTargetReference(operation)
+  if (compoundTarget) {
+    await setEntitySyncState(operation.workspaceId, compoundTarget.entityType, compoundTarget.entityId, 'failed')
+  }
 }
 
 async function setOperationRejected(operation: OutboxOperationRecord, errorCode: SyncErrorCode) {
@@ -124,6 +153,10 @@ async function setOperationRejected(operation: OutboxOperationRecord, errorCode:
   const entityId = outboxEntityId(operation.payloadJson)
   if (entityType && entityId) {
     await setEntitySyncState(operation.workspaceId, entityType, entityId, 'failed')
+  }
+  const compoundTarget = compoundTargetReference(operation)
+  if (compoundTarget) {
+    await setEntitySyncState(operation.workspaceId, compoundTarget.entityType, compoundTarget.entityId, 'failed')
   }
 }
 
@@ -166,11 +199,61 @@ async function setOperationConflict(
   })
   await rmCalendarDb.conflicts.add(conflict)
   await setEntitySyncState(operation.workspaceId, entityType, entityId, 'needs_attention')
+  const compoundTarget = compoundTargetReference(operation)
+  if (compoundTarget) {
+    await setEntitySyncState(operation.workspaceId, compoundTarget.entityType, compoundTarget.entityId, 'needs_attention')
+  }
+}
+
+async function acknowledgeEntityRevision(
+  operation: OutboxOperationRecord,
+  entityRevision: SyncEntityRevision
+) {
+  const outstandingOperations = await rmCalendarDb.outboxOperations.where('workspaceId').equals(operation.workspaceId).toArray()
+  const remainingOperations = outstandingOperations
+    .filter((candidate) => operationProducesEntity(candidate, entityRevision.entityType, entityRevision.entityId))
+    .sort((left, right) => left.sequence - right.sequence)
+  const nextOperation = remainingOperations[0]
+  if (nextOperation) {
+    await rmCalendarDb.outboxOperations.put({
+      ...nextOperation,
+      baseRevision: entityRevision.serverRevision
+    })
+    await setEntitySyncState(operation.workspaceId, entityRevision.entityType, entityRevision.entityId, 'pending', {
+      serverRevision: entityRevision.serverRevision,
+      pendingBaseRevision: entityRevision.serverRevision,
+      lastLocalMutationId: operation.operationId
+    })
+    return
+  }
+
+  if (entityRevision.entityType === 'activity') {
+    const dependentFollowUps = outstandingOperations.filter(
+      (candidate) =>
+        candidate.dependsOnJson.includes(operation.operationId) &&
+        candidate.payloadJson.sourceActivityId === entityRevision.entityId
+    )
+    for (const dependent of dependentFollowUps) {
+      await rmCalendarDb.outboxOperations.put({
+        ...dependent,
+        payloadJson: {
+          ...dependent.payloadJson,
+          sourceBaseRevision: entityRevision.serverRevision
+        }
+      })
+    }
+  }
+
+  await setEntitySyncState(operation.workspaceId, entityRevision.entityType, entityRevision.entityId, 'synced', {
+    serverRevision: entityRevision.serverRevision,
+    lastLocalMutationId: operation.operationId
+  })
 }
 
 async function acknowledgeOperation(
   operation: OutboxOperationRecord,
-  serverRevision: number
+  serverRevision: number,
+  entityRevisions?: SyncEntityRevision[]
 ) {
   const entityType = syncEntityTypeForOperation(operation.kind)
   const entityId = outboxEntityId(operation.payloadJson)
@@ -179,45 +262,18 @@ async function acknowledgeOperation(
     return
   }
 
-  const outstandingOperations = await rmCalendarDb.outboxOperations.where('workspaceId').equals(operation.workspaceId).toArray()
-  const remainingOperations = outstandingOperations
-    .filter((candidate) => outboxEntityId(candidate.payloadJson) === entityId)
-    .sort((left, right) => left.sequence - right.sequence)
-  const nextOperation = remainingOperations[0]
-  if (nextOperation) {
-    await rmCalendarDb.outboxOperations.put({
-      ...nextOperation,
-      baseRevision: serverRevision
-    })
-    await setEntitySyncState(operation.workspaceId, entityType, entityId, 'pending', {
-      serverRevision,
-      pendingBaseRevision: serverRevision,
-      lastLocalMutationId: operation.operationId
-    })
-    return
+  const revisions = entityRevisions?.length
+    ? entityRevisions
+    : [{ entityType, entityId, serverRevision }]
+  const uniqueRevisions = revisions.filter(
+    (revision, index) =>
+      revisions.findIndex(
+        (candidate) => candidate.entityType === revision.entityType && candidate.entityId === revision.entityId
+      ) === index
+  )
+  for (const revision of uniqueRevisions) {
+    await acknowledgeEntityRevision(operation, revision)
   }
-
-  if (entityType === 'activity') {
-    const dependentFollowUps = outstandingOperations.filter(
-      (candidate) =>
-        candidate.dependsOnJson.includes(operation.operationId) &&
-        candidate.payloadJson.sourceActivityId === entityId
-    )
-    for (const dependent of dependentFollowUps) {
-      await rmCalendarDb.outboxOperations.put({
-        ...dependent,
-        payloadJson: {
-          ...dependent.payloadJson,
-          sourceBaseRevision: serverRevision
-        }
-      })
-    }
-  }
-
-  await setEntitySyncState(operation.workspaceId, entityType, entityId, 'synced', {
-    serverRevision,
-    lastLocalMutationId: operation.operationId
-  })
 }
 
 async function acquireSyncRun(workspaceId: string, now: string) {
@@ -343,7 +399,7 @@ export async function runLocalSyncCycle(
           }
 
           if (result.disposition === 'applied' || result.disposition === 'already_applied') {
-            await acknowledgeOperation(processing, result.serverRevision)
+            await acknowledgeOperation(processing, result.serverRevision, result.entityRevisions)
             summary.acknowledged += 1
           } else if (result.disposition === 'retry') {
             await setOperationRetry(processing, now, result.errorCode, result.retryAt)
